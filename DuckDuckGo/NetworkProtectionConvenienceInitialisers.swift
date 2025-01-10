@@ -17,26 +17,23 @@
 //  limitations under the License.
 //
 
-#if NETWORK_PROTECTION
-
 import NetworkProtection
 import UIKit
 import Common
 import NetworkExtension
-
-#if SUBSCRIPTION
 import Subscription
-#endif
+
 
 private class DefaultTunnelSessionProvider: TunnelSessionProvider {
     func activeSession() async -> NETunnelProviderSession? {
-        try? await ConnectionSessionUtilities.activeSession()
+        return await AppDependencyProvider.shared.networkProtectionTunnelController.activeSession()
     }
 }
 
 extension ConnectionStatusObserverThroughSession {
     convenience init() {
         self.init(tunnelSessionProvider: DefaultTunnelSessionProvider(),
+                  platformSnoozeTimingStore: NetworkProtectionSnoozeTimingStore(userDefaults: .networkProtectionGroupDefaults),
                   platformNotificationCenter: .default,
                   platformDidWakeNotification: UIApplication.didBecomeActiveNotification)
     }
@@ -58,69 +55,35 @@ extension ConnectionServerInfoObserverThroughSession {
     }
 }
 
-extension NetworkProtectionKeychainTokenStore {
-    convenience init() {
-        let featureVisibility = DefaultNetworkProtectionVisibility.forTokenStore()
-        let isSubscriptionEnabled = featureVisibility.isPrivacyProLaunched()
-        let accessTokenProvider: () -> String? = {
-#if SUBSCRIPTION
-            if featureVisibility.shouldMonitorEntitlement() {
-                return { AccountManager().accessToken }
-            }
-#endif
-            return { nil }
-        }()
-
-        self.init(keychainType: .dataProtection(.unspecified),
-                  serviceName: "\(Bundle.main.bundleIdentifier!).authToken",
-                  errorEvents: .networkProtectionAppDebugEvents,
-                  isSubscriptionEnabled: isSubscriptionEnabled,
-                  accessTokenProvider: accessTokenProvider)
-    }
-}
-
-extension NetworkProtectionCodeRedemptionCoordinator {
-    convenience init(isManualCodeRedemptionFlow: Bool = false) {
-        let settings = VPNSettings(defaults: .networkProtectionGroupDefaults)
-        self.init(
-            environment: settings.selectedEnvironment,
-            tokenStore: NetworkProtectionKeychainTokenStore(),
-            isManualCodeRedemptionFlow: isManualCodeRedemptionFlow,
-            errorEvents: .networkProtectionAppDebugEvents,
-            isSubscriptionEnabled: DefaultNetworkProtectionVisibility().isPrivacyProLaunched()
-        )
-    }
-}
-
 extension NetworkProtectionVPNSettingsViewModel {
     convenience init() {
         self.init(
             notificationsAuthorization: NotificationsAuthorizationController(),
-            settings: VPNSettings(defaults: .networkProtectionGroupDefaults)
+            controller: AppDependencyProvider.shared.networkProtectionTunnelController,
+            settings: AppDependencyProvider.shared.vpnSettings
         )
     }
 }
 
 extension NetworkProtectionLocationListCompositeRepository {
-    convenience init() {
-        let settings = VPNSettings(defaults: .networkProtectionGroupDefaults)
+    
+    convenience init(accountManager: AccountManager) {
+        let settings = AppDependencyProvider.shared.vpnSettings
         self.init(
             environment: settings.selectedEnvironment,
-            tokenStore: NetworkProtectionKeychainTokenStore(),
-            errorEvents: .networkProtectionAppDebugEvents,
-            isSubscriptionEnabled: DefaultNetworkProtectionVisibility().isPrivacyProLaunched()
+            tokenStore: AppDependencyProvider.shared.networkProtectionKeychainTokenStore,
+            errorEvents: .networkProtectionAppDebugEvents
         )
     }
 }
 
 extension NetworkProtectionVPNLocationViewModel {
-    convenience init() {
-        let locationListRepository = NetworkProtectionLocationListCompositeRepository()
+    
+    convenience init(accountManager: AccountManager) {
+        let locationListRepository = NetworkProtectionLocationListCompositeRepository(accountManager: accountManager)
         self.init(
             locationListRepository: locationListRepository,
-            settings: VPNSettings(defaults: .networkProtectionGroupDefaults)
+            settings: AppDependencyProvider.shared.vpnSettings
         )
     }
 }
-
-#endif

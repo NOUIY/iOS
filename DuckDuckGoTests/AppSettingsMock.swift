@@ -22,6 +22,12 @@ import Foundation
 @testable import DuckDuckGo
 
 class AppSettingsMock: AppSettings {
+    var appBehavior: DuckDuckGo.AppBehavior? = .new
+
+    var defaultTextZoomLevel: DuckDuckGo.TextZoomLevel = .percent100
+
+    var recentlyVisitedSites: Bool = false
+
     var isSyncBookmarksPaused: Bool = false
 
     var isSyncCredentialsPaused: Bool = false
@@ -62,6 +68,12 @@ class AppSettingsMock: AppSettings {
 
     var autofill: Bool = false
 
+    var autofillImportViaSyncStart: Date?
+
+    func clearAutofillImportViaSyncStart() {
+        autofillImportViaSyncStart = nil
+    }
+
     var voiceSearchEnabled: Bool = false
 
     var widgetInstalled: Bool = false
@@ -70,4 +82,23 @@ class AppSettingsMock: AppSettings {
     }
     
     var autoconsentEnabled = true
+
+    var crashCollectionOptInStatus: CrashCollectionOptInStatus = .undetermined
+    var crashCollectionShouldRevertOptedInStatusTrigger: Int = 0
+
+    var newTabPageSectionsEnabled: Bool = false
+
+    var duckPlayerMode: DuckDuckGo.DuckPlayerMode = .alwaysAsk
+    var duckPlayerAskModeOverlayHidden: Bool = false
+    var duckPlayerOpenInNewTab: Bool = false
+    
+    var newTabPageShortcutsSettings: Data?
+    var newTabPageSectionsSettings: Data?
+
+    var newTabPageIntroMessageEnabled: Bool?
+    var newTabPageIntroMessageSeenCount: Int = 0
+
+    var onboardingHighlightsEnabled: Bool = false
+    var onboardingAddToDockState: OnboardingAddToDockState = .disabled
+
 }

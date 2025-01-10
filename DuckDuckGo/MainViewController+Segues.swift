@@ -24,30 +24,23 @@ import Bookmarks
 import BrowserServicesKit
 import SwiftUI
 import PrivacyDashboard
-
-#if SUBSCRIPTION
 import Subscription
-#endif
+import os.log
 
 extension MainViewController {
 
     func segueToDaxOnboarding() {
-        os_log(#function, log: .generalLog, type: .debug)
+        Logger.lifecycle.debug(#function)
         hideAllHighlightsIfNeeded()
-        let storyboard = UIStoryboard(name: "DaxOnboarding", bundle: nil)
-        guard let controller = storyboard.instantiateInitialViewController(creator: { coder in
-            DaxOnboardingViewController(coder: coder)
-        }) else {
-            assertionFailure()
-            return
-        }
+
+        let controller = OnboardingIntroViewController(onboardingPixelReporter: contextualOnboardingPixelReporter)
         controller.delegate = self
         controller.modalPresentationStyle = .overFullScreen
         present(controller, animated: false)
     }
 
     func segueToHomeRow() {
-        os_log(#function, log: .generalLog, type: .debug)
+        Logger.lifecycle.debug(#function)
         hideAllHighlightsIfNeeded()
         let storyboard = UIStoryboard(name: "HomeRow", bundle: nil)
         guard let controller = storyboard.instantiateInitialViewController() else {
@@ -59,13 +52,13 @@ extension MainViewController {
     }
 
     func segueToBookmarks() {
-        os_log(#function, log: .generalLog, type: .debug)
+        Logger.lifecycle.debug(#function)
         hideAllHighlightsIfNeeded()
         launchBookmarksViewController()
     }
 
     func segueToEditCurrentBookmark() {
-        os_log(#function, log: .generalLog, type: .debug)
+        Logger.lifecycle.debug(#function)
         hideAllHighlightsIfNeeded()
         guard let link = currentTab?.link,
               let bookmark = menuBookmarksViewModel.favorite(for: link.url) ??
@@ -77,7 +70,7 @@ extension MainViewController {
     }
 
     func segueToEditBookmark(_ bookmark: BookmarkEntity) {
-        os_log(#function, log: .generalLog, type: .debug)
+        Logger.lifecycle.debug(#function)
         hideAllHighlightsIfNeeded()
         launchBookmarksViewController {
             $0.openEditFormForBookmark(bookmark)
@@ -85,7 +78,7 @@ extension MainViewController {
     }
 
     private func launchBookmarksViewController(completion: ((BookmarksViewController) -> Void)? = nil) {
-        os_log(#function, log: .generalLog, type: .debug)
+        Logger.lifecycle.debug(#function)
 
         let storyboard = UIStoryboard(name: "Bookmarks", bundle: nil)
         let bookmarks = storyboard.instantiateViewController(identifier: "BookmarksViewController") { coder in
@@ -98,34 +91,15 @@ extension MainViewController {
         }
         bookmarks.delegate = self
 
-        let controller = ThemableNavigationController(rootViewController: bookmarks)
+        let controller = UINavigationController(rootViewController: bookmarks)
         controller.modalPresentationStyle = .automatic
         present(controller, animated: true) {
             completion?(bookmarks)
         }
     }
 
-    func segueToActionSheetDaxDialogWithSpec(_ spec: DaxDialogs.ActionSheetSpec) {
-        os_log(#function, log: .generalLog, type: .debug)
-        hideAllHighlightsIfNeeded()
-
-        if spec == DaxDialogs.ActionSheetSpec.fireButtonEducation {
-            ViewHighlighter.hideAll()
-        }
-
-        let storyboard = UIStoryboard(name: "DaxOnboarding", bundle: nil)
-        let controller = storyboard.instantiateViewController(identifier: "ActionSheetDaxDialog", creator: { coder in
-            ActionSheetDaxDialogViewController(coder: coder)
-        })
-        controller.spec = spec
-        controller.delegate = self
-        controller.modalTransitionStyle = .crossDissolve
-        controller.modalPresentationStyle = .overFullScreen
-        present(controller, animated: true)
-    }
-
-    func segueToReportBrokenSite(mode: PrivacyDashboardMode = .report) {
-        os_log(#function, log: .generalLog, type: .debug)
+    func segueToReportBrokenSite(entryPoint: PrivacyDashboardEntryPoint = .report) {
+        Logger.lifecycle.debug(#function)
         hideAllHighlightsIfNeeded()
 
         guard let currentURL = currentTab?.url,
@@ -133,12 +107,16 @@ extension MainViewController {
             assertionFailure("Missing fundamental data")
             return
         }
-        
+
+        if entryPoint == .report {
+            fireBrokenSiteReportShown()
+        }
+
         let storyboard = UIStoryboard(name: "PrivacyDashboard", bundle: nil)
         let controller = storyboard.instantiateInitialViewController { coder in
             PrivacyDashboardViewController(coder: coder,
                                            privacyInfo: privacyInfo,
-                                           dashboardMode: mode,
+                                           entryPoint: entryPoint,
                                            privacyConfigurationManager: ContentBlocking.shared.privacyConfigurationManager,
                                            contentBlockingManager: ContentBlocking.shared.contentBlockingManager,
                                            breakageAdditionalInfo: self.currentTab?.makeBreakageAdditionalInfo())
@@ -150,7 +128,11 @@ extension MainViewController {
         }
         
         currentTab?.privacyDashboard = controller
+        controller.delegate = currentTab
+        currentTab?.breakageCategory = nil
+
         controller.popoverPresentationController?.delegate = controller
+        controller.view.backgroundColor = UIColor(designSystemColor: .backgroundSheets)
 
         if UIDevice.current.userInterfaceIdiom == .pad {
             controller.modalPresentationStyle = .formSheet
@@ -161,8 +143,30 @@ extension MainViewController {
         present(controller, animated: true)
     }
 
+    private func fireBrokenSiteReportShown() {
+        let parameters = [
+            PrivacyDashboardEvents.Parameters.source: BrokenSiteReport.Source.appMenu.rawValue
+        ]
+        Pixel.fire(pixel: .reportBrokenSiteShown, withAdditionalParameters: parameters)
+    }
+
+    func segueToNegativeFeedbackForm(isFromBrokenSiteReportFlow: Bool = false) {
+        Logger.lifecycle.debug(#function)
+        hideAllHighlightsIfNeeded()
+
+        let feedbackPicker = FeedbackPickerViewController.loadFromStoryboard()
+
+        feedbackPicker.popoverPresentationController?.delegate = feedbackPicker
+        feedbackPicker.view.backgroundColor = UIColor(designSystemColor: .backgroundSheets)
+        feedbackPicker.modalPresentationStyle = isPad ? .formSheet : .pageSheet
+        feedbackPicker.loadViewIfNeeded()
+        feedbackPicker.configure(with: Feedback.Category.allCases, isFromBrokenSiteReportFlow: isFromBrokenSiteReportFlow)
+
+        present(UINavigationController(rootViewController: feedbackPicker), animated: true)
+    }
+
     func segueToDownloads() {
-        os_log(#function, log: .generalLog, type: .debug)
+        Logger.lifecycle.debug(#function)
         hideAllHighlightsIfNeeded()
 
         let storyboard = UIStoryboard(name: "Downloads", bundle: nil)
@@ -174,7 +178,7 @@ extension MainViewController {
     }
 
     func segueToTabSwitcher() {
-        os_log(#function, log: .generalLog, type: .debug)
+        Logger.lifecycle.debug(#function)
         hideAllHighlightsIfNeeded()
 
         let storyboard = UIStoryboard(name: "TabSwitcher", bundle: nil)
@@ -199,29 +203,43 @@ extension MainViewController {
     }
 
     func segueToSettings() {
-        os_log(#function, log: .generalLog, type: .debug)
+        Logger.lifecycle.debug(#function)
         hideAllHighlightsIfNeeded()
         launchSettings()
     }
 
-#if SUBSCRIPTION
     func segueToPrivacyPro() {
-        os_log(#function, log: .generalLog, type: .debug)
+        Logger.lifecycle.debug(#function)
         hideAllHighlightsIfNeeded()
         launchSettings {
-            $0.triggerDeepLinkNavigation(to: .subscriptionFlow)
+            $0.triggerDeepLinkNavigation(to: .subscriptionFlow())
         }
     }
-#endif
+
+    func segueToSubscriptionRestoreFlow() {
+        Logger.lifecycle.debug(#function)
+        hideAllHighlightsIfNeeded()
+        launchSettings {
+            $0.triggerDeepLinkNavigation(to: .restoreFlow)
+        }
+    }
+
+    func segueToVPN() {
+        Logger.lifecycle.debug(#function)
+        hideAllHighlightsIfNeeded()
+        launchSettings {
+            $0.triggerDeepLinkNavigation(to: .netP)
+        }
+    }
 
     func segueToDebugSettings() {
-        os_log(#function, log: .generalLog, type: .debug)
+        Logger.lifecycle.debug(#function)
         hideAllHighlightsIfNeeded()
         launchDebugSettings()
     }
 
     func segueToSettingsCookiePopupManagement() {
-        os_log(#function, log: .generalLog, type: .debug)
+        Logger.lifecycle.debug(#function)
         hideAllHighlightsIfNeeded()
         launchSettings {
             $0.openCookiePopupManagement()
@@ -229,18 +247,22 @@ extension MainViewController {
     }
 
     func segueToSettingsLoginsWithAccount(_ account: SecureVaultModels.WebsiteAccount) {
-        os_log(#function, log: .generalLog, type: .debug)
+        Logger.lifecycle.debug(#function)
         hideAllHighlightsIfNeeded()
         launchSettings {
             $0.shouldPresentLoginsViewWithAccount(accountDetails: account)
         }
     }
 
-    func segueToSettingsSync() {
-        os_log(#function, log: .generalLog, type: .debug)
+    func segueToSettingsSync(with source: String? = nil) {
+        Logger.lifecycle.debug(#function)
         hideAllHighlightsIfNeeded()
         launchSettings {
-            $0.presentLegacyView(.sync)
+            if let source = source {
+                $0.shouldPresentSyncViewWithSource(source)
+            } else {
+                $0.presentLegacyView(.sync)
+            }
         }
     }
     
@@ -250,30 +272,45 @@ extension MainViewController {
                                                             syncDataProviders: syncDataProviders,
                                                             appSettings: appSettings,
                                                             bookmarksDatabase: bookmarksDatabase,
-                                                            tabManager: tabManager)
-#if SUBSCRIPTION
-        let settingsViewModel = SettingsViewModel(legacyViewProvider: legacyViewProvider,
-                                                  accountManager: AccountManager(),
-                                                  deepLink: deepLinkTarget)
-#else
-        let settingsViewModel = SettingsViewModel(legacyViewProvider: legacyViewProvider)
-#endif
+                                                            tabManager: tabManager,
+                                                            syncPausedStateManager: syncPausedStateManager,
+                                                            fireproofing: fireproofing,
+                                                            websiteDataManager: websiteDataManager)
 
-        let settingsController = SettingsHostingController(viewModel: settingsViewModel, viewProvider: legacyViewProvider)
-        settingsController.applyTheme(ThemeManager.shared.currentTheme)
-        
-        // We are still presenting legacy views, so use a Navcontroller
-        let navController = UINavigationController(rootViewController: settingsController)
-        navController.applyTheme(ThemeManager.shared.currentTheme)
-        settingsController.modalPresentationStyle = UIModalPresentationStyle.automatic
-        
-        present(navController, animated: true) {
-            completion?(settingsViewModel)
+        let aiChatSettings = AIChatSettings(privacyConfigurationManager: ContentBlocking.shared.privacyConfigurationManager,
+                                            internalUserDecider: AppDependencyProvider.shared.internalUserDecider)
+
+        let settingsViewModel = SettingsViewModel(legacyViewProvider: legacyViewProvider,
+                                                  subscriptionManager: AppDependencyProvider.shared.subscriptionManager,
+                                                  subscriptionFeatureAvailability: subscriptionFeatureAvailability,
+                                                  voiceSearchHelper: voiceSearchHelper,
+                                                  deepLink: deepLinkTarget,
+                                                  historyManager: historyManager,
+                                                  syncPausedStateManager: syncPausedStateManager,
+                                                  privacyProDataReporter: privacyProDataReporter,
+                                                  textZoomCoordinator: textZoomCoordinator,
+                                                  aiChatSettings: aiChatSettings)
+        Pixel.fire(pixel: .settingsPresented)
+
+        if let navigationController = self.presentedViewController as? UINavigationController,
+           let settingsHostingController = navigationController.viewControllers.first as? SettingsHostingController {
+            navigationController.popToRootViewController(animated: false)
+            completion?(settingsHostingController.viewModel)
+        } else {
+            let settingsController = SettingsHostingController(viewModel: settingsViewModel, viewProvider: legacyViewProvider)
+
+            // We are still presenting legacy views, so use a Navcontroller
+            let navController = UINavigationController(rootViewController: settingsController)
+            settingsController.modalPresentationStyle = UIModalPresentationStyle.automatic
+
+            present(navController, animated: true) {
+                completion?(settingsViewModel)
+            }
         }
     }
 
     private func launchDebugSettings(completion: ((RootDebugViewController) -> Void)? = nil) {
-        os_log(#function, log: .generalLog, type: .debug)
+        Logger.lifecycle.debug(#function)
 
         let storyboard = UIStoryboard(name: "Debug", bundle: nil)
         let settings = storyboard.instantiateViewController(identifier: "DebugMenu") { coder in
@@ -281,10 +318,11 @@ extension MainViewController {
                                     sync: self.syncService,
                                     bookmarksDatabase: self.bookmarksDatabase,
                                     internalUserDecider: AppDependencyProvider.shared.internalUserDecider,
-                                    tabManager: self.tabManager)
+                                    tabManager: self.tabManager,
+                                    fireproofing: self.fireproofing)
         }
 
-        let controller = ThemableNavigationController(rootViewController: settings)
+        let controller = UINavigationController(rootViewController: settings)
         controller.modalPresentationStyle = .automatic
         present(controller, animated: true) {
             completion?(settings)
@@ -292,7 +330,7 @@ extension MainViewController {
     }
 
     private func hideAllHighlightsIfNeeded() {
-        os_log(#function, log: .generalLog, type: .debug)
+        Logger.lifecycle.debug(#function)
         if !DaxDialogs.shared.shouldShowFireButtonPulse {
             ViewHighlighter.hideAll()
         }

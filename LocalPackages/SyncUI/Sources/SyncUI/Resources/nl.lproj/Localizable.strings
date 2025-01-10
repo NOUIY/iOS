@@ -1,11 +1,14 @@
+/* No comment provided by engineer. */
+"A device password is required to use Sync & Backup." = "Er is een apparaatwachtwoord vereist om 'Synchronisatie  en back-up' te kunnen gebruiken.";
+
 /* Standard Buttons - Back Button */
 "back.button" = "Terug";
 
-/* Sync Paused Errors - Bookmarks Limit Exceeded Action */
-"bookmarks.limit.exceeded.action" = "Bladwijzers beheren";
+/* Do not translate - stringsdict entry */
+"bookmarks.invalid.objects.present.description" = "bookmarks.invalid.objects.present.description";
 
-/* Sync Paused Errors - Bookmarks Limit Exceeded Description */
-"bookmarks.limit.exceeded.description" = "Bladwijzerlimiet overschreden. Verwijder er een paar om de synchronisatie te hervatten.";
+/* Alert title for invalid bookmarks being filtered out of synced data */
+"bookmarks.invalid.objects.present.title" = "Sommige bladwijzers worden niet gesynchroniseerd vanwege te lange inhoud in bepaalde velden.";
 
 /* Camera View - Go to Settings Button */
 "camera.go.to.settings.button" = "Ga naar Instellingen";
@@ -43,17 +46,23 @@
 /* Connect With Server Sheet - Title */
 "connect.with.server.sheet.title" = "Dit apparaat synchroniseren en back-up maken";
 
-/* Sync Paused Errors - Credentials Limit Exceeded Action */
-"credentials.limit.exceeded.action" = "Aanmeldingsgegevens beheren";
+/* Standard Buttons - Copy Button */
+"copy.button" = "Kopiëren";
 
-/* Sync Paused Errors - Credentials Limit Exceeded Description */
-"credentials.limit.exceeded.description" = "Je hebt de limiet voor het aantal aanmeldingsgegevens overschreden. Verwijder er een paar om de synchronisatie te hervatten.";
+/* Do not translate - stringsdict entry */
+"credentials.invalid.objects.present.description" = "credentials.invalid.objects.present.description";
+
+/* Alert title for invalid logins being filtered out of synced data */
+"credentials.invalid.objects.present.title" = "Sommige aanmeldingen worden niet gesynchroniseerd vanwege te lange inhoud in bepaalde velden.";
 
 /* Delete Server Data - Button */
 "delete.server.data" = "Servergegevens uitschakelen en verwijderen ...";
 
 /* No comment provided by engineer. */
 "Dev environment" = "Ontwikkelomgeving";
+
+/* Device SyncedSheet Button to go get DuckDuckGo on other devices */
+"device.synced.sheet.button.get.other.devices" = "DuckDuckGo downloaden op andere apparaten";
 
 /* Device SyncedSheet - Title */
 "device.synced.sheet.title" = "Je gegevens zijn gesynchroniseerd!";
@@ -81,6 +90,9 @@
 
 /* Options - Fetch Favicons Title */
 "fetch.favicons.option.title" = "Pictogrammen automatisch downloaden";
+
+/* No comment provided by engineer. */
+"Go to Settings" = "Ga naar Instellingen";
 
 /* No comment provided by engineer. */
 "Keep Development" = "In ontwikkelen houden";
@@ -112,8 +124,11 @@
 /* Standard Buttons - Paste Button */
 "paste.button" = "Plakken";
 
-/* Description of rollout banner */
-"preferences.sync.rollout-banner.description" = "'Synchronisatie en back-up' wordt geleidelijk uitgerold en is mogelijk nog niet beschikbaar in DuckDuckGo op je andere apparaten.";
+/* Button title for sync bookmarks limits exceeded warning to go to manage bookmarks */
+"prefrences.sync.bookmarks-limit-exceeded-action" = "Bladwijzers beheren";
+
+/* Button title for sync credentials limits exceeded warning to go to manage passwords */
+"prefrences.sync.credentials-limit-exceeded-action" = "Wachtwoorden beheren …";
 
 /* Preparing To Sync Sheet - Description */
 "preparing.to.sync.sheet.description" = "Je bladwijzers en wachtwoorden worden voorbereid voor synchronisatie. Dit hoeft niet zo lang te duren.";
@@ -206,13 +221,31 @@
 "scan.or.see.code.title" = "QR-code scannen";
 
 /* No comment provided by engineer. */
+"Secure Your Device to Use Sync & Backup" = "Beveilig je apparaat om 'Synchronisatie en back-up' te gebruiken";
+
+/* No comment provided by engineer. */
 "Switch to Production" = "Overschakelen naar productie";
 
 /* Link label for syncing and backing up the device */
 "sync.and.backup.this.device.link" = "Dit apparaat synchroniseren en back-up maken";
 
-/* Sync Paused Errors - Title */
-"sync.limit.exceeded.title" = "Synchronisatie onderbroken";
+/* Button to get DuckDuckGo on other devices */
+"sync.get.other.devices" = "DuckDuckGo downloaden op andere apparaten";
+
+/* Button title to share link for downloading DuckDuckGo on other devices */
+"sync.get.other.devices.card.button.title" = "Downloadlink delen";
+
+/* Message before share link for downloading DuckDuckGo on other devices */
+"sync.get.other.devices.card.message" = "Om DuckDuckGo te downloaden op een desktop of een ander mobiel apparaat, ga naar:";
+
+/* Title of card with share links for users to download DuckDuckGo on other devices */
+"sync.get.other.devices.card.title" = "Download DuckDuckGo op andere apparaten om met dit apparaat te synchroniseren";
+
+/* Title of screen with share links for users to download DuckDuckGo on other devices */
+"sync.get.other.devices.screen.title" = "Download DuckDuckGo";
+
+/* Message included when sharing a url via the system share sheet */
+"sync.get.other.devices.share.link.message" = "Installeer de DuckDuckGo-browser op je apparaten om je bladwijzers en wachtwoorden veilig te synchroniseren:";
 
 /* Sync Menu Path */
 "sync.menu.path" = "'Instellingen' > 'Synchronisatie en back-up' > 'Synchroniseren met een ander apparaat'";
@@ -225,9 +258,6 @@
 
 /* Data syncing unavailable warning message */
 "sync.warning.data.syncing.disabled.upgrade.required" = "Synchroniseren en back-up is helaas niet langer beschikbaar in deze versie van de app. Werk DuckDuckGo bij naar de nieuwste versie om door te gaan.";
-
-/* Title of the warning message */
-"sync.warning.sync.paused" = "Synchronisatie en back-up is gepauzeerd";
 
 /* Title of the warning message */
 "sync.warning.sync.unavailable" = "'Synchronisatie en back-up' is niet beschikbaar";

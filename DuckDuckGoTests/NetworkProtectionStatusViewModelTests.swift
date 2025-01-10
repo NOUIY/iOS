@@ -21,12 +21,15 @@ import XCTest
 import NetworkProtection
 import NetworkExtension
 import NetworkProtectionTestUtils
+import SubscriptionTestingUtilities
+import Subscription
 @testable import DuckDuckGo
 
 final class NetworkProtectionStatusViewModelTests: XCTestCase {
     private var tunnelController: MockTunnelController!
     private var statusObserver: MockConnectionStatusObserver!
     private var serverInfoObserver: MockConnectionServerInfoObserver!
+    private var subscriptionManager: SubscriptionManagerMock!
     private var viewModel: NetworkProtectionStatusViewModel!
 
     private var testError: Error {
@@ -34,16 +37,25 @@ final class NetworkProtectionStatusViewModelTests: XCTestCase {
         return NEVPNError(_nsError: nsError)
     }
 
-    override func setUp() {
-        super.setUp()
+    override func setUpWithError() throws {
+        try super.setUpWithError()
         tunnelController = MockTunnelController()
         statusObserver = MockConnectionStatusObserver()
         serverInfoObserver = MockConnectionServerInfoObserver()
-        viewModel = NetworkProtectionStatusViewModel(
-            tunnelController: tunnelController,
-            statusObserver: statusObserver,
-            serverInfoObserver: serverInfoObserver
-        )
+        subscriptionManager = SubscriptionManagerMock(accountManager: AccountManagerMock(),
+                                                      subscriptionEndpointService: SubscriptionEndpointServiceMock(),
+                                                      authEndpointService: AuthEndpointServiceMock(),
+                                                      storePurchaseManager: StorePurchaseManagerMock(),
+                                                      currentEnvironment: SubscriptionEnvironment(serviceEnvironment: .production, purchasePlatform: .appStore),
+                                                      canPurchase: true,
+                                                      subscriptionFeatureMappingCache: SubscriptionFeatureMappingCacheMock())
+        viewModel = NetworkProtectionStatusViewModel(tunnelController: tunnelController,
+                                                     settings: VPNSettings(defaults: .networkProtectionGroupDefaults),
+                                                     statusObserver: statusObserver,
+                                                     serverInfoObserver: serverInfoObserver,
+                                                     locationListRepository: MockNetworkProtectionLocationListRepository(),
+                                                     usesUnifiedFeedbackForm: false,
+                                                     subscriptionManager: subscriptionManager)
     }
 
     override func tearDown() {
@@ -54,18 +66,12 @@ final class NetworkProtectionStatusViewModelTests: XCTestCase {
         super.tearDown()
     }
 
-    func testInit_prefetchesLocationList() throws {
-        let locationListRepo = MockNetworkProtectionLocationListRepository()
-        viewModel = NetworkProtectionStatusViewModel(locationListRepository: locationListRepo)
-        waitFor(condition: locationListRepo.didCallFetchLocationList)
+    func testStatusUpdate_connected_setsIsNetPEnabledToTrue() async throws {
+        await whenStatusUpdate_connected()
     }
 
-    func testStatusUpdate_connected_setsIsNetPEnabledToTrue() throws {
-        whenStatusUpdate_connected()
-    }
-
-    func testStatusUpdate_notConnected_setsIsNetPEnabledToFalse() throws {
-        whenStatusUpdate_notConnected()
+    func testStatusUpdate_notConnected_setsIsNetPEnabledToFalse() async throws {
+        await whenStatusUpdate_notConnected()
     }
 
     func testDidToggleNetPToTrue_setsTunnelControllerStateToTrue() async {
@@ -78,27 +84,27 @@ final class NetworkProtectionStatusViewModelTests: XCTestCase {
         XCTAssertEqual(self.tunnelController.didCallStart, false)
     }
 
-    func testStatusUpdate_connected_setsHeaderTitleToOn() {
+    func testStatusUpdate_connected_setsHeaderTitleToOn() async {
         viewModel.headerTitle = ""
-        whenStatusUpdate_connected()
+        await whenStatusUpdate_connected()
         XCTAssertEqual(self.viewModel.headerTitle, UserText.netPStatusHeaderTitleOn)
     }
 
-    func testStatusUpdate_notconnected_setsHeaderTitleToOff() {
+    func testStatusUpdate_notconnected_setsHeaderTitleToOff() async {
         viewModel.headerTitle = ""
-        whenStatusUpdate_notConnected()
+        await whenStatusUpdate_notConnected()
         XCTAssertEqual(self.viewModel.headerTitle, UserText.netPStatusHeaderTitleOff)
     }
 
-    func testStatusUpdate_connected_setsStatusImageIDToVPN() {
+    func testStatusUpdate_connected_setsStatusImageIDToVPN() async {
         viewModel.statusImageID = ""
-        whenStatusUpdate_connected()
+        await whenStatusUpdate_connected()
         XCTAssertEqual(self.viewModel.statusImageID, "VPN")
     }
 
-    func testStatusUpdate_disconnected_setsStatusImageIDToVPNDisabled() {
+    func testStatusUpdate_disconnected_setsStatusImageIDToVPNDisabled() async {
         viewModel.statusImageID = ""
-        whenStatusUpdate_notConnected()
+        await whenStatusUpdate_notConnected()
         XCTAssertEqual(self.viewModel.statusImageID, "VPNDisabled")
     }
 
@@ -168,9 +174,9 @@ final class NetworkProtectionStatusViewModelTests: XCTestCase {
     func testStatusUpdate_nilServerLocationAndServerAddress_hidesConnectionDetails() throws {
         let serverInfo = NetworkProtectionStatusServerInfo(serverLocation: nil, serverAddress: nil)
         // Wait for initial value first
-        try waitForPublisher(viewModel.$shouldShowConnectionDetails, toEmit: false)
+        try waitForPublisher(viewModel.$hasServerInfo, toEmit: false)
         serverInfoObserver.subject.send(serverInfo)
-        try waitForPublisher(viewModel.$shouldShowConnectionDetails, toEmit: false)
+        try waitForPublisher(viewModel.$hasServerInfo, toEmit: false)
     }
 
     func testStatusUpdate_anyServerInfoPropertiesNonNil_showsConnectionDetails() throws {
@@ -180,31 +186,31 @@ final class NetworkProtectionStatusViewModelTests: XCTestCase {
             NetworkProtectionStatusServerInfo(serverLocation: serverAttributes(), serverAddress: "111.222.333.444")
         ] {
             serverInfoObserver.subject.send(serverInfo)
-            try waitForPublisher(viewModel.$shouldShowConnectionDetails, toEmit: true)
+            try waitForPublisher(viewModel.$hasServerInfo, toEmit: true)
         }
     }
 
     // MARK: - Helpers
 
-    private func whenStatusUpdate_connected() {
+    private func whenStatusUpdate_connected() async {
         statusObserver.subject.send(.connected(connectedDate: Date()))
-        waitFor(condition: self.viewModel.isNetPEnabled)
+        await waitFor(condition: self.viewModel.isNetPEnabled)
     }
 
-    private func whenStatusUpdate_notConnected() {
+    private func whenStatusUpdate_notConnected() async {
         let nonConnectedCases: [ConnectionStatus] = [.disconnected, .disconnecting, .notConfigured, .reasserting]
         for current in nonConnectedCases {
             statusObserver.subject.send(current)
-            waitFor(condition: !self.viewModel.isNetPEnabled)
+            await waitFor(condition: !self.viewModel.isNetPEnabled)
         }
     }
 
-    private func waitFor(condition: @escaping @autoclosure () -> Bool) {
+    private func waitFor(condition: @escaping @autoclosure () -> Bool) async {
         let predicate = NSPredicate { _, _ in
             condition()
         }
         let expectation = XCTNSPredicateExpectation(predicate: predicate, object: nil)
-        wait(for: [expectation], timeout: 20)
+        await fulfillment(of: [expectation], timeout: 20)
     }
 
     private func serverAttributes() -> NetworkProtectionServerInfo.ServerAttributes {

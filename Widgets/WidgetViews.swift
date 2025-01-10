@@ -19,6 +19,7 @@
 
 import SwiftUI
 import WidgetKit
+import DesignResourcesKit
 
 struct FavoriteView: View {
 
@@ -28,8 +29,8 @@ struct FavoriteView: View {
     var body: some View {
 
         ZStack {
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color.widgetFavoritesBackground)
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color(designSystemColor: .container))
 
             if let favorite = favorite {
 
@@ -37,26 +38,35 @@ struct FavoriteView: View {
 
                     ZStack {
                         
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(favorite.needsColorBackground ? Color.forDomain(favorite.domain) : Color.widgetFavoritesBackground)
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(favorite.needsColorBackground ? Color.forDomain(favorite.domain) : Color(designSystemColor: .container))
                             .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
                         
                         if let image = favorite.favicon {
-                            
-                            Image(uiImage: image)
-                                .scaleDown(image.size.width > 60)
-                                .cornerRadius(10)
+
+                            if image.size.width > 60 {
+                                Image(uiImage: image)
+                                    .resizable()
+                                    .useFullColorRendering()
+                                    .aspectRatio(contentMode: .fit)
+                                    .cornerRadius(10)
+                            } else {
+                                Image(uiImage: image)
+                                    .useFullColorRendering()
+                                    .cornerRadius(10)
+                            }
                             
                         } else if favorite.isDuckDuckGo {
                             
-                            Image("WidgetDaxLogo")
+                            Image(.duckDuckGoColor24)
                                 .resizable()
+                                .useFullColorRendering()
                                 .frame(width: 45, height: 45, alignment: .center)
                             
                         } else {
                             
                             Text(favorite.domain.first?.uppercased() ?? "")
-                                .foregroundColor(Color.widgetFavoriteLetter)
+                                .foregroundColor(Color.white)
                                 .font(.system(size: 42))
                             
                         }
@@ -81,25 +91,28 @@ struct LargeSearchFieldView: View {
         Link(destination: DeepLinks.newSearch) {
             ZStack {
 
-                Capsule(style: .circular)
-                    .fill(Color.widgetSearchFieldBackground)
+                RoundedRectangle(cornerSize: CGSize(width: 8, height: 8))
+                    .fill(Color(designSystemColor: .container))
                     .frame(minHeight: 46, maxHeight: 46)
-                    .padding(16)
+                    .padding(.vertical, 16)
 
                 HStack {
 
-                    Image("WidgetDaxLogo")
-                        .resizable()
+                    Image(.duckDuckGoColor24)
+                        .useFullColorRendering()
                         .frame(width: 24, height: 24, alignment: .leading)
 
                     Text(UserText.searchDuckDuckGo)
-                        .foregroundColor(Color.widgetSearchFieldText)
+                        .daxBodyRegular()
+                        .foregroundColor(Color(designSystemColor: .textSecondary))
 
                     Spacer()
 
-                    Image("WidgetSearchLoupe")
+                    Image(.findSearch20)
+                        .useFullColorRendering()
+                        .foregroundColor(Color(designSystemColor: .textPrimary).opacity(0.5))
 
-                }.padding(EdgeInsets(top: 0, leading: 27, bottom: 0, trailing: 27))
+                }.padding(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
 
             }.unredacted()
         }
@@ -124,7 +137,6 @@ struct FavoritesRowView: View {
 
             }
         }
-        .padding(.horizontal, 16)
 
     }
 
@@ -166,7 +178,6 @@ struct FavoritesWidgetView: View {
 
     var body: some View {
         ZStack {
-            Rectangle().fill(Color.widgetBackground)
 
             VStack(alignment: .center, spacing: 0) {
 
@@ -182,23 +193,22 @@ struct FavoritesWidgetView: View {
 
             }.padding(.bottom, 8)
 
-            VStack(spacing: 8) {
+            VStack(spacing: 4) {
                 Text(UserText.noFavoritesMessage)
-                    .font(.system(size: 15))
+                    .daxSubheadRegular()
                     .multilineTextAlignment(.center)
-                    .foregroundColor(.widgetAddFavoriteMessage)
+                    .foregroundColor(Color(designSystemColor: .textSecondary))
                     .padding(.horizontal)
                     .accessibilityHidden(true)
 
                 HStack {
                     Text(UserText.noFavoritesCTA)
-                        .bold()
-                        .font(.system(size: 15))
-                        .foregroundColor(.widgetAddFavoriteCTA)
+                        .daxSubheadRegular()
+                        .foregroundColor(Color(designSystemColor: .accent))
 
                     Image(systemName: "chevron.right")
                         .imageScale(.medium)
-                        .foregroundColor(.widgetAddFavoriteCTA)
+                        .foregroundColor(Color(designSystemColor: .accent))
                 }.accessibilityHidden(true)
 
             }
@@ -206,7 +216,7 @@ struct FavoritesWidgetView: View {
             .padding(EdgeInsets(top: widgetFamily == .systemLarge ? 48 : 60, leading: 0, bottom: 0, trailing: 0))
 
         }
-        .widgetContainerBackground(color: .widgetBackground)
+        .widgetContainerBackground(color: Color(designSystemColor: .backgroundSheets))
     }
 }
 
@@ -215,32 +225,60 @@ struct SearchWidgetView: View {
 
     var body: some View {
         ZStack {
-            Rectangle()
-                .fill(Color.widgetBackground)
-                .accessibilityLabel(Text(UserText.searchDuckDuckGo))
-
             VStack(alignment: .center, spacing: 15) {
 
-                Image("WidgetDaxLogo")
+                Image(.logo)
                     .resizable()
+                    .useFullColorRendering()
                     .frame(width: 46, height: 46, alignment: .center)
                     .isHidden(false)
                     .accessibilityHidden(true)
 
                 ZStack(alignment: Alignment(horizontal: .trailing, vertical: .center)) {
 
-                    Capsule(style: .circular)
-                        .fill(Color.widgetSearchFieldBackground)
-                        .frame(width: 123, height: 46)
+                    RoundedRectangle(cornerSize: CGSize(width: 8, height: 8))
+                        .fill(Color(designSystemColor: .container))
+                        .frame(width: 126, height: 46)
 
-                    Image("WidgetSearchLoupe")
-                        .padding(.trailing)
+                    Image(.findSearch20)
+                        .useFullColorRendering()
+                        .frame(width: 20, height: 20)
+                        .padding(.leading)
+                        .padding(.trailing, 13)
                         .isHidden(false)
-
+                        .accessibilityHidden(true)
+                        .foregroundColor(Color(designSystemColor: .textPrimary).opacity(0.5))
                 }
-            }.accessibilityHidden(true)
+                .accessibilityHidden(true)
+            }.accessibilityLabel(Text(UserText.searchDuckDuckGo))
         }
-        .widgetContainerBackground(color: .widgetBackground)
+        .widgetContainerBackground(color: Color(designSystemColor: .backgroundSheets))
+    }
+}
+
+struct PasswordsWidgetView: View {
+    var entry: Provider.Entry
+
+    var body: some View {
+        ZStack {
+            VStack(alignment: .center, spacing: 6) {
+
+                Image(.widgetPasswordIllustration)
+                        .useFullColorRendering()
+                        .frame(width: 96, height: 72)
+                        .isHidden(false)
+                        .accessibilityHidden(true)
+
+                Text(UserText.passwords)
+                        .daxSubheadRegular()
+                        .foregroundColor(Color(designSystemColor: .textPrimary))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 8)
+
+            }
+            .accessibilityLabel(Text(UserText.passwords))
+        }
+        .widgetContainerBackground(color: Color(designSystemColor: .backgroundSheets))
     }
 }
 
@@ -253,7 +291,15 @@ extension View {
                 color
             }
         } else {
-            self
+            background(color)
+        }
+    }
+
+    func makeAccentable(_ isAccentable: Bool = true) -> some View {
+        if #available(iOSApplicationExtension 16.0, *) {
+            return self.widgetAccentable(isAccentable)
+        } else {
+            return self
         }
     }
 
@@ -293,9 +339,10 @@ extension View {
 
 extension Image {
 
-    @ViewBuilder func scaleDown(_ shouldScale: Bool) -> some View {
-        if shouldScale {
-            self.resizable().aspectRatio(contentMode: .fit)
+    /// Marks images as exempt from tint color overrides, such as favicons which should not have their color modified even when a tint color is set.
+    @ViewBuilder func useFullColorRendering() -> some View {
+        if #available(iOSApplicationExtension 18.0, *) {
+            self.widgetAccentedRenderingMode(.fullColor)
         } else {
             self
         }
@@ -329,6 +376,14 @@ struct WidgetViews_Previews: PreviewProvider {
             .environment(\.colorScheme, .light)
 
         SearchWidgetView(entry: emptyState)
+            .previewContext(WidgetPreviewContext(family: .systemSmall))
+            .environment(\.colorScheme, .dark)
+
+        PasswordsWidgetView(entry: emptyState)
+            .previewContext(WidgetPreviewContext(family: .systemSmall))
+            .environment(\.colorScheme, .light)
+
+        PasswordsWidgetView(entry: emptyState)
             .previewContext(WidgetPreviewContext(family: .systemSmall))
             .environment(\.colorScheme, .dark)
 

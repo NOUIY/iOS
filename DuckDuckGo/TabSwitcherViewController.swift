@@ -24,9 +24,8 @@ import DDGSync
 import WebKit
 import Bookmarks
 import Persistence
+import os.log
 
-// swiftlint:disable file_length
-// swiftlint:disable:next type_body_length
 class TabSwitcherViewController: UIViewController {
     
     struct Constants {
@@ -72,7 +71,7 @@ class TabSwitcherViewController: UIViewController {
     var currentSelection: Int?
     
     private var tabSwitcherSettings: TabSwitcherSettings = DefaultTabSwitcherSettings()
-    private var isProcessingUpdates = false
+    private(set) var isProcessingUpdates = false
     private var canUpdateCollection = true
 
     let favicons = Favicons.shared
@@ -94,7 +93,7 @@ class TabSwitcherViewController: UIViewController {
         refreshTitle()
         setupBackgroundView()
         currentSelection = tabsModel.currentIndex
-        applyTheme(ThemeManager.shared.currentTheme)
+        decorate()
         becomeFirstResponder()
         
         if !tabSwitcherSettings.hasSeenNewLayout {
@@ -124,20 +123,11 @@ class TabSwitcherViewController: UIViewController {
         collectionView.backgroundView = view
     }
     
-    private func refreshDisplayModeButton(theme: Theme = ThemeManager.shared.currentTheme) {
-        switch theme.currentImageSet {
-        case .dark:
-            if tabSwitcherSettings.isGridViewEnabled {
-                displayModeButton.setImage(UIImage(named: "tabsToggleGrid-Dark"), for: .normal)
-            } else {
-                displayModeButton.setImage(UIImage(named: "tabsToggleList-Dark"), for: .normal)
-            }
-        case .light:
-            if tabSwitcherSettings.isGridViewEnabled {
-                displayModeButton.setImage(UIImage(named: "tabsToggleGrid-Light"), for: .normal)
-            } else {
-                displayModeButton.setImage(UIImage(named: "tabsToggleList-Light"), for: .normal)
-            }
+    private func refreshDisplayModeButton() {
+        if tabSwitcherSettings.isGridViewEnabled {
+            displayModeButton.setImage(UIImage(named: "tabsToggleGrid"), for: .normal)
+        } else {
+            displayModeButton.setImage(UIImage(named: "tabsToggleList"), for: .normal)
         }
     }
 
@@ -234,7 +224,7 @@ class TabSwitcherViewController: UIViewController {
             ActionMessageView.present(message: UserText.bookmarkAllTabsSaved)
         } else {
             let failedToSaveCount = openTabsCount - results.newCount - results.existingCount
-            os_log("Failed to save %d tabs", log: .generalLog, type: .debug, failedToSaveCount)
+            Logger.general.debug("Failed to save \(failedToSaveCount) tabs")
             ActionMessageView.present(message: UserText.bookmarkAllTabsFailedToSave)
         }
     }
@@ -244,7 +234,6 @@ class TabSwitcherViewController: UIViewController {
         let alert = UIAlertController(title: UserText.alertBookmarkAllTitle,
                                       message: UserText.alertBookmarkAllMessage,
                                       preferredStyle: .alert)
-        alert.overrideUserInterfaceStyle()
         alert.addAction(UIAlertAction(title: UserText.actionCancel, style: .cancel))
         alert.addAction(title: UserText.actionBookmark, style: .default) {
             let model = MenuBookmarksViewModel(bookmarksDatabase: self.bookmarksDatabase, syncService: self.syncService)
@@ -271,24 +260,41 @@ class TabSwitcherViewController: UIViewController {
     }
     
     @IBAction func onDisplayModeButtonPressed(_ sender: UIButton) {
-        tabSwitcherSettings.isGridViewEnabled = !tabSwitcherSettings.isGridViewEnabled
-        
-        if tabSwitcherSettings.isGridViewEnabled {
-            Pixel.fire(pixel: .tabSwitcherGridEnabled)
-        } else {
-            Pixel.fire(pixel: .tabSwitcherListEnabled)
+        guard isProcessingUpdates == false else { return }
+
+        isProcessingUpdates = true
+        // Idea is here to wait for any pending processing of reconfigureItems on a cells,
+        // so when transition to/from grid happens we can request cells without any issues
+        // related to mismatched identifiers.
+        // Alternative is to use reloadItems instead of reconfigureItems but it looks very bad
+        // when tabs are reloading in the background.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+            guard let self else { return }
+
+            tabSwitcherSettings.isGridViewEnabled = !tabSwitcherSettings.isGridViewEnabled
+
+            if tabSwitcherSettings.isGridViewEnabled {
+                Pixel.fire(pixel: .tabSwitcherGridEnabled)
+            } else {
+                Pixel.fire(pixel: .tabSwitcherListEnabled)
+            }
+
+            self.refreshDisplayModeButton()
+
+            UIView.transition(with: view,
+                              duration: 0.3,
+                              options: .transitionCrossDissolve, animations: {
+                self.collectionView.reloadData()
+            }, completion: { _ in
+                self.isProcessingUpdates = false
+            })
         }
-        
-        refreshDisplayModeButton()
-        
-        UIView.transition(with: view,
-                          duration: 0.3,
-                          options: .transitionCrossDissolve, animations: {
-                            self.collectionView.reloadData()
-        }, completion: nil)
     }
 
     @IBAction func onAddPressed(_ sender: UIBarButtonItem) {
+        guard !isProcessingUpdates else { return }
+
+        Pixel.fire(pixel: .tabSwitcherNewTab)
         delegate.tabSwitcherDidRequestNewTab(tabSwitcher: self)
         dismiss()
     }
@@ -311,22 +317,22 @@ class TabSwitcherViewController: UIViewController {
     }
 
     @IBAction func onFirePressed(sender: AnyObject) {
-        Pixel.fire(pixel: .forgetAllPressedTabSwitching)
         
-        if DaxDialogs.shared.shouldShowFireButtonPulse {
-            let spec = DaxDialogs.shared.fireButtonEducationMessage()
-            performSegue(withIdentifier: "ActionSheetDaxDialog", sender: spec)
-        } else {
+        func presentForgetDataAlert() {
             let alert = ForgetDataAlert.buildAlert(forgetTabsAndDataHandler: { [weak self] in
                 self?.forgetAll()
             })
-            
+
             if let anchor = sender as? UIView {
                 self.present(controller: alert, fromView: anchor)
             } else {
                 self.present(controller: alert, fromView: toolbar)
             }
         }
+
+        Pixel.fire(pixel: .forgetAllPressedTabSwitching)
+        ViewHighlighter.hideAll()
+        presentForgetDataAlert()
     }
 
     private func forgetAll() {
@@ -427,6 +433,7 @@ extension TabSwitcherViewController: UICollectionViewDataSource {
 extension TabSwitcherViewController: UICollectionViewDelegate {
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        Pixel.fire(pixel: .tabSwitcherSwitchTabs)
         currentSelection = indexPath.row
         markCurrentAsViewedAndDismiss()
     }
@@ -506,22 +513,22 @@ extension TabSwitcherViewController: TabObserver {
             return
         }
 
-        if let index = tabsModel.indexOf(tab: tab), index < collectionView.numberOfItems(inSection: 0) {
-            if #available(iOS 15.0, *) {
-                collectionView.reconfigureItems(at: [IndexPath(row: index, section: 0)])
-            } else {
-                collectionView.reloadItems(at: [IndexPath(row: index, section: 0)])
+        collectionView.performBatchUpdates({}, completion: { [weak self] completed in
+            guard completed, let self = self else { return }
+            if let index = self.tabsModel.indexOf(tab: tab), index < self.collectionView.numberOfItems(inSection: 0) {
+                self.collectionView.reconfigureItems(at: [IndexPath(row: index, section: 0)])
             }
-        }
+        })
     }
 }
 
-extension TabSwitcherViewController: Themable {
+extension TabSwitcherViewController {
     
-    func decorate(with theme: Theme) {
+    private func decorate() {
+        let theme = ThemeManager.shared.currentTheme
         view.backgroundColor = theme.backgroundColor
         
-        refreshDisplayModeButton(theme: theme)
+        refreshDisplayModeButton()
         
         titleView.textColor = theme.barTintColor
         bookmarkAllButton.tintColor = theme.barTintColor
@@ -535,4 +542,3 @@ extension TabSwitcherViewController: Themable {
         collectionView.reloadData()
     }
 }
-// swiftlint:enable file_length

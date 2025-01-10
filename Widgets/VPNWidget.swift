@@ -26,13 +26,39 @@ import WidgetKit
 import NetworkExtension
 import NetworkProtection
 
-#if ALPHA
-
 enum VPNStatus {
     case status(NEVPNStatus)
     case error
     case notConfigured
+
+    var isConnecting: Bool {
+        switch self {
+        case .status(let status):
+            return status == .connecting
+        default:
+            return false
+        }
+    }
+
+    var isDisconnecting: Bool {
+        switch self {
+        case .status(let status):
+            return status == .disconnecting
+        default:
+            return false
+        }
+    }
+
+    var isConnected: Bool {
+        switch self {
+        case .status(let status):
+            return status.isConnected
+        default:
+            return false
+        }
+    }
 }
+
 struct VPNStatusTimelineEntry: TimelineEntry {
     let date: Date
     let status: VPNStatus
@@ -50,18 +76,18 @@ class VPNStatusTimelineProvider: TimelineProvider {
     typealias Entry = VPNStatusTimelineEntry
 
     func placeholder(in context: Context) -> VPNStatusTimelineEntry {
-        return VPNStatusTimelineEntry(date: Date(), status: .status(.connected), location: "Los Angeles, CA")
+        return VPNStatusTimelineEntry(date: Date(), status: .status(.connected), location: "Los Angeles")
     }
 
     func getSnapshot(in context: Context, completion: @escaping (VPNStatusTimelineEntry) -> Void) {
-        let entry = VPNStatusTimelineEntry(date: Date(), status: .status(.connected), location: "Los Angeles, CA")
+        let entry = VPNStatusTimelineEntry(date: Date(), status: .status(.connected), location: "Los Angeles")
         completion(entry)
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<VPNStatusTimelineEntry>) -> Void) {
         NETunnelProviderManager.loadAllFromPreferences { managers, error in
             let defaults = UserDefaults.networkProtectionGroupDefaults
-            let location = defaults.string(forKey: NetworkProtectionUserDefaultKeys.lastSelectedServer) ?? "Unknown Location"
+            let location = defaults.string(forKey: NetworkProtectionUserDefaultKeys.lastSelectedServerCity) ?? "Unknown Location"
             let expiration = Date().addingTimeInterval(TimeInterval.minutes(5))
 
             if error != nil {
@@ -111,43 +137,36 @@ extension NEVPNStatus {
 
 @available(iOSApplicationExtension 17.0, *)
 struct VPNStatusView: View {
+
     @Environment(\.widgetFamily) var family: WidgetFamily
+    @Environment(\.widgetRenderingMode) var widgetRenderingMode
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.openURL) private var openURL
+
     var entry: VPNStatusTimelineProvider.Entry
+
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
+        return formatter
+    }()
+
+    private let snoozeTimingStore = NetworkProtectionSnoozeTimingStore(userDefaults: .networkProtectionGroupDefaults)
 
     @ViewBuilder
     var body: some View {
         Group {
             switch entry.status {
             case .status(let status):
-                HStack {
-                    connectionView(with: status)
-                        .padding([.leading, .trailing], 16)
-
-                    Spacer()
-                }
-            case .error:
-                Text("Error")
-                    .foregroundStyle(Color.black)
-            case .notConfigured:
-                Text("VPN Not Configured")
-                    .foregroundStyle(Color.black)
+                connectionView(with: status)
+            case .error, .notConfigured:
+                connectionView(with: .disconnected)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .containerBackground(for: .widget) {
-            switch entry.status {
-            case .status(let status):
-                switch status {
-                case .connecting, .connected, .reasserting:
-                    Color.vpnWidgetBackgroundColor
-                case .disconnecting, .disconnected, .invalid:
-                    Color.white
-                @unknown default:
-                    Color.white
-                }
-            case .error, .notConfigured:
-                Color.white
-            }
+            Color(designSystemColor: .backgroundSheets)
         }
     }
 
@@ -155,56 +174,131 @@ struct VPNStatusView: View {
         HStack {
             VStack(alignment: .leading, spacing: 0) {
                 Image(headerImageName(with: status))
-                    .frame(width: 50, height: 54)
-                    .padding(.top, 15)
-
-                Spacer()
+                    .useFullColorRendering()
+                    .padding([.bottom], 7)
+                    .accessibilityHidden(true)
 
                 Text(title(with: status))
                     .font(.system(size: 16, weight: .semibold))
                     .fontWeight(.semibold)
-                    .foregroundStyle(status.isConnected ? Color.white : Color.black)
+                    .foregroundStyle(Color(designSystemColor: .textPrimary))
 
-                Text(status.isConnected ? entry.location : "VPN is Off")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(status.isConnected ? Color.white : Color.black)
-                    .opacity(status.isConnected ? 0.8 : 0.6)
+                if status == .connected {
+                    Text(snoozeTimingStore.isSnoozing ? UserText.vpnWidgetSnoozingUntil(endDate: snoozeEndDateString) : entry.location)
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundStyle(Color(designSystemColor: .textSecondary))
+                        .opacity(status.isConnected ? 0.8 : 0.6)
+                } else {
+                    Text(UserText.vpnWidgetDisconnectedSubtitle)
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundStyle(Color(designSystemColor: .textSecondary))
+                        .opacity(status.isConnected ? 0.8 : 0.6)
+                }
 
                 switch status {
-                case .connected, .connecting, .reasserting:
-                    Button(intent: DisableVPNIntent()) {
-                        Text("Disconnect")
-                            .font(.system(size: 15, weight: .medium))
-                            .fontWeight(.semibold)
-                    }
-                    .foregroundStyle(Color.vpnWidgetBackgroundColor)
-                    .buttonStyle(.borderedProminent)
-                    .tint(.white)
-                    .disabled(status != .connected)
-                    .padding(.top, 6)
-                    .padding(.bottom, 16)
+                case .connected:
+                    let buttonTitle = snoozeTimingStore.isSnoozing ? UserText.vpnWidgetLiveActivityWakeUpButton : UserText.vpnWidgetDisconnectButton
+                    let intent: any AppIntent = snoozeTimingStore.isSnoozing ? CancelSnoozeVPNIntent() : WidgetDisableVPNIntent()
+
+                    Button(buttonTitle, intent: intent)
+                        .borderedStyle(widgetRenderingMode == .fullColor)
+                        .makeAccentable(status == .connected)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(snoozeTimingStore.isSnoozing ?
+                                         connectButtonForegroundColor(isDisabled: false) :
+                                         disconnectButtonForegroundColor(isDisabled: status != .connected))
+                        .buttonBorderShape(.roundedRectangle(radius: 8))
+                        .tint(snoozeTimingStore.isSnoozing ?
+                              Color(designSystemColor: .accent) :
+                                disconnectButtonBackgroundColor(isDisabled: status != .connected)
+                        )
+                        .disabled(status != .connected)
+                        .frame(height: 28)
+                        .padding(.top, 6)
+                        .padding(.bottom, 16)
+                case .connecting, .reasserting:
+                    Button(UserText.vpnWidgetDisconnectButton, intent: WidgetDisableVPNIntent())
+                        .borderedStyle(widgetRenderingMode == .fullColor)
+                        .makeAccentable(status == .connected)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(disconnectButtonForegroundColor(isDisabled: status != .connected))
+                        .buttonBorderShape(.roundedRectangle(radius: 8))
+                        .tint(disconnectButtonBackgroundColor(isDisabled: status != .connected))
+                        .disabled(status != .connected)
+                        .frame(height: 28)
+                        .padding(.top, 6)
+                        .padding(.bottom, 16)
                 case .disconnected, .disconnecting:
-                    Button(intent: EnableVPNIntent()) {
-                        Text("Connect")
-                            .font(.system(size: 15, weight: .medium))
-                            .fontWeight(.semibold)
-                    }
-                    .foregroundStyle(.white)
-                    .buttonStyle(.borderedProminent)
-                    .tint(Color.vpnWidgetBackgroundColor)
-                    .disabled(status != .disconnected)
-                    .padding(.top, 6)
-                    .padding(.bottom, 16)
+                    connectButton
+                        .borderedStyle(widgetRenderingMode == .fullColor)
+                        .makeAccentable(status == .disconnected)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(connectButtonForegroundColor(isDisabled: status != .disconnected))
+                        .buttonBorderShape(.roundedRectangle(radius: 8))
+                        .tint(Color(designSystemColor: .accent))
+                        .disabled(status != .disconnected)
+                        .frame(height: 28)
+                        .padding(.top, 6)
+                        .padding(.bottom, 16)
                 default:
                     Spacer()
                 }
             }
+            .padding(.horizontal, 14)
+            .padding(.top, 16)
+            Spacer()
         }
+    }
+
+    private var snoozeEndDateString: String {
+        if let activeTiming = snoozeTimingStore.activeTiming {
+            return dateFormatter.string(from: activeTiming.endDate)
+        } else {
+            return ""
+        }
+    }
+
+    private var connectButton: Button<Text> {
+        switch entry.status {
+        case .status:
+            Button(UserText.vpnWidgetConnectButton, intent: WidgetEnableVPNIntent())
+        case .error, .notConfigured:
+            Button(UserText.vpnWidgetConnectButton) {
+                openURL(DeepLinks.openVPN)
+            }
+        }
+    }
+
+    private func connectButtonForegroundColor(isDisabled: Bool) -> Color {
+        let isDark = colorScheme == .dark
+        let standardForegroundColor = isDark ? Color.black.opacity(0.84) : Color.white
+        let disabledForegroundColor = isDark ? Color.white.opacity(0.36) : Color.black.opacity(0.36)
+        return isDisabled ? disabledForegroundColor : standardForegroundColor
+    }
+
+    private func disconnectButtonBackgroundColor(isDisabled: Bool) -> Color {
+        let isDark = colorScheme == .dark
+        let standardBackgroundColor = isDark ? Color.white.opacity(0.18) : Color.black.opacity(0.06)
+        let disabledBackgroundColor = isDark ? Color.white.opacity(0.06) : Color.black.opacity(0.06)
+        return isDisabled ? disabledBackgroundColor : standardBackgroundColor
+    }
+
+    private func disconnectButtonForegroundColor(isDisabled: Bool) -> Color {
+        let isDark = colorScheme == .dark
+        let defaultForegroundColor = isDark ? Color.white.opacity(0.84) : Color.black.opacity(0.84)
+        let disabledForegroundColor = isDark ? Color.white.opacity(0.36) : Color.black.opacity(0.36)
+        return isDisabled ? disabledForegroundColor : defaultForegroundColor
     }
 
     private func headerImageName(with status: NEVPNStatus) -> String {
         switch status {
-        case .connecting, .connected, .reasserting: return "vpn-on"
+        case .connected:
+            if snoozeTimingStore.isSnoozing {
+                return "vpn-off"
+            } else {
+                return "vpn-on"
+            }
+        case .connecting, .reasserting: return "vpn-on"
         case .disconnecting, .disconnected: return "vpn-off"
         case .invalid: return "vpn-off"
         @unknown default: return "vpn-off"
@@ -213,9 +307,15 @@ struct VPNStatusView: View {
 
     private func title(with status: NEVPNStatus) -> String {
         switch status {
-        case .connecting, .connected, .reasserting: return "Protected"
-        case .disconnecting, .disconnected: return "Unprotected"
-        case .invalid: return "Invalid"
+        case .connected:
+            let snoozeTimingStore = NetworkProtectionSnoozeTimingStore(userDefaults: .networkProtectionGroupDefaults)
+            if snoozeTimingStore.activeTiming != nil {
+                return UserText.vpnWidgetSnoozingStatus
+            } else {
+                return UserText.vpnWidgetConnectedStatus
+            }
+        case .connecting, .reasserting: return UserText.vpnWidgetConnectedStatus
+        case .disconnecting, .disconnected, .invalid: return UserText.vpnWidgetDisconnectedStatus
         @unknown default: return "Unknown"
         }
     }
@@ -224,14 +324,12 @@ struct VPNStatusView: View {
 
 @available(iOSApplicationExtension 17.0, *)
 struct VPNStatusWidget: Widget {
-    let kind: String = "VPNStatusWidget"
-
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: VPNStatusTimelineProvider()) { entry in
+        StaticConfiguration(kind: WidgetKind.vpn.rawValue, provider: VPNStatusTimelineProvider()) { entry in
             VPNStatusView(entry: entry).widgetURL(DeepLinks.openVPN)
         }
-        .configurationDisplayName("VPN Status")
-        .description("View and manage the VPN connection")
+        .configurationDisplayName(UserText.vpnWidgetGalleryDisplayName)
+        .description(UserText.vpnWidgetGalleryDescription)
         .supportedFamilies([.systemSmall])
         .contentMarginsDisabled()
     }
@@ -286,16 +384,17 @@ struct VPNStatusView_Previews: PreviewProvider {
             Text("iOS 17 required")
         }
     }
-
 }
 
-extension Color {
+extension Button {
 
-    static var vpnWidgetBackgroundColor: Color {
-        let color = UIColor(designSystemColor: .accent).resolvedColor(with: UITraitCollection(userInterfaceStyle: .light))
-        return Color(color)
+    @ViewBuilder
+    func borderedStyle(_ isBordered: Bool) -> some View {
+        if isBordered {
+            self.buttonStyle(.borderedProminent)
+        } else {
+            self.buttonStyle(.automatic)
+        }
     }
 
 }
-
-#endif

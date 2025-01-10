@@ -2,7 +2,7 @@
 "%@" = "%@";
 
 /* No comment provided by engineer. */
-"%@ [%@](https://form.asana.com/?k=_wNLt6YcT5ILpQjDuW0Mxw&d=137249556945)" = "%1$@ [%2$@](https://form.asana.com/?k=_wNLt6YcT5ILpQjDuW0Mxw&d=137249556945)";
+"%@ " = "%@ ";
 
 /* Buton label for Edit action */
 "action.generic.edit" = "Modifica";
@@ -15,6 +15,18 @@
 
 /* Button label for managing favorites */
 "action.manage.favorites" = "Gestisci";
+
+/* Button label for OK action */
+"action.ok" = "OK";
+
+/* Title for text zoom menu item.  %d%% is replaced with percent, e.g. 56% so do not change that please. */
+"action.text-zoom-menu-item" = "Zoom (%d%%)";
+
+/* Text zoom menu item */
+"action.text-zoom-sheet-menu-item" = "Zoom";
+
+/* Title for text zoom sheet view.  %d%% is replaced with percent, e.g. 56% so do not change that please. */
+"action.text-zoom-sheet-title" = "Zoom testo (%d%%)";
 
 /* Add action - button shown in alert */
 "action.title.add" = "Aggiungi";
@@ -38,7 +50,7 @@
 "action.title.copy.message" = "URL copiato";
 
 /* Delete action - button shown in alert */
-"action.title.delete" = "Cancella";
+"action.title.delete" = "Elimina";
 
 /* Disable protection action */
 "action.title.disable.protection" = "Disattiva la tutela della privacy";
@@ -133,26 +145,50 @@
 /* No comment provided by engineer. */
 "alert.message.bookmarkAll" = "I segnalibri già presenti non saranno duplicati.";
 
+/* Description for alert shown when sync error occurs because of bad bookmarks data */
+"alert.sync-bookmarks-bad-data-error-description" = "Alcuni segnalibri sono formattati in modo errato o sono troppo lunghi e non sono stati sincronizzati.";
+
 /* Description for alert shown when sync bookmarks paused for too many items */
-"alert.sync-bookmarks-paused-description" = "Hai superato il limite di sincronizzazione dei segnalibri. Prova a eliminarne qualcuno. Fino a quando il problema non verrà risolto, non sarà eseguito il backup dei tuoi segnalibri.";
+"alert.sync-bookmarks-paused-description" = "Hai raggiunto il numero massimo di segnalibri. Elimina alcuni segnalibri per riprendere la sincronizzazione.";
 
 /* Title for alert shown when sync bookmarks paused for too many items */
-"alert.sync-bookmarks-paused-title" = "La sincronizzazione dei segnalibri è in pausa";
+"alert.sync-bookmarks-paused-title" = "Sync dei segnalibri è in pausa";
+
+/* Description for alert shown when sync error occurs because of bad credentials data */
+"alert.sync-credentials-bad-data-error-description" = "Alcune password sono formattate in modo errato o sono troppo lunghe e non sono state sincronizzate.";
 
 /* Description for alert shown when sync credentials paused for too many items */
-"alert.sync-credentials-paused-description" = "Hai superato il limite di sincronizzazione delle password. Prova a eliminarne qualcuna. Fino a quando il problema non verrà risolto, non sarà eseguito il backup delle tue password.";
+"alert.sync-credentials-paused-description" = "Hai raggiunto il numero massimo di password. Elimina alcune password per riprendere la sincronizzazione.";
 
 /* Title for alert shown when sync credentials paused for too many items */
-"alert.sync-credentials-paused-title" = "La sincronizzazione delle password è in pausa";
+"alert.sync-credentials-paused-title" = "Sync delle password è in pausa";
 
 /* Title for sync error alert */
 "alert.sync-error" = "Errore di sincronizzazione e backup";
+
+/* Sync error alert action button title, takes the user to the sync settings page. */
+"alert.sync-error-action" = "Impostazioni Sync";
+
+/* Description for alert shown when user logged off from sync */
+"alert.sync-invalid-login-error-description" = "La sincronizzazione è stata sospesa. Se vuoi continuare a sincronizzare questo dispositivo, riconnettiti utilizzando un altro dispositivo o il tuo codice di ripristino.";
 
 /* Learn more button in alert */
 "alert.sync-paused-alert-learn-more-button" = "Ulteriori informazioni";
 
 /* Confirmation button in alert */
 "alert.sync-paused-alert-ok-button" = "OK";
+
+/* Title for alert shown when sync paused for an error */
+"alert.sync-paused-title" = "Sync è in pausa";
+
+/* Description for alert shown when sync error occurs because of too many requests */
+"alert.sync-too-many-requests-error-description" = "Sync & Backup non è temporaneamente disponibile.";
+
+/* Title of the warning message that tells the user that there was an error with the sync feature. */
+"alert.sync.warning.sync-error" = "Errore di sincronizzazione";
+
+/* Title of the warning message */
+"alert.sync.warning.sync-paused" = "Sincronizzazione e Backup è in pausa";
 
 /* Question from confirmation dialog */
 "alert.title.bookmarkAll" = "Creare un segnalibro con tutte le schede?";
@@ -196,225 +232,6 @@
 /* Shown on authentication screen */
 "app.authentication.unlock" = "Sblocca DuckDuckGo.";
 
-/* First part of about page content (note the trailing space) */
-"appTP.about.content1" = "You’ve probably heard about companies like Google and Facebook tracking you behind the scenes on third-party websites. But did you know they also track your personal information through apps on your device?\n\nIn 2022, DuckDuckGo found that ";
-
-/* Second part of about page content (note the trailing space) */
-"appTP.about.content2" = "over 85% of free iOS apps tested contained hidden trackers from other companies.";
-
-/* Third part of about page content (note the leading space) */
-"appTP.about.content3" = " Of the 395 apps tested, 60% sent data to Google. This happens even while you’re not using your device.\n\nTrackers in apps may have access to a lot more information than their website tracker cousins, such as your location down to which floor of a building you're on, how often you play games while at work, and when and how long you sleep each day. Even if you haven’t given apps explicit permission to collect data, they can still take it without your knowledge.\n\nTracking networks like Facebook and Google use these little pieces of information to build a digital profile about you. With it, tracking networks can manipulate what you see online and allow advertisers to bid on access to you based on your data.\n\nTrackers in apps is a BIG problem for privacy. But DuckDuckGo has a solution that can help.\n\nWhen enabled in the DuckDuckGo Privacy Browser app, App Tracking Protection blocks many trackers in other apps, not just the trackers we find on websites when you browse. These dual layers of protection reduce what companies know about you overall, so you can use your apps with more peace of mind, knowing you’re more protected.";
-
-/* Navigation Title for AppTP about page */
-"appTP.about.navTitle" = "About App Trackers";
-
-/* Title for AppTP about page */
-"appTP.about.title" = "What Are App Trackers?";
-
-/* Title for 'Report an Issue' button in the activity view. */
-"appTP.activityView.reportIssue" = "Report Issue";
-
-/* Text label for switch that turns blocking on or off for a tracker */
-"appTP.blockTrackerText" = "Block this Tracker";
-
-/* Detail string describing what AppTP is */
-"appTP.cell.detail" = "Blocca i sistemi di tracciamento delle app sul tuo dispositivo";
-
-/* String indicating AppTP is disabled when viewed from the settings screen */
-"appTP.cell.disabled" = "Disattivato";
-
-/* String indicating AppTP is enabled when viewed from the settings screen */
-"appTP.cell.enabled" = "Attivato";
-
-/* Info string informing the user what App Tracking Protection does. */
-"appTP.empty.disabled.info" = "Attiva App Tracking Protection per bloccare fastidiosi sistemi di tracciamento in altre app.";
-
-/* Info string informing the user we're looking for trackers in other apps. */
-"appTP.empty.enabled.heading" = "We’re blocking hidden trackers";
-
-/* Info string informing the user we're looking for trackers in other apps. */
-"appTP.empty.enabled.info" = "Come back soon to see a list of all the app trackers we’ve blocked.";
-
-/* First answer for AppTP FAQ page */
-"appTP.faq.answer1" = "App Tracking Protection blocks app trackers from other companies, like when Facebook tries to track you in a banking app. Companies may still track you in apps they own.";
-
-/* Second answer for AppTP FAQ page */
-"appTP.faq.answer2" = "Yes! App Tracking Protection works across all apps on your device to block the most common hidden trackers we find trying to collect your personal info.";
-
-/* Third answer for AppTP FAQ page */
-"appTP.faq.answer3" = "We currently only block the most common trackers that we find on iOS. This helps us to comprehensively test App Tracking Protection and lower frequency of app breakage, while blocking up to 70% of all tracking requests.";
-
-/* Fourth answer for AppTP FAQ page */
-"appTP.faq.answer4" = "You’ll be asked to set up a virtual private network (VPN) connection, but you don't need to install a VPN app for App Tracking Protection to work.\n\nThis permission, which works only on your device, allows App Tracking Protection to monitor network traffic so that it can block known trackers.";
-
-/* Fifth answer for AppTP FAQ page */
-"appTP.faq.answer5" = "You can use App Tracking Protection at the same time as using an IKEv2 protocol VPN app on an iOS device. You won’t be able to use App Tracking Protection on an iOS device if you’re using a VPN app that uses a different type of protocol, like WireGuard or OpenVPN type VPNs.";
-
-/* Sixth answer for AppTP FAQ page */
-"appTP.faq.answer6" = "A VPN sends your data from the device to its own server, where it secures and anonymizes your data from prying eyes. However, this allows the VPN company to see your network traffic.\n\nApp Tracking Protection is different. Instead of sending your data to a VPN server, App Tracking Protection works only on your device, sitting between your apps and the servers they talk to.\n\nWhenever App Tracking Protection recognizes a known tracker, it blocks the tracker from sending personal information (such as your IP address, activity, and device details) off your device. All other traffic reaches its destination, so your apps work normally.";
-
-/* Seventh answer for AppTP FAQ page */
-"appTP.faq.answer7" = "App Tracking Protection works only on your device and doesn’t send your data off your device to DuckDuckGo. We don’t collect or store any data from your apps.";
-
-/* First question for AppTP FAQ page */
-"appTP.faq.question1" = "How does App Tracking Protection work?";
-
-/* Second question for AppTP FAQ page */
-"appTP.faq.question2" = "Does App Tracking Protection block trackers in all apps on my device?";
-
-/* Third question for AppTP FAQ page */
-"appTP.faq.question3" = "Does App Tracking Protection block all app trackers?";
-
-/* Fourth question for AppTP FAQ page */
-"appTP.faq.question4" = "Why does App Tracking Protection use a VPN connection?";
-
-/* Fifth question for AppTP FAQ page */
-"appTP.faq.question5" = "Will App Tracking Protection work if I also use a VPN app?";
-
-/* Sixth question for AppTP FAQ page */
-"appTP.faq.question6" = "How is App Tracking Protection different from a VPN?";
-
-/* Seventh question for AppTP FAQ page */
-"appTP.faq.question7" = "Is my data private?";
-
-/* Title for AppTP FAQ page */
-"appTP.faq.title" = "App Tracking Protection FAQ";
-
-/* Do not translate. StringsDict entry -- Count part of string 'App Tracking Protection blocked x tracking attempts today' */
-"appTP.home.blockedCount" = "appTP.home.blockedCount";
-
-/* Prefix of string 'App Tracking Protection blocked x tracking attempts today' (note the trailing space) */
-"appTP.home.blockedPrefix" = "Oggi, App Tracking Protection ha bloccato ";
-
-/* Prefix of string 'App Tracking Protection blocked x tracking attempts today' (note the leading space) */
-"appTP.home.blockedSuffix" = " nelle tue app.";
-
-/* Prefix of string 'App Tracking Protection disabled. Tap to re-enable.' (note the trailing space) */
-"appTP.home.disabledPrefix" = "App Tracking Protection disabled. ";
-
-/* Suffix of string 'App Tracking Protection disabled. Tap to re-enable.' */
-"appTP.home.disabledSuffix" = "Tap to continue blocking tracking attempts across your apps.";
-
-/* Text indicating the tracking event occured 'just now'. Example: Last attempt 'just now' */
-"appTP.justNow" = "Proprio adesso";
-
-/* View to manage trackers for AppTP. Allows the user to turn trackers on or off. */
-"appTP.manageTrackers" = "Gestisci sistemi di tracciamento";
-
-/* Button title for AppTP onboarding */
-"appTP.onboarding.continueButton" = "Continue";
-
-/* Button title for AppTP onboarding to enable AppTP */
-"appTP.onboarding.enableeButton" = "Enable App Tracking Protection";
-
-/* Button title for AppTP onboarding to learn more about AppTP */
-"appTP.onboarding.learnMoreButton" = "Learn More";
-
-/* First part of info on the first AppTP onboarding page */
-"appTP.onboarding.page1Info1" = "Over 85% of free iOS apps";
-
-/* Second part of info on the first AppTP onboarding page (note the leading space) */
-"appTP.onboarding.page1Info2" = " we’ve tested allow other companies to track your personal information, even when you’re sleeping.";
-
-/* Third part of info on the first AppTP onboarding page */
-"appTP.onboarding.page1Info3" = "See who we catch trying to track you in your apps and take back control.";
-
-/* First part of info on the second AppTP onboarding page (note the trailing space) */
-"appTP.onboarding.page2Info1" = "App Tracking Protection ";
-
-/* Second part of info on the second AppTP onboarding page */
-"appTP.onboarding.page2Info2" = "detects and blocks app trackers from other companies,";
-
-/* Third part of info on the second AppTP onboarding page (note the leading space) */
-"appTP.onboarding.page2Info3" = " like when Google attempts to track you in a health app.";
-
-/* Fourth part of info on the second AppTP onboarding page */
-"appTP.onboarding.page2Info4" = "It’s free,";
-
-/* Fifth part of info on the second AppTP onboarding page (note the leading and trailing space) */
-"appTP.onboarding.page2Info5" = " and you can enjoy your apps as you normally would. Working in the background, it helps ";
-
-/* Sixth part of info on the second AppTP onboarding page */
-"appTP.onboarding.page2Info6" = "protect you night and day.";
-
-/* First part of info on the third AppTP onboarding page */
-"appTP.onboarding.page3Info1" = "App Tracking Protection is not a VPN.";
-
-/* Second part of info on the third AppTP onboarding page (note the leading space) */
-"appTP.onboarding.page3Info2" = " However, your device will recognize it as one. This is because it uses a local VPN connection to work.";
-
-/* Third part of info on the third AppTP onboarding page (note the trailing space) */
-"appTP.onboarding.page3Info3" = "App Tracking Protection is different. ";
-
-/* Fourth part of info on the third AppTP onboarding page */
-"appTP.onboarding.page3Info4" = "It never routes app data through an external server.";
-
-/* Title for first AppTP onboarding page */
-"appTP.onboarding.title1" = "One easy step for better app privacy!";
-
-/* Title for second AppTP onboarding page */
-"appTP.onboarding.title2" = "How does it work?";
-
-/* Title for third AppTP onboarding page */
-"appTP.onboarding.title3" = "Who sees your data?";
-
-/* Breakage report app name label */
-"appTP.report.appLabel" = "Which app is having issues?";
-
-/* Breakage report app name placeholder */
-"appTP.report.appPlaceholder" = "App name";
-
-/* Breakage report category label */
-"appTP.report.categoryLabel" = "Cosa sta succede?";
-
-/* Breakage report comment label */
-"appTP.report.commentLabel" = "Comments";
-
-/* Breakage report comment placeholder */
-"appTP.report.commentPlaceholder" = "Add additional details";
-
-/* Breakage report footer explaining what is collected in the breakage report */
-"appTP.report.footer" = "In addition to the details entered into this form, your app issue report will contain:\n• A list of trackers blocked in the last 10 min\n• Whether App Tracking Protection is enabled\n• Aggregate DuckDuckGo app diagnostics";
-
-/* Breakage report submit button */
-"appTP.report.submit" = "Invia";
-
-/* Breakage report form title */
-"appTP.report.title" = "Report Issue";
-
-/* Breakage report succcess message */
-"appTP.report.toast" = "Grazie! Il feedback è stato inviato.";
-
-/* Cancel button for 'Report an Issue' alert. */
-"appTP.reportAlert.cancel" = "Non adesso";
-
-/* Confirm button for 'Report an Issue' alert. */
-"appTP.reportAlert.confirm" = "Segnala problema";
-
-/* Message for 'Report an Issue' alert. */
-"appTP.reportAlert.message" = "Let us know if you disabled App Tracking Protection for this specific tracker because it caused app issues. Your feedback helps us improve!";
-
-/* Title for 'Report an Issue' alert. */
-"appTP.reportAlert.title" = "Report Issue?";
-
-/* Toast notification diplayed after restoring the blocklist to default settings */
-"appTP.restoreDefaultsToast" = "Default settings restored";
-
-/* Button to restore the blocklist to its default state. */
-"appTP.restoreDefualts" = "Ripristina i valori predefiniti";
-
-/* Title for the App Tracking Protection feature */
-"appTP.title" = "Protezione dal tracciamento delle app";
-
-/* Text indicating when the tracker was last allowed. Example: Last attempt allowed (timeString) */
-"appTP.trackerAllowedTimestamp" = "Ultimo tentativo consentito alle %@";
-
-/* Text indicating when the tracker was last blocked. Example: Last attempt blocked (timeString) */
-"appTP.trackerBlockedTimestamp" = "Ultimo tentativo bloccato alle %@";
-
-/* Do not translate. StringsDict entry -- Subtitle for tracking attempts in App Tracking Protection Activity View. Example: (count) tracking attempts */
-"appTP.trackingattempts" = "appTP.trackingattempts";
-
 /* Authentication Alert Sign In Button */
 "auth.alert.login.button" = "Accedi";
 
@@ -439,6 +256,18 @@
 /* No comment provided by engineer. */
 "autoclear.on" = "On";
 
+/* Subtitle for search history items */
+"autocomplete.history.search.duckduckgo" = "Cerca DuckDuckGo";
+
+/* The message text shown in suggestions */
+"autocomplete.history.warning.message" = "I suggerimenti di ricerca ora includono i siti visitati di recente. Disattiva nelle impostazioni o cancella in qualsiasi momento con il 🔥 Fire Button.";
+
+/* Title for message show in suggestions */
+"autocomplete.history.warning.title" = "La stessa privacy.\nSuggerimenti di ricerca migliori!";
+
+/* Switch to tab hint */
+"autocomplete.switch.to.tab" = "Passa alla scheda";
+
 /* Autoconsent for Cookie Management Setting state */
 "autoconsent.disabled" = "Disattivato";
 
@@ -460,23 +289,59 @@
 /* Do not translate - stringsdict entry */
 "autofill.delete.all.passwords.sync.confirmation.body" = "autofill.delete.all.passwords.sync.confirmation.body";
 
+/* Open Settings action for disabling autofill in Settings */
+"autofill.disable.prompt.action.open-settings" = "Apri Impostazioni";
+
+/* Message for informing user that they can disable autofill in Settings */
+"autofill.disable.prompt.message" = "Puoi disattivare il salvataggio della password in qualsiasi momento.";
+
 /* Text link to email protection website */
 "autofill.enable.email.protection" = "Abilita Email Protection";
 
 /* Accessibility title for a Hide Password button replacing displayed password with ***** */
 "autofill.hide-password" = "Nascondi password";
 
+/* Button label to get link to download the desktop browser */
+"autofill.import.passwords.get-browser-button" = "Scarica il browser per desktop";
+
+/* Step 1 for instructions to import passwords */
+"autofill.import.passwords.instructions.step1" = "Apri DuckDuckGo su Mac o Windows";
+
+/* Step 2 for instructions to import passwords. This reads as 'Go to Settings > Passwords' */
+"autofill.import.passwords.instructions.step2" = "Vai su %1$@ > %2$@";
+
+/* second parameter for autofill.import.passwords.instructions.step2 */
+"autofill.import.passwords.instructions.step2.passwords" = "Password";
+
+/* first parameter for autofill.import.passwords.instructions.step2 */
+"autofill.import.passwords.instructions.step2.settings" = "Impostazioni";
+
+/* Step 3 for instructions to import passwords. This reads as 'Select Import Passwords and follow the steps' */
+"autofill.import.passwords.instructions.step3" = "Seleziona %@ e segui i passaggi per l'importazione";
+
+/* Parameter for autofill.import.passwords.instructions.step3 */
+"autofill.import.passwords.instructions.step3.import" = "Importa password...";
+
+/* Step 4 for instructions to import passwords: Once imported on your computer you can set up sync on this iPhone|iPad|device */
+"autofill.import.passwords.instructions.step4" = "Una volta importate sul tuo computer, puoi impostare la sincronizzazione su questo %@";
+
+/* Title for section with instructions to import passwords */
+"autofill.import.passwords.instructions.title" = "Importa dal browser desktop:";
+
+/* Subtitle for screen to import passwords */
+"autofill.import.passwords.subtitle" = "Importa le password nella versione desktop del browser DuckDuckGo, quindi sincronizza su tutti i dispositivi.";
+
+/* Button label to sync passwords with desktop browser */
+"autofill.import.passwords.sync-button" = "Sincronizzazione con il desktop";
+
+/* Title for screen to import passwords */
+"autofill.import.passwords.title" = "Come importare le password";
+
 /* Disable action for alert when asking the user if they want to keep using autofill */
 "autofill.keep-enabled.alert.disable" = "Disabilita";
 
-/* Confirm action for alert when asking the user if they want to keep using autofill */
-"autofill.keep-enabled.alert.keep-using" = "Continua a salvare";
-
-/* Message for alert when asking the user if they want to keep using autofill */
-"autofill.keep-enabled.alert.message" = "Puoi disattivare questa funzione in qualsiasi momento in Impostazioni.";
-
-/* Title for alert when asking the user if they want to keep using autofill */
-"autofill.keep-enabled.alert.title" = "Continuare a salvare le password?";
+/* A link that takes the user to the DuckDuckGo help pages explaining password managers */
+"autofill.learn.more.link.title" = "Ulteriori informazioni";
 
 /* Button displayed after saving/updating an autofill login that takes the user to the saved login */
 "autofill.login-save-action-button.toast" = "Visualizza";
@@ -568,8 +433,11 @@
 /* Username label for login details on autofill */
 "autofill.logins.details.username" = "Nome utente";
 
-/* Subtitle for view displayed when autofill has no items */
-"autofill.logins.empty-view.subtitle" = "Le password sono archiviate in modo sicuro sul tuo dispositivo.";
+/* Title for button to Import Passwords when autofill has no items */
+"autofill.logins.empty-view.button.title" = "Importa password";
+
+/* Subtitle for view displayed when no autofill passwords have been saved */
+"autofill.logins.empty-view.subtitle.first.paragraph" = "Puoi importare le password salvate da un altro browser in DuckDuckGo.";
 
 /* Title for view displayed when autofill has no items */
 "autofill.logins.empty-view.title" = "Nessuna password ancora salvata";
@@ -588,6 +456,9 @@
 
 /* Title for a toggle that enables autofill */
 "autofill.logins.list.enable" = "Salva e compila automaticamente le password";
+
+/* Footer label displayed below table section with option to enable autofill */
+"autofill.logins.list.enable.footer" = "Le password sono archiviate in modo sicuro sul tuo dispositivo.";
 
 /* Toast message when a login item is deleted */
 "autofill.logins.list.login-deleted-message" = "Password per %@ eliminata";
@@ -610,6 +481,12 @@
 /* Placeholder for search field on autofill login listing */
 "autofill.logins.list.search-placeholder" = "Cerca password";
 
+/* Subtext under Autofill Settings briefly explaining security to alleviate user concerns. */
+"autofill.logins.list.settings.footer.fallback" = "Le password sono crittografate. Nessuno tranne te può vederle, nemmeno noi.";
+
+/* Subtext under Autofill Settings briefly explaining security to alleviate user concerns. Has a URL link by clicking Learn More. */
+"autofill.logins.list.settings.footer.markdown" = "Le password sono crittografate. Nessuno tranne te può vederle, nemmeno noi. [Scopri di più](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/sync-and-backup/password-manager-security/)";
+
 /* Section title for group of suggested saved logins */
 "autofill.logins.list.suggested" = "Suggerimenti";
 
@@ -626,7 +503,7 @@
 "autofill.logins.prompt.auth.cancel" = "Annulla";
 
 /* Reason for auth during login prompt */
-"autofill.logins.prompt.auth.reason" = "Sblocca per utilizzare la password salvata";
+"autofill.logins.prompt.auth.reason" = "Sblocca il dispositivo per usare la password salvata";
 
 /* Title for section of autofill logins that are an exact match to the current website */
 "autofill.logins.prompt.exact.match.title" = "Da questo sito web";
@@ -651,6 +528,37 @@
 
 /* Do not translate - stringsdict entry */
 "autofill.number.of.passwords" = "autofill.number.of.passwords";
+
+/* Description of autofill onboarding prompt's secure storage feature
+   Description of autofill onboarding prompt's secure storage feature with a string describing the available biometry + passcode as a parameter */
+"autofill.onboarding.key-features.secure-storage.description" = "Le password sono crittografate, archiviate sul dispositivo e bloccate con %@.";
+
+/* Parameter for the description of autofill onboarding prompt's secure storage feature describing Face ID biometry + passcode */
+"autofill.onboarding.key-features.secure-storage.description.parameter.face-id" = "Face ID o passcode";
+
+/* Parameter for the description of autofill onboarding prompt's secure storage feature describing passcode only if no biometry are available */
+"autofill.onboarding.key-features.secure-storage.description.parameter.passcode" = "codice di accesso";
+
+/* Parameter for the description of autofill onboarding prompt's secure storage feature describing Touch ID biometry + passcode */
+"autofill.onboarding.key-features.secure-storage.description.parameter.touch-id" = "Touch ID o codice di accesso";
+
+/* Title of autofill onboarding prompt's secure storage feature */
+"autofill.onboarding.key-features.secure-storage.title" = "Archiviazione sicura";
+
+/* Description of autofill onboarding prompt's sign-in feature */
+"autofill.onboarding.key-features.sign-ins.description" = "Non è necessario ricordare i dati di accesso.";
+
+/* Title of autofill onboarding prompt's sign-in feature */
+"autofill.onboarding.key-features.sign-ins.title" = "Accesso senza problemi";
+
+/* Description of autofill onboarding prompt's sync feature */
+"autofill.onboarding.key-features.sync.description" = "Crittografia end-to-end e facilità di configurazione.";
+
+/* Title of autofill onboarding prompt's sync feature */
+"autofill.onboarding.key-features.sync.title" = "Sincronizzazione tra dispositivi";
+
+/* Title of autofill onboarding prompt's features list */
+"autofill.onboarding.key-features.title" = "Caratteristiche principali";
 
 /* Subtitle for prompt to use suggested strong password for creating a login */
 "autofill.password-generation-prompt.subtitle" = "Le password sono archiviate in modo sicuro sul tuo dispositivo.";
@@ -697,20 +605,41 @@
 /* CTA displayed on modal asking if the user never wants to be prompted to save a login for this website agin */
 "autofill.save-login.never-prompt.CTA" = "Non chiedere mai per questo sito";
 
-/* Message displayed on modal asking for the user to save the login for the first time */
-"autofill.save-login.new-user.message" = "Le password sono archiviate in modo sicuro sul tuo dispositivo.";
-
 /* Title displayed on modal asking for the user to save the login for the first time */
-"autofill.save-login.new-user.title" = "Vuoi che DuckDuckGo salvi la password?";
+"autofill.save-login.new-user.title" = "Salvare questa password?";
 
-/* Cancel CTA displayed on modal asking for the user to save the login */
-"autofill.save-login.not-now.CTA" = "Non salvare";
+/* CTA displayed on modal asking if the user wants to dismiss the save login action for now */
+"autofill.save-login.no-thanks.CTA" = "No, grazie";
+
+/* Message displayed on modal asking for the user to save the login for the first time */
+"autofill.save-login.security.message" = "Memorizza in modo sicuro la tua password sul dispositivo con DuckDuckGo Passwords & Autofill.";
 
 /* Title displayed on modal asking for the user to save the login */
 "autofill.save-login.title" = "Salvare password?";
 
 /* Confirm CTA displayed on modal asking for the user to save the password */
 "autofill.save-password.save.CTA" = "Salva password";
+
+/* Title for the button to report that autofill is not working on a site in autofill settings */
+"autofill.settings.report.not.working.button.title" = "Segnala un problema con la compilazione automatica";
+
+/* Button title for the confirmation prompt when reporting autofill is not working for a website */
+"autofill.settings.report.not.working.confirmation.button" = "Invia il rapporto";
+
+/* Message for the confirmation prompt when reporting autofill is not working for a website */
+"autofill.settings.report.not.working.confirmation.message" = "Le segnalazioni inviate a DuckDuckGo sono anonime e non includono il nome utente, la password o altre informazioni di identificazione personale.\n\nIl rapporto include solo l'url del sito web e lo stato di alcune impostazioni di compilazione automatica.";
+
+/* Title for the confirmation prompt when reporting autofill is not working for a website */
+"autofill.settings.report.not.working.confirmation.title" = "Il rapporto di compilazione automatica non funziona su %@?";
+
+/* Message shown to user when they submit a report that autofill is not working for a website */
+"autofill.settings.report.not.working.sent.confirmation" = "Grazie. Il tuo rapporto ci aiuterà a rendere DuckDuckGo migliore per tutti.";
+
+/* Subtitle for the row to report that autofill is not working on a site in autofill settings */
+"autofill.settings.report.not.working.subtitle" = "Segnala in forma anonima la compilazione automatica non funzionante su questo sito. Le password non vengono mai condivise.";
+
+/* Title for the row to report that autofill is not working on a site in autofill settings */
+"autofill.settings.report.not.working.title" = "La compilazione automatica non funziona?";
 
 /* Accessibility title for a Show Password button displaying actial password instead of ***** */
 "autofill.show-password" = "Mostra password";
@@ -752,13 +681,13 @@
 "bookmark.delete.alert.message" = "L'operazione eliminerà il tuo segnalibro per \"%@\"";
 
 /* Delete bookmark alert title */
-"bookmark.delete.alert.title" = "Delete?";
+"bookmark.delete.alert.title" = "Eliminare?";
 
 /* The message shown after a bookmark has been deleted */
 "bookmark.deleted.toast" = "Segnalibro eliminato";
 
 /* Delete bookmark folder alert delete button */
-"bookmark.deleteFolderAlert.deleteButton" = "Cancella";
+"bookmark.deleteFolderAlert.deleteButton" = "Elimina";
 
 /* Do not translate - stringsdict entry */
 "bookmark.deleteFolderAlert.message" = "bookmark.deleteFolderAlert.message";
@@ -780,6 +709,9 @@
 
 /* More options button text */
 "bookmark.moreButton" = "Informazioni";
+
+/* Placeholder in the bookmarks search bar */
+"bookmark.searchbar.placeholder" = "Ricerca";
 
 /* Placeholder in the add bookmark form */
 "bookmark.title.placeholder" = "Titolo del sito";
@@ -823,8 +755,146 @@
 /* Title of prompt for users where they can choose to import or export an HTML file containing webpage bookmarks */
 "bookmarks.importExport.title" = "Importa un file HTML di segnalibri da un altro browser o esporta i segnalibri esistenti.";
 
-/* No comment provided by engineer. */
-"bucket: %@" = "bucket: %@";
+/* Button to open report form */
+"broken.site.report.menu.title" = "Segnala un problema con questo sito";
+
+/* Acknowledge button */
+"broken.site.report.missing.description.alert.button" = "Fatto";
+
+/* It appears as an alert after user tries to send a report without submitting any details */
+"broken.site.report.missing.description.alert.description" = "Descrivi il problema riscontrato su questo sito, così possiamo capire meglio come risolverlo.";
+
+/* It appears as an alert after user tries to send a report without submitting any details */
+"broken.site.report.missing.description.alert.title" = "Descrizione necessaria";
+
+/* Message that appears after submitting report */
+"broken.site.report.success.toast" = "Il tuo rapporto aiuta a rendere DuckDuckGo migliore per tutti.";
+
+/* Button to answer question 'Did turning off protections resolve the issue on this site?' */
+"broken.site.report.toggle.alert.no.button" = "No";
+
+/* An alert that appears after user turns off the privacy protection */
+"broken.site.report.toggle.alert.title" = "La disattivazione delle Protezioni della Privacy ha risolto il problema su questo sito?";
+
+/* Button to answer question 'Did turning off protections resolve the issue on this site?' */
+"broken.site.report.toggle.alert.yes.button" = "Sì";
+
+/* Button to continue the onboarding process */
+"contextual.onboarding.addToDock.buttons.skip" = "Salta";
+
+/* Button on the last screen of the onboarding, it will dismiss the onboarding screen. */
+"contextual.onboarding.addToDock.buttons.startBrowsing" = "Inizia a navigare";
+
+/* Button of the onboarding dialog. On click it shows a dialog with a tutorial video about how to add the DDG browser icon to the device dock. */
+"contextual.onboarding.addToDock.buttons.tutorial" = "Dammi indicazioni";
+
+/* Message of the last screen of the onboarding that promotes adding the DDG browser icon to the dock. */
+"contextual.onboarding.addToDock.promo.contextual.message" = "Ricorda: quando navighi con me gli annunci inquietanti non possono seguirti.\n\nQuindi tienimi nel tuo dock per la navigazione quotidiana.";
+
+/* The message of the onboarding dialog popup that promotes adding the DDG browser icon to the dock. */
+"contextual.onboarding.addToDock.promo.intro.message" = "Sarò a portata di mano per tutta la tua navigazione quotidiana.";
+
+/* The title of the onboarding dialog popup that promotes adding the DDG browser icon to the dock. */
+"contextual.onboarding.addToDock.promo.title" = "Aggiungimi al tuo dock!";
+
+/* The message of the onboarding dialog popup that explains how to add the DDG browser icon to the dock. */
+"contextual.onboarding.addToDock.tutorial.message" = "Trova l'icona di DuckDuckGo sulla tua schermata Home. Quindi premi e trascinala nella posizione desiderata. Ecco fatto!";
+
+/* The title of the onboarding dialog popup that explains how to add the DDG browser icon to the dock. */
+"contextual.onboarding.addToDock.tutorial.title" = "Aggiungermi al tuo dock è facile.";
+
+/* First parameter is a count of additional trackers, second and third are names of the tracker networks (strings) */
+"contextual.onboarding.browsing.multiple.trackers" = "contextual.onboarding.browsing.multiple.trackers";
+
+/* Parameter is domain name (string) */
+"contextual.onboarding.browsing.one.tracker" = "*%1$@* stava cercando di tracciare la tua attività qui. L'ho bloccato!\n\n☝️ Tocca lo scudo per maggiori informazioni.";
+
+/* Button on the last screen of the onboarding, it will dismiss the onboarding screen. */
+"contextual.onboarding.final-screen.button" = "Batti cinque!";
+
+/* Message of the last screen of the onboarding to the browser app. */
+"contextual.onboarding.final-screen.message" = "Ricorda: quando navighi con me gli annunci inquietanti non possono seguirti. 👌";
+
+/* Title of the last screen of the onboarding to the browser app */
+"contextual.onboarding.final-screen.title" = "Ben fatto!";
+
+/* After the user performs their first search using the browser, this dialog explains the advantages of using DuckDuckGo */
+"contextual.onboarding.first-search-done.message" = "È DuckDuckGo Search. Veloce, privata e con meno annunci.";
+
+/* During onboarding steps this button is shown and takes either to the next steps or closes the onboarding. */
+"contextual.onboarding.got-it.button" = "Ho capito!";
+
+/* Message of the last screen of the onboarding to the browser app. */
+"contextual.onboarding.highlights.final-screen.message" = "Ricorda: quando navighi con me gli annunci inquietanti non possono seguirti.";
+
+/* After the user performs their first search using the browser, this dialog explains the advantages of using DuckDuckGo */
+"contextual.onboarding.highlights.first-search-done.message" = "È DuckDuckGo Search! Privato. Veloce. Meno annunci.";
+
+/* Message of a popover on the browser that invites the user to try a search explaining that their searches are private */
+"contextual.onboarding.highlights.try-a-search.message" = "Le tue ricerche su DuckDuckGo sono sempre private.";
+
+/* Browser Search query for baby ducklings */
+"contextual.onboarding.highlights.try-search.surprise-me" = "anatroccoli";
+
+/* Title of a popover on the new tab page browser that invites the user to try a visiting a website */
+"contextual.onboarding.ntp.try-a-site.title" = "Prova a visitare un sito!";
+
+/* Message of a popover on the browser that invites the user to try a search explaining that their searches are anonymous */
+"contextual.onboarding.try-a-search.message" = "Le tue ricerche su DuckDuckGo sono sempre anonime.";
+
+/* Title of a popover on the browser that invites the user to try a search */
+"contextual.onboarding.try-a-search.title" = "Ti va di iniziare?\nProva una ricerca!";
+
+/* Message of a popover on the browser that invites the user to try visiting a website to explain that we block trackers */
+"contextual.onboarding.try-a-site.message" = "Bloccherò i sistemi di tracciamento in modo che non possano spiarti e";
+
+/* Title of a popover on the browser that invites the user to try a visiting a website */
+"contextual.onboarding.try-a-site.title" = "In seguito, prova a visitare un sito!";
+
+/* Message of a popover on the browser that invites the user to try visiting the browser Fire Button. Please leave the line break */
+"contextual.onboarding.try-fire-button.message" = "Cancella istantaneamente la tua attività di navigazione con il Fire Button.\n\nProvalo! 🔥";
+
+/* Browser Search query for how to say duck in english */
+"contextual.onboarding.try-search.option1-English" = "come si dice \"anatra\" in spagnolo";
+
+/* Browser Search query for how to say duck in english */
+"contextual.onboarding.try-search.option1international" = "come si dice \"anatra\" in inglese";
+
+/* Search query for the cast of Mighty Ducks */
+"contextual.onboarding.try-search.option2-english" = "cast delle papere potenti";
+
+/* Search query for the cast of Avatar */
+"contextual.onboarding.try-search.option2-international" = "cast di avatar";
+
+/* Browser Search query for local weather */
+"contextual.onboarding.try-search.option3" = "meteo locale";
+
+/* Browser Search query for chocolate chip cookie recipes */
+"contextual.onboarding.try-search.surprise-me-english" = "ricette di biscotti con gocce di cioccolato";
+
+/* Browser Search query for dinner recipes */
+"contextual.onboarding.try-search.surprise-me-international" = "ricette per la cena";
+
+/* Title for a button that triggers an unknown search query for the user. */
+"contextual.onboarding.try-search.surprise-me-title" = "Sorprendimi!";
+
+/* Crash Report always send button title */
+"crash.report.dialog.always.send" = "Invia sempre segnalazioni di arresto anomalo";
+
+/* Crash Report hide details button title */
+"crash.report.dialog.hide.details" = "Nascondi";
+
+/* Crash Report dialog message */
+"crash.report.dialog.message" = "Le segnalazioni sugli arresti anomali aiutano DuckDuckGo a diagnosticare i problemi e a migliorare i nostri prodotti. Non contengono informazioni personali identificabili.";
+
+/* Crash Report never send button title */
+"crash.report.dialog.never.send" = "Non inviare mai";
+
+/* Crash Report show details button title */
+"crash.report.dialog.show.details" = "Controlla cosa è stato inviato";
+
+/* Crash Report dialog title */
+"crash.report.dialog.title" = "Inviare automaticamente le segnalazioni di arresto anomalo?";
 
 /* Title for a section containing only items from past month */
 "date.range.past-month" = "Ultimo mese";
@@ -837,18 +907,6 @@
 
 /* Title for a section containing only items from yesterday */
 "date.range.yesterday" = "Ieri";
-
-/* Button title accepting to enable feature to automatically manage cookie popups */
-"dax.cookie-consent.button.accept" = "Gestisci popup dei cookie";
-
-/* Button title rejecting to enable feature to automatically manage cookie popups */
-"dax.cookie-consent.button.reject" = "No, grazie";
-
-/* First part of text displayed on Dax dialog for enabling Autoconsent for Cookie Management feature */
-"dax.cookie-consent.first" = "Sembra che su questo sito sia presente un popup per il consenso ai cookie👇";
-
-/* Second part of text displayed on Dax dialog for enabling Autoconsent for Cookie Management feature */
-"dax.cookie-consent.second" = "Vuoi che me ne occupi io? Posso cercare di ridurre al minimo i cookie, massimizzare la privacy e nascondere i popup come questo.";
 
 /* No comment provided by engineer. */
 "dax.hide.button" = "Nascondi suggerimenti per sempre";
@@ -920,10 +978,16 @@
 "dax.onboarding.home.subsequent" = "Ben fatto!\n\nRicorda: quando navighi con me, gli annunci inquietanti non possono seguirti. 👍";
 
 /* No comment provided by engineer. */
-"dax.onboarding.message" = "Internet può essere un po' inquietante.\n\nNon preoccuparti! Effettuare ricerche e navigare in modo privato è più facile di quanto pensi.";
-
-/* No comment provided by engineer. */
 "Debug" = "Debug";
+
+/* Default string used if users device is not iPhone or iPad */
+"device.type.default" = "dispositivo";
+
+/* Device type is iPhone */
+"device.type.iphone" = "iPhone";
+
+/* Device type is iPad */
+"device.type.pad" = "iPad";
 
 /* GPC Setting state */
 "donotsell.disabled" = "Disattivato";
@@ -940,17 +1004,20 @@
 /* Alert action for starting a file dowload */
 "downloads.alert.action.save-to-downloads" = "Salva in Download";
 
-/* Cancel download action for alert when trying to cancel the file download */
+/* Cancel download action for downloads */
 "downloads.cancel-download.alert.cancel" = "Annulla";
 
 /* Message for alert when trying to cancel the file download */
 "downloads.cancel-download.alert.message" = "Vuoi davvero annullare questo download?";
 
-/* Resume download action for alert when trying to cancel the file download */
-"downloads.cancel-download.alert.resume" = "Riprendi";
+/* Confirm action for alert when trying to cancel the file download */
+"downloads.cancel-download.alert.no" = "No";
 
 /* Title for alert when trying to cancel the file download */
 "downloads.cancel-download.alert.title" = "Annullare il download?";
+
+/* Confirm action for for alert when trying to cancel the file download */
+"downloads.cancel-download.alert.yes" = "Sì";
 
 /* Button for deleting all items on downloads list */
 "downloads.downloads-list.delete-all" = "Elimina tutto";
@@ -987,6 +1054,57 @@
 
 /* No comment provided by engineer. */
 "Duck Address" = "Duck Address";
+
+/* Title for message explaining to the user that Duck Player is not available */
+"duck-player.contingency-title" = "Duck Player non disponibile";
+
+/* Button for the message explaining to the user that Duck Player is not available so the user can learn more */
+"duck-player.video-contingency-cta" = "Ulteriori informazioni";
+
+/* Message explaining to the user that Duck Player is not available */
+"duck-player.video-contingency-message" = "La funzionalità di Duck Player è stata influenzata dalle recenti modifiche a YouTube. Stiamo lavorando per risolvere questi problemi. Ti ringraziamo per la comprensione.";
+
+/* No comment provided by engineer. */
+"DuckDuckGo for iOS" = "DuckDuckGo per iOS";
+
+/* Text displayed when DuckPlayer is always enabled */
+"duckPlayer.alwaysEnabled.label" = "Sempre";
+
+/* Text displayed when DuckPlayer is in 'Ask' mode. */
+"duckPlayer.ask.label" = "Chiedi ogni volta";
+
+/* Text displayed when DuckPlayer is in off. */
+"duckPlayer.never.label" = "Mai";
+
+/* Body text for the modal feature explanation */
+"duckplayer.presentation.modal.body" = "Duck Player ti consente di guardare YouTube senza annunci mirati in DuckDuckGo e ciò che guardi non inciderà sui consigli che ricevi.";
+
+/* Button that will dismiss the modal */
+"duckplayer.presentation.modal.dismiss-button" = "Ho capito!";
+
+/* Two line title (separated by \n) for the feature explanation */
+"duckplayer.presentation.modal.title" = "YouTube ti inonda di annunci? Prova Duck Player!";
+
+/* Two line title (separated by \n) for the feature explanation */
+"duckplayer.presentation.modal.title.youtube" = "YouTube ti inonda di annunci? Non con Duck Player!";
+
+/* Footer label in the settings screen for Duck Player */
+"duckplayer.settings.footer" = "DuckDuckGo fornisce tutti gli elementi essenziali per la privacy di cui hai bisogno per proteggerti mentre navighi sul Web.";
+
+/* Text explaining what Duck Player is in the settings screen. */
+"duckplayer.settings.info-text" = "Duck Player ti consente di guardare YouTube senza annunci mirati in DuckDuckGo e ciò che guardi non inciderà sui consigli che ricevi.";
+
+/* Button that takes the user to learn more about Duck Player. */
+"duckplayer.settings.learn-more" = "Ulteriori informazioni";
+
+/* Settings screen cell text for DuckPlayer settings to open in new tab */
+"duckplayer.settings.open-new-tab-label" = "Apri Duck Player in una nuova scheda";
+
+/* Settings screen cell text for DuckPlayer settings */
+"duckplayer.settings.open-videos-in" = "Apri i video di YouTube in Duck Player";
+
+/* Settings screen cell text for DuckPlayer settings */
+"duckplayer.settings.title" = "Duck Player";
 
 /* Email protection service offered by DuckDuckGo */
 "email-protection" = "Protezione email";
@@ -1060,9 +1178,6 @@
 /* Empty search placeholder on bookmarks search */
 "empty.search" = "Nessuna corrispondenza trovata";
 
-/* No comment provided by engineer. */
-"Error" = "Errore";
-
 /* Button title to Sign In */
 "error.email-protection-sign-in.action" = "Accedi";
 
@@ -1091,7 +1206,7 @@
 "error.preemptive-crash.title" = "Rilevato un problema con l'app";
 
 /* Generic error message on a dialog for when the cause is not known. */
-"error.unknown.try.again" = "An unknown error has occurred";
+"error.unknown.try.again" = "Si è verificato un errore sconosciuto";
 
 /* No comment provided by engineer. */
 "favorite" = "Preferito";
@@ -1207,6 +1322,39 @@
 /* Confirmation button */
 "feedback.form.submit" = "Invia";
 
+/* Title of the feedback form */
+"feedback.form.title" = "Aiuta a migliorare Privacy Pro";
+
+/* Category for Identity Theft Restoration feedback */
+"feedback.general.category.itr" = "Identity Theft Restoration";
+
+/* Category for Personal Info Removal feedback */
+"feedback.general.category.pir" = "Rimozione delle informazioni personali";
+
+/* Category for subscription and payments feedback */
+"feedback.general.category.ppro" = "Abbonamento e pagamenti";
+
+/* Prompt to select a category for general feedback */
+"feedback.general.category.select" = "SELEZIONA UNA CATEGORIA";
+
+/* Category for VPN feedback */
+"feedback.general.category.vpn" = "VPN";
+
+/* Category for access code issues */
+"feedback.itr.category.access-code" = "Problema con il codice di accesso";
+
+/* Category for issues contacting an advisor */
+"feedback.itr.category.cant-contact-advisor" = "Impossibile contattare il consulente";
+
+/* Prompt to select a category for Identity Theft Restoration feedback */
+"feedback.itr.category.select" = "SELEZIONA UNA CATEGORIA";
+
+/* Category for other Identity Theft Restoration issues */
+"feedback.itr.category.something-else" = "Qualcos'altro";
+
+/* Category for unhelpful advisor calls */
+"feedback.itr.category.unhelpful" = "Chiamata al consulente inutile";
+
 /* No comment provided by engineer. */
 "feedback.negative.form.genericPlaceholder" = "Sii quanto più specifico possibile";
 
@@ -1246,6 +1394,24 @@
 /* No comment provided by engineer. */
 "feedback.performance.slowLoading" = "Il caricamento delle pagine web o dei risultati di ricerca è lento";
 
+/* Category for when scan finds incorrect records */
+"feedback.pir.category.not-me" = "La scansione ha trovato dei record che non sono miei";
+
+/* Category for when scan doesn't find info on a specific site */
+"feedback.pir.category.nothing-on-site" = "La scansione non ha trovato le mie informazioni su un sito specifico";
+
+/* Category for other Personal Info Removal issues */
+"feedback.pir.category.other" = "Qualcos'altro";
+
+/* Category for when the removal process is stuck */
+"feedback.pir.category.removal-stuck" = "Il processo di rimozione è bloccato";
+
+/* Category for when the scan is stuck */
+"feedback.pir.category.scan-stuck" = "La scansione dei record è bloccata";
+
+/* Prompt to select a category for Personal Info Removal feedback */
+"feedback.pir.category.select" = "SELEZIONA UNA CATEGORIA";
+
 /* Header above input field */
 "feedback.positive.form.header" = "Condividi maggiori dettagli";
 
@@ -1263,6 +1429,15 @@
 
 /* Button encouraging uses to share details aboout their feedback */
 "feedback.positive.submit" = "Condividi maggiori dettagli";
+
+/* Category for other Privacy Pro issues */
+"feedback.ppro.category.other" = "Qualcos'altro";
+
+/* Category for one-time password issues */
+"feedback.ppro.category.otp" = "Problema con la password monouso";
+
+/* Prompt to select a category for Privacy Pro feedback */
+"feedback.ppro.category.select" = "SELEZIONA UNA CATEGORIA";
 
 /* No comment provided by engineer. */
 "feedback.start.footer" = "Il tuo feedback anonimo è importante per noi.";
@@ -1309,6 +1484,21 @@
 /* No comment provided by engineer. */
 "fireButtonAnimation.waterSwirl.name" = "Mulinello";
 
+/* Description text above the Share Link button */
+"get.browser.on-your-desktop-go-to" = "Sul tuo computer, visita:";
+
+/* Title for the Share Download Link button */
+"get.browser.share-link" = "Condividi link per il download";
+
+/* Message displayed in the share action when sharing via email */
+"get.browser.share-link.message" = "Cerca privatamente e blocca i sistemi di tracciamento con il browser per desktop DuckDuckGo. Visita questo link dal tuo computer per scaricarlo oggi stesso.";
+
+/* Title displayed in the share action */
+"get.browser.share-link.title" = "Scarica il browser DuckDuckGo per Mac o Windows";
+
+/* Title for the get desktop browser feature */
+"get.browser.title" = "Scarica DuckDuckGo per Mac o Windows";
+
 /* No comment provided by engineer. */
 "home.row.onboarding.header" = "Aggiungi DuckDuckGo alla tua schermata iniziale!";
 
@@ -1323,6 +1513,9 @@
 
 /* Home tab title */
 "homeTab.title" = "Schermata iniziale";
+
+/* No comment provided by engineer. */
+"ID: %@ | %@ | %@" = "ID: %1$@ | %2$@ | %3$@";
 
 /* OK title for invite screen alert dismissal button */
 "invite.alert.ok.button" = "OK";
@@ -1396,12 +1589,6 @@
 /* No comment provided by engineer. */
 "keyCommandShowAllTabs" = "Mostra tutte le schede";
 
-/* Please preserve newline character */
-"launchscreenWelcomeMessage" = "DuckDuckGo\nti dà il benvenuto!";
-
-/* No comment provided by engineer. */
-"LOREM IPSUM" = "LOREM IPSUM";
-
 /* Summary text for the macOS browser waitlist */
 "mac-browser.waitlist.summary" = "DuckDuckGo per Mac ti offre la velocità di cui hai bisogno, le funzioni di navigazione che desideri e i migliori strumenti per la privacy.";
 
@@ -1422,9 +1609,6 @@
 
 /* Title for the Join Waitlist screen */
 "mac-waitlist.join-waitlist-screen.try-duckduckgo-for-mac" = "Scarica DuckDuckGo per Mac.";
-
-/* Disclaimer for the Join Waitlist screen */
-"mac-waitlist.join-waitlist-screen.windows" = "La versione per Windows arriverà presto!";
 
 /* Title for the macOS waitlist button redirecting to Windows waitlist */
 "mac-waitlist.join-waitlist-screen.windows-waitlist" = "Cerchi la versione per Windows?";
@@ -1456,167 +1640,146 @@
 /* Edit button */
 "navigation.title.edit" = "Modifica";
 
-/* String indicating NetP is connected when viewed from the settings screen */
-"netP.cell.connected" = "Connected";
+/* String indicating NetP is snoozing when viewed from the settings screen */
+"netP.cell.snoozing" = "In sospensione";
 
-/* String indicating NetP is disconnected when viewed from the settings screen */
-"netP.cell.disconnected" = "Not connected";
+/* Title for the DuckDuckGo VPN feature */
+"netP.title" = "VPN DuckDuckGo";
 
-/* Title for the Network Protection feature */
-"netP.title" = "Network Protection";
+/* Button title for tooltip about adding VPN widget */
+"network.protection.addwidget.tip.action" = "Aggiungi widget";
 
-/* Privacy Policy title for Network Protection */
-"network-protection.privacy-policy.title" = "Privacy policy";
+/* Message for tooltip about adding VPN widget */
+"network.protection.addwidget.tip.message" = "Attiva e disattiva la VPN direttamente dalla schermata iniziale.";
 
-/* Title text for the Network Protection terms and conditions accept button */
-"network-protection.waitlist.agree-and-continue" = "Accetta e continua";
+/* Title for tooltip about adding VPN widget */
+"network.protection.addwidget.tip.title" = "Aggiungi widget VPN";
 
-/* Availability disclaimer for Network Protection join waitlist screen */
-"network-protection.waitlist.availability-disclaimer" = "Network Protection è gratuito durante l'accesso anticipato.";
+/* The body of the notification when Privacy Pro subscription expired */
+"network.protection.entitlement.expired.notification.body" = "La VPN si è scollegata perché l'abbonamento è scaduto. Iscriviti a Privacy Pro per riconnettere la VPN di DuckDuckGo.";
 
-/* Agree and Continue button for Network Protection join waitlist screen */
-"network-protection.waitlist.button.agree-and-continue" = "Accetta e continua";
+/* The body of the notification shown when VPN fails to reconnect */
+"network.protection.failure.notification.body" = "La VPN di DuckDuckGo non è riuscita a connettersi. Riprova in seguito.";
 
-/* Enable Notifications button for Network Protection joined waitlist screen */
-"network-protection.waitlist.button.enable-notifications" = "Abilita notifiche";
+/* Title for the VPN FAQ screen. */
+"network.protection.faq.title" = "Domande frequenti su DuckDuckGo VPN";
 
-/* Button title for users who already have an invite code */
-"network-protection.waitlist.button.existing-invite-code" = "Ho un codice invito";
+/* Message for tooltip about geoswitching */
+"network.protection.geoswitching.tip.message" = "Puoi personalizzare la tua posizione VPN connettendoti a uno qualsiasi dei nostri server in tutto il mondo.";
 
-/* Join Waitlist button for Network Protection join waitlist screen */
-"network-protection.waitlist.button.join-waitlist" = "Unisciti alla lista d'attesa";
+/* Title for tooltip about geoswitching */
+"network.protection.geoswitching.tip.title" = "Cambia posizione";
 
-/* Button title text for the Network Protection waitlist confirmation prompt */
-"network-protection.waitlist.get-started" = "Iniziamo";
-
-/* Subtitle for section 1 of the Network Protection invited screen */
-"network-protection.waitlist.invited.section-1.subtitle" = "Crittografa il traffico online su browser e app.";
-
-/* Title for section 1 of the Network Protection invited screen */
-"network-protection.waitlist.invited.section-1.title" = "Copertura completa del dispositivo";
-
-/* Subtitle for section 2 of the Network Protection invited screen */
-"network-protection.waitlist.invited.section-2.subtitle" = "Non c'è bisogno di un'app specifica. Connettiti con un clic e visualizza lo stato della connessione a colpo d'occhio.";
-
-/* Title for section 2 of the Network Protection invited screen */
-"network-protection.waitlist.invited.section-2.title" = "Veloce, affidabile e facile da usare";
-
-/* Subtitle for section 3 of the Network Protection invited screen */
-"network-protection.waitlist.invited.section-3.subtitle" = "Non registriamo né salviamo dati che possano collegarti alla tua attività online.";
-
-/* Title for section 3 of the Network Protection invited screen */
-"network-protection.waitlist.invited.section-3.title" = "Rigorosa politica di non registrazione";
-
-/* Subtitle for Network Protection invited screen */
-"network-protection.waitlist.invited.subtitle" = "Ottieni un ulteriore livello di protezione online con la VPN creata per la velocità e la semplicità. Crittografa la tua connessione internet su tutto il dispositivo e nascondi la tua posizione e il tuo indirizzo IP ai siti che visiti.";
-
-/* Title for Network Protection invited screen */
-"network-protection.waitlist.invited.title" = "Ti invitiamo a provare\nNetwork Protection in accesso anticipato!";
-
-/* First subtitle for Network Protection join waitlist screen */
-"network-protection.waitlist.join.subtitle.1" = "Proteggi la tua connessione sempre e ovunque con Network Protection, la VPN di DuckDuckGo.";
-
-/* Second subtitle for Network Protection join waitlist screen */
-"network-protection.waitlist.join.subtitle.2" = "Iscriviti alla lista d'attesa e ti avviseremo quando sarà il tuo turno.";
-
-/* Title for Network Protection join waitlist screen */
-"network-protection.waitlist.join.title" = "Network Protection Early Access";
-
-/* Title for Network Protection joined waitlist screen */
-"network-protection.waitlist.joined.title" = "Sei in lista d'attesa.";
-
-/* Subtitle 1 for Network Protection joined waitlist screen when notifications are enabled */
-"network-protection.waitlist.joined.with-notifications.subtitle.1" = "I nuovi inviti vengono inviati con un intervallo di pochi giorni, in base all'ordine di arrivo.";
-
-/* Subtitle 2 for Network Protection joined waitlist screen when notifications are enabled */
-"network-protection.waitlist.joined.with-notifications.subtitle.2" = "Ti informeremo quando l'invito sarà pronto.";
-
-/* Body text for the alert to enable notifications */
-"network-protection.waitlist.notification-alert.description" = "Ti informeremo quando l'invito a testare Network Protection sarà pronto.";
-
-/* Subtitle for the alert to confirm enabling notifications */
-"network-protection.waitlist.notification-prompt-description" = "Ricevi una notifica quando la tua copia dell'accesso anticipato a Network Protection sarà pronta.";
-
-/* Title for the alert to confirm enabling notifications */
-"network-protection.waitlist.notification-prompt-title" = "Ricevi un avviso non appena ricevi l'invito";
-
-/* Title for Network Protection waitlist notification */
-"network-protection.waitlist.notification.text" = "Apri il tuo invito";
-
-/* Title for Network Protection waitlist notification */
-"network-protection.waitlist.notification.title" = "Network Protection è pronto!";
-
-/* Subtitle text for the Network Protection settings row */
-"network-protection.waitlist.settings-subtitle.joined-and-invited" = "Il tuo invito è pronto!";
-
-/* Subtitle text for the Network Protection settings row */
-"network-protection.waitlist.settings-subtitle.joined-but-not-invited" = "Sei in lista d'attesa.";
-
-/* Subtitle text for the Network Protection settings row */
-"network-protection.waitlist.settings-subtitle.waitlist-not-joined" = "Iscriviti alla lista d'attesa privata";
+/* The body of the notification shown when VPN connection is interrupted */
+"network.protection.interrupted.notification.body" = "La VPN di DuckDuckGo è stata interrotta. Tentativo di riconnessione in corso...";
 
 /* Message for the network protection invite dialog */
-"network.protection.invite.dialog.message" = "Enter your invite code to get started.";
+"network.protection.invite.dialog.message" = "Inserisci il tuo codice invito per iniziare.";
 
 /* Title for the network protection invite screen */
-"network.protection.invite.dialog.title" = "Ti abbiamo invitato a provare Network Protection";
+"network.protection.invite.dialog.title" = "Hai ricevuto un invito a provare DuckDuckGo VPN";
 
 /* Prompt for the network protection invite code text field */
-"network.protection.invite.field.prompt" = "Invite Code";
+"network.protection.invite.field.prompt" = "Codice invito";
 
 /* Message for the network protection invite success view */
-"network.protection.invite.success.message" = "Hide your location from websites and conceal your online activity from Internet providers and others on your network.";
+"network.protection.invite.success.message" = "Nascondi la tua posizione dai siti web e la tua attività online ai provider internet e ad altri utenti sulla tua rete.";
 
 /* Title for the network protection invite success view */
-"network.protection.invite.success.title" = "Success! You’re in.";
+"network.protection.invite.success.title" = "Operazione completata.";
+
+/* The title of the notifications shown from VPN */
+"network.protection.notification.title" = "DuckDuckGo";
 
 /* Title text for an iOS quick action that opens VPN settings */
 "network.protection.quick-action.open-vpn" = "Apri VPN";
 
+/* Button title for tooltip about VPN snooze mode */
+"network.protection.snooze.tip.action" = "Ulteriori informazioni";
+
+/* Message for tooltip about VPN snooze mode */
+"network.protection.snooze.tip.message" = "Puoi utilizzare siti o app che bloccano il traffico VPN disattivando temporaneamente la connessione VPN.";
+
+/* Title for tooltip about VPN snooze mode */
+"network.protection.snooze.tip.title" = "Evita i conflitti VPN";
+
+/* The body of the notification when the VPN is snoozed, with a duration string as parameter (e.g, 30 minutes) */
+"network.protection.snoozed.notification.body" = "La VPN è sospesa per %@";
+
 /* The label for when NetP VPN is connected plus the length of time connected as a formatter HH:MM:SS string */
-"network.protection.status.connected.format" = "Connected - %@";
+"network.protection.status.connected.format" = "Connesso · %@";
 
 /* The label for the NetP VPN when connecting */
-"network.protection.status.connecting" = "Connecting...";
+"network.protection.status.connecting" = "Connessione in corso...";
 
 /* The label for the NetP VPN when disconnected */
-"network.protection.status.disconnected" = "Not connected";
+"network.protection.status.disconnected" = "Non collegata";
 
 /* The label for the NetP VPN when disconnecting */
-"network.protection.status.disconnecting" = "Disconnecting...";
+"network.protection.status.disconnecting" = "Disconnessione in corso...";
 
-/* Message label text for the netP status view */
-"network.protection.status.header.message" = "DuckDuckGo's VPN secures all of your device's Internet traffic anytime, anywhere.";
+/* Message label text for the status view when VPN is disconnected */
+"network.protection.status.header.message.off" = "Connetti per proteggere tutto il traffico\nInternet del tuo dispositivo.";
 
-/* Header title label text for the status view when netP is disconnected */
-"network.protection.status.header.title.off" = "Network Protection is Off";
+/* Message label text for the status view when VPN is disconnected */
+"network.protection.status.header.message.on" = "Tutto il traffico Internet del dispositivo è protetto\n tramite la VPN.";
 
-/* Header title label text for the status view when netP is connected */
-"network.protection.status.header.title.on" = "Network Protection is On";
+/* Header title label text for the status view when VPN is disconnected */
+"network.protection.status.header.title.off" = "DuckDuckGo VPN è disattivata";
+
+/* Header title label text for the status view when VPN is connected */
+"network.protection.status.header.title.on" = "DuckDuckGo VPN è attiva";
+
+/* Header title label text for the status view when VPN is snoozing */
+"network.protection.status.header.title.snoozed" = "DuckDuckGo VPN è sospesa";
 
 /* The status view 'Share Feedback' button which is shown inline on the status view after the temporary free use footer text */
-"network.protection.status.menu.share.feedback" = "Share Feedback";
+"network.protection.status.menu.share.feedback" = "Condividi feedback";
+
+/* The label for the NetP VPN when paused */
+"network.protection.status.paused" = "In pausa";
+
+/* The label for when NetP VPN is snoozing plus the length of time remaining formatted as '0:00' */
+"network.protection.status.snoozing.format" = "In sospensione, %@ rimanenti";
+
+/* Snooze button title shown in NetworkProtection's status view. */
+"network.protection.status.view.action.snooze" = "Posponi di 20 minuti";
+
+/* Wake Up button title shown in NetworkProtection's status view. */
+"network.protection.status.view.action.wake-up" = "Sveglia";
 
 /* Connection details label shown in NetworkProtection's status view. */
-"network.protection.status.view.connection.details" = "Connection Details";
+"network.protection.status.view.connection.details" = "Dettagli della connessione";
+
+/* Custom DNS label shown in NetworkProtection's status view. */
+"network.protection.status.view.custom.dns" = "Server DNS";
 
 /* Generic connection failed error message shown in NetworkProtection's status view. */
-"network.protection.status.view.error.connection.failed.message" = "Please try again later.";
+"network.protection.status.view.error.connection.failed.message" = "Riprova più tardi.";
 
 /* Generic connection failed error title shown in NetworkProtection's status view. */
-"network.protection.status.view.error.connection.failed.title" = "Failed to Connect.";
+"network.protection.status.view.error.connection.failed.title" = "Connessione non riuscita.";
 
 /* IP Address label shown in NetworkProtection's status view. */
-"network.protection.status.view.ip.address" = "IP Address";
+"network.protection.status.view.ip.address" = "Indirizzo IP";
 
 /* Location label shown in NetworkProtection's status view. */
-"network.protection.status.view.location" = "Location";
+"network.protection.status.view.location" = "Posizione";
 
 /* Label shown on the title of the settings section in NetworkProtection's status view. */
 "network.protection.status.view.settings.section.title" = "Gestisci";
 
 /* Title label text for the status view when netP is disconnected */
-"network.protection.status.view.title" = "Network Protection";
+"network.protection.status.view.title" = "VPN";
+
+/* The body of the notification shown when VPN reconnects successfully */
+"network.protection.success.notification.body" = "La VPN di DuckDuckGo è attiva. La tua posizione e le tue attività online sono protette.";
+
+/* The body of the notification shown when VPN connects successfully with the city + state/country as formatted parameter */
+"network.protection.success.notification.subtitle.including.serverLocation" = "Instradamento del traffico del dispositivo tramite %@.";
+
+/* The body of the notification shown when VPN connects successfully with the city + state/country as formatted parameter */
+"network.protection.success.notification.subtitle.snooze.ended.including.serverLocation" = "La sospensione della VPN è finita. Instradamento del traffico del dispositivo tramite %@.";
 
 /* Title for the button to link to the iOS app settings and enable notifications app-wide. */
 "network.protection.turn.on.notifications.button.title" = "Attiva le notifiche";
@@ -1624,32 +1787,50 @@
 /* Footer text under the button to link to the iOS app settings and enable notifications app-wide. */
 "network.protection.turn.on.notifications.section.footer" = "Consenti a DuckDuckGo di inviarti notifiche se la tua connessione si interrompe o lo stato della VPN cambia.";
 
+/* Title of the About section in the VPN status screen */
+"network.protection.vpn.about" = "Informazioni";
+
+/* Section header for the toggle for VPN notifications. */
+"network.protection.vpn.alerts.section.header" = "Notifiche";
+
 /* List section footer for the toggle for VPN alerts. */
 "network.protection.vpn.alerts.toggle.section.footer" = "Ricevi una notifica se la tua connessione si interrompe o lo stato della VPN cambia.";
 
-/* Title for the toggle for VPN alerts. */
-"network.protection.vpn.alerts.toggle.title" = "Avvisi VPN";
+/* Title for the toggle for VPN notifications. */
+"network.protection.vpn.alerts.toggle.title" = "Notifiche VPN";
+
+/* Title for the data volume section in the VPN status screen */
+"network.protection.vpn.data-volume" = "Volume dati";
 
 /* Footer text for the Exclude Local Networks setting item. */
 "network.protection.vpn.exclude.local.networks.setting.footer" = "Consenti al traffico locale di bypassare la VPN e connettersi ai dispositivi sulla tua rete locale, come una stampante.";
+
+/* Header text for the Exclude Local Networks setting item. */
+"network.protection.vpn.exclude.local.networks.setting.header" = "Generale";
 
 /* Title for the Exclude Local Networks setting item. */
 "network.protection.vpn.exclude.local.networks.setting.title" = "Escludi reti locali";
 
 /* Title for the VPN Location screen's All Countries section. */
-"network.protection.vpn.location.all.countries.section.title" = "All Countries";
+"network.protection.vpn.location.all.countries.section.title" = "Tutti i paesi";
+
+/* Description of the location type in the VPN status screen */
+"network.protection.vpn.location.connected" = "Posizione connessa";
 
 /* Subtitle of countries item when there are multiple cities, example : */
 "network.protection.vpn.location.country.item.formatted.cities.count" = "%d città";
 
-/* Title for the VPN Location screen's Nearest Available selection item. */
-"network.protection.vpn.location.nearest.available.item.title" = "Nearest Available";
+/* Description of the location type in the VPN status screen */
+"network.protection.vpn.location.nearest" = "(Più vicino)";
 
 /* Footer describing the VPN Location screen's Recommended section which just has Nearest Available. */
 "network.protection.vpn.location.recommended.section.footer" = "Connettiti automaticamente al server più vicino che riusciamo a trovare.";
 
 /* Title for the VPN Location screen's Recommended section. */
-"network.protection.vpn.location.recommended.section.title" = "Recommended";
+"network.protection.vpn.location.recommended.section.title" = "Consigliato";
+
+/* Description of the location type in the VPN status screen */
+"network.protection.vpn.location.selected" = "Posizione selezionata";
 
 /* Subtitle for the preferred location item that formats a city and country. E.g Chicago, United States */
 "network.protection.vpn.location.subtitle.formatted.city.and.country" = "%1$@, %2$@";
@@ -1661,28 +1842,154 @@
 "network.protection.vpn.notifications.title" = "Notifiche VPN";
 
 /* Label for the Preferred Location VPN Settings item when the nearest available location is selected. */
-"network.protection.vpn.preferred.location.nearest" = "Nearest Available";
+"network.protection.vpn.preferred.location.nearest" = "Posizione più vicina";
 
 /* Title for the Preferred Location VPN Settings item. */
-"network.protection.vpn.preferred.location.title" = "Preferred Location";
+"network.protection.vpn.preferred.location.title" = "Posizione preferita";
 
-/* Footer text for the Always on VPN setting item. */
-"network.protection.vpn.secure.dns.setting.footer" = "La nostra VPN utilizza il DNS protetto per mantenere privata la tua attività online, in modo che il tuo provider internet non possa vedere quali siti web visiti.";
+/* Footer text for the DNS server setting item. */
+"network.protection.vpn.secure.dns.setting.footer" = "DuckDuckGo instrada le query DNS tramite i nostri server DNS in modo che il tuo provider internet non possa vedere quali siti web visiti.";
+
+/* Title for the FAQ row in the VPN status screen. */
+"network.protection.vpn.settings.faq" = "Domande frequenti e assistenza";
+
+/* Title for the feedback row in the VPN status screen. */
+"network.protection.vpn.settings.share-feedback" = "Condividi feedback sulla VPN";
 
 /* Title for the VPN Settings screen. */
 "network.protection.vpn.settings.title" = "Impostazioni VPN";
 
+/* Information message about New Tab Page redesign */
+"new.tab.page.intro.message.body" = "Personalizza i tuoi Preferiti e le funzionalità principali. Riorganizza gli elementi o nascondili per mantenere tutto in ordine.";
+
+/* Title of information message about New Tab Page redesign */
+"new.tab.page.intro.message.title" = "La tua pagina Nuova scheda è... Nuova!";
+
+/* Name of favorites section setting */
+"new.tab.page.settings.section.name.favorites" = "Preferiti";
+
+/* Name of shortcuts section setting */
+"new.tab.page.settings.section.name.shortcuts" = "Scorciatoie";
+
+/* Footer of the group allowing for setting up new tab page sections */
+"new.tab.page.settings.sections.description" = "Mostra, nascondi e riordina le sezioni nella nuova scheda";
+
+/* Header title of the group allowing for setting up new tab page sections */
+"new.tab.page.settings.sections.header.title" = "SEZIONI";
+
+/* Header title of the shortcuts in New Tab Page preferences. */
+"new.tab.page.settings.shortcuts.header.title" = "Scorciatoie";
+
+/* Title of New Tab Page preferences page. */
+"new.tab.page.settings.title" = "Personalizza pagina Nuova scheda";
+
+/* Shortcut title leading to AI Chat */
+"new.tab.page.shortcut.ai.chat" = "Chat IA";
+
+/* Shortcut title leading to Bookmarks */
+"new.tab.page.shortcut.bookmarks" = "Segnalibri";
+
+/* Shortcut title leading to Downloads */
+"new.tab.page.shortcut.downloads" = "Download";
+
+/* Shortcut title leading to Passwords */
+"new.tab.page.shortcut.passwords" = "Password";
+
+/* Shortcut title leading to app settings */
+"new.tab.page.shortcut.settings" = "Impostazioni";
+
+/* Text shown on the favorites info tooltip */
+"new.tab.page.tooltip.body" = "Su qualsiasi sito, apri il menu ••• e seleziona **Aggiungi preferito** per aggiungerlo alla nuova scheda.";
+
 /* Do not translate - stringsdict entry */
 "number.of.tabs" = "number.of.tabs";
-
-/* No comment provided by engineer. */
-"Ok" = "OK";
 
 /* Text displayed on notification appearing in the address bar when the browser  dismissed the cookie popup automatically rejecting it */
 "omnibar.notification.cookies-managed" = "Cookie gestiti";
 
 /* Text displayed on notification appearing in the address bar when the browser  hides a cookie popup */
 "omnibar.notification.popup-hidden" = "Popup nascosto";
+
+/* Button on the Add to Dock tutorial screen of the onboarding, it will proceed to the next step of the onboarding. */
+"onboarding.addToDock.buttons.gotIt" = "Fatto";
+
+/* Button to change the default browser */
+"onboarding.browsers.cta" = "Scegli il tuo browser";
+
+/* Message to highlight how the browser allows you to block cookie pop-ups */
+"onboarding.browsers.features.cookiePopups.title" = "Blocca i popup dei cookie";
+
+/* Message to highlight browser capability of blocking creepy ads */
+"onboarding.browsers.features.creepyAds.title" = "Blocca gli annunci invasivi";
+
+/* Message to highlight browser capability of swiftly erase browsing data */
+"onboarding.browsers.features.eraseBrowsingData.title" = "Elimina rapidamente i dati di navigazione";
+
+/* Message to highlight browser capability of private searches */
+"onboarding.browsers.features.privateSearch.title" = "Cerca privatamente per impostazione predefinita";
+
+/* Message to highlight browser capability ofblocking 3rd party trackers */
+"onboarding.browsers.features.trackerBlocker.title" = "Blocca i sistemi di tracciamento di terze parti";
+
+/* The title of the dialog to show the privacy features that DuckDuckGo offers */
+"onboarding.browsers.title" = "Protezioni della privacy attivate!";
+
+/* The message of the option to set the address bar to the bottom. */
+"onboarding.highlights.addressBarPosition.bottom.message" = "Facile da raggiungere";
+
+/* The title of the option to set the address bar to the bottom. */
+"onboarding.highlights.addressBarPosition.bottom.title" = "Parte inferiore";
+
+/* The title of the CTA to progress to the next onboarding screen. */
+"onboarding.highlights.addressBarPosition.cta" = "Successivo";
+
+/* Indicates what address bar option (Top/Bottom) is the default one. E.g. Top (Default) */
+"onboarding.highlights.addressBarPosition.default" = "(predefinito)";
+
+/* The title of the onboarding dialog popup to select the preferred address bar position. */
+"onboarding.highlights.addressBarPosition.title" = "Dove devo mettere la barra degli indirizzi?";
+
+/* The message of the option to set the address bar to the top. */
+"onboarding.highlights.addressBarPosition.top.message" = "Facile da vedere";
+
+/* The title of the option to set the address bar to the top. */
+"onboarding.highlights.addressBarPosition.top.title" = "Parte superiore";
+
+/* The title of the CTA to progress to the next onboarding screen. */
+"onboarding.highlights.appIconSelection.cta" = "Successivo";
+
+/* The subheader of the onboarding dialog popup to select the preferred App icon. */
+"onboarding.highlights.appIconSelection.message" = "Scegli l'icona della tua app:";
+
+/* The title of the onboarding dialog popup to select the preferred App icon. */
+"onboarding.highlights.appIconSelection.title" = "Quale colore mi sta meglio?";
+
+/* Message to highlight how the browser allows you to block cookie pop-ups */
+"onboarding.highlights.browsers.features.cookiePopups.title" = "Blocca le richieste di cookie e i popup";
+
+/* Message to highlight browser capability of blocking creepy ads */
+"onboarding.highlights.browsers.features.creepyAds.title" = "Blocca gli annunci mirati";
+
+/* Message to highlight browser capability of swiftly erase browsing data */
+"onboarding.highlights.browsers.features.eraseBrowsingData.title" = "Cancella rapidamente i dati di navigazione";
+
+/* Message to highlight browser capability ofblocking 3rd party trackers */
+"onboarding.highlights.browsers.features.trackerBlocker.title" = "Blocca i sistemi di tracciamento di terze parti";
+
+/* The title of the dialog to show the privacy features that DuckDuckGo offers */
+"onboarding.highlights.browsers.title" = "Protezioni attivate!";
+
+/* The title of the fire button CTA to skip erasing the data. */
+"onboarding.highlights.fireDialog.cta.skip" = "Salta";
+
+/* The title of the onboarding dialog popup */
+"onboarding.highlights.intro.title" = "Ciao.\n\nVuoi un browser più veloce che ti garantisca protezione?";
+
+/* Button to continue the onboarding process */
+"onboarding.intro.cta" = "Continua";
+
+/* The title of the onboarding dialog popup */
+"onboarding.intro.title" = "Ciao.\n\nVuoi navigare in Internet con più privacy?";
 
 /* No comment provided by engineer. */
 "onboarding.widgets.continueButton" = "Aggiungi widget";
@@ -1717,17 +2024,94 @@
 /* ’Link’ is link on a website */
 "open.externally.failed" = "Impossibile trovare l'app necessaria per aprire il link";
 
-/* No comment provided by engineer. */
-"Please enter which app on your device is broken." = "Indica quale app del tuo dispositivo non funziona.";
-
 /* Activate button */
-"pm.activate" = "Reactivate";
+"pm.activate" = "Riattiva";
 
 /* Cancel button */
-"pm.cancel" = "Cancel";
+"pm.cancel" = "Annulla";
 
 /* Deactivate button */
-"pm.deactivate" = "Deactivate";
+"pm.deactivate" = "Disattiva";
+
+/* Label for the email form in the Privacy Pro feedback form */
+"ppro.feedback-form.email.label" = "Email (facoltativo)";
+
+/* Placeholder for the email form in the Privacy Pro feedback form */
+"ppro.feedback-form.email.placeholder" = "name@email.com";
+
+/* Placeholder for the General Feedback step in the Privacy Pro feedback form */
+"ppro.feedback-form.general-feedback.placeholder" = "Comunicaci la tua opinione...";
+
+/* Title for the General Feedback step in the Privacy Pro feedback form */
+"ppro.feedback-form.general-feedback.title" = "Feedback generale";
+
+/* Title for the ITR category in the Privacy Pro feedback form */
+"ppro.feedback-form.report-itr-problem.title" = "Identity Theft Restoration";
+
+/* Title for the PIR category in the Privacy Pro feedback form */
+"ppro.feedback-form.report-pir-problem.title" = "Personal Information Removal";
+
+/* Title for the Subscriptions and Payments category in the Privacy Pro feedback form */
+"ppro.feedback-form.report-ppro-problem.title" = "Abbonamenti e pagamenti";
+
+/* Placeholder for the Report a Problem step in the Privacy Pro feedback form */
+"ppro.feedback-form.report-problem.placeholder" = "Raccontaci cosa succede...";
+
+/* Title for the Report a Problem step in the Privacy Pro feedback form */
+"ppro.feedback-form.report-problem.title" = "Segnala un problema";
+
+/* Title for the VPN category in the Privacy Pro feedback form */
+"ppro.feedback-form.report-vpn-problem.title" = "VPN";
+
+/* Placeholder for the Feature Request step in the Privacy Pro feedback form */
+"ppro.feedback-form.request-feature.placeholder" = "Quale funzionalità vorresti vedere?";
+
+/* Title for the Feature Request step in the Privacy Pro feedback form */
+"ppro.feedback-form.request-feature.title" = "Richiesta di funzionalità";
+
+/* Title for the category selection section in the Privacy Pro feedback form */
+"ppro.feedback-form.select-category.title" = "SELEZIONA UNA CATEGORIA";
+
+/* Text for the body of the PPro feedback form */
+"ppro.feedback-form.text-1" = "Hai trovato un problema non trattato nel nostro [centro assistenza](duck://)? Ci piacerebbe saperlo.\n\nIndica un indirizzo e-mail se vuoi che ti contattiamo in merito a questo problema (potremmo non essere in grado di rispondere a tutti i problemi):";
+
+/* Text for the body of the PPro feedback form */
+"ppro.feedback-form.text-2" = "Oltre ai dettagli inseriti sopra, inviamo alcune informazioni anonime con il tuo feedback:";
+
+/* Bullet text for the body of the PPro feedback form */
+"ppro.feedback-form.text-3" = "• Se alcune funzioni del browser sono attive";
+
+/* Bullet text for the body of the PPro feedback form */
+"ppro.feedback-form.text-4" = "• Diagnostica aggregata dell'applicazione (ad esempio, codici di errore)";
+
+/* Text for the body of the PPro feedback form */
+"ppro.feedback-form.text-5" = "Toccando \"Invia\" accetti che DuckDuckGo possa usare le informazioni inviate per migliorare l'app.";
+
+/* Title for the text box in the Privacy Pro feedback form */
+"ppro.feedback-form.text-box.title" = "Feedback";
+
+/* Title for the Privacy Pro feedback form */
+"ppro.feedback-form.title" = "Invia feedback";
+
+/* Button title for sync bookmarks limits exceeded warning to go to manage bookmarks */
+"prefrences.sync.bookmarks-limit-exceeded-action" = "Gestisci segnalibri";
+
+/* Description for sync bookmarks limits exceeded warning */
+"prefrences.sync.bookmarks-limit-exceeded-description" = "Hai raggiunto il numero massimo di segnalibri. Eliminane alcuni per riprendere la sincronizzazione.";
+
+/* Button title for sync credentials limits exceeded warning to go to manage passwords */
+"prefrences.sync.credentials-limit-exceeded-action" = "Gestisci password…";
+
+/* Description for sync credentials limits exceeded warning */
+"prefrences.sync.credentials-limit-exceeded-description" = "Hai raggiunto il numero massimo di password. Eliminane alcuni per riprendere la sincronizzazione.";
+
+/* Description invalid credentials error when syncing.
+   Description of incorrectly formatted data error when syncing.
+   Description of too many requests error when syncing. */
+"prefrences.sync.invalid-login-description" = "Sync ha riscontrato un errore. Prova a disattivare la sincronizzazione su questo dispositivo e riconnettiti utilizzando un altro dispositivo o il codice di ripristino.";
+
+/* Title for sync limits exceeded warning */
+"prefrences.sync.limit-exceeded-title" = "Sincronizzazione in pausa";
 
 /* No comment provided by engineer. */
 "preserveLogins.domain.list.footer" = "Per mantenere l'accesso degli utenti, i siti web si affidano ai cookie. Quando attivi la Protezione dal fuoco per un sito, i cookie non verranno cancellati e manterrai l'accesso, anche dopo aver usato il Fire Button (icona del fuoco). Continueremo a bloccare i tracker di terze parti anche sui siti ignifughi.";
@@ -1765,6 +2149,9 @@
 /* Confirmation button in alert */
 "preserveLogins.remove.all.ok" = "OK";
 
+/* No comment provided by engineer. */
+"Privacy Protections" = "Protezioni della Privacy";
+
 /* Privacy Icon accessibility title */
 "privacy.icon.dax" = "Logo DuckDuckGo";
 
@@ -1795,6 +2182,18 @@
 /* No comment provided by engineer. */
 "section.title.favorites" = "Preferiti";
 
+/* Name of the option the user can chose to give general browser feedback */
+"send.browser.feedback.general-feedback" = "Feedback generale";
+
+/* Name of the option the user can chose to give browser feedback about a problem they enountered */
+"send.browser.feedback.report-problem" = "Segnala un problema";
+
+/* Name of the option the user can chose to give browser feedback about a feature they would like */
+"send.browser.feedback.request-feature" = "Richiedi una funzionalità";
+
+/* Title of the picker where the user can chose the category of the feedback they want ot send. */
+"send.browser.feedback.select-category" = "SELEZIONA UNA CATEGORIA";
+
 /* Settings cell for About DDG */
 "settings.about.ddg" = "Info su DuckDuckGo";
 
@@ -1804,17 +2203,24 @@
 /* about page */
 "settings.about.text" = "Fondata nel 2008, DuckDuckGo è un'azienda indipendente che tutela la privacy online per tutti coloro che sono stanchi di essere tracciati online e vogliono una soluzione semplice. Siamo la dimostrazione che si può garantire una vera protezione della privacy online senza compromessi.\n\nIl browser DuckDuckGo è ricco di funzioni essenziali come i segnalibri, le schede, le password e molto altro ancora, [oltre a numerose e potenti protezioni della privacy](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/privacy/web-tracking-protections/) che normalmente non vengono offerte dai browser più comuni. Stiamo parlando di uno straordinario set completo per la protezione della privacy, che aiuta a proteggere le attività online, dalla ricerca alla navigazione, alle e-mail e molto altro ancora.\n\nCon le nostre protezioni della privacy non è necessario conoscere particolari tecnici o dover affrontare configurazioni complesse. È sufficiente scegliere il browser DuckDuckGo su tutti i dispositivi personali per avere automaticamente garantita la privacy.\n\nPer saperne di più su come funzionano le protezioni della privacy di DuckDuckGo, è possibile consultare le nostre [pagine di aiuto](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/).";
 
+/* Settings screen accessibility section title */
+"settings.accessibility" = "Accessibilità";
+
 /* Settings screen cell text for adding the app to the dock */
 "settings.add.to.dock" = "Aggiungi app al tuo dock";
 
 /* Settings screen cell text for add widget to the home screen */
 "settings.add.widget" = "Aggiungi widget alla schermata iniziale";
 
-/* Settings screen cell text for addess bar position */
-"settings.address.bar" = "Posizione Barra degli indirizzi";
+/* Name of the settings subsection related to the address bar
+   Settings screen cell text for addess bar position */
+"settings.address.bar" = "Barra degli indirizzi";
 
 /* Settings screen cell title for toggling full URL visibility in address bar */
 "settings.address.full.url" = "Mostra l'indirizzo completo del sito";
+
+/* Label describing a feature which is turned on always */
+"settings.always.on" = "Sempre attiva";
 
 /* Settings screen appearance section title */
 "settings.appearance" = "Aspetto";
@@ -1826,16 +2232,34 @@
 "settings.associated.apps.description" = "Disattiva per impedire che i collegamenti si aprano automaticamente in altre app installate.";
 
 /* Settings screen cell for autocomplete */
-"settings.autocomplete" = "Mostra suggerimenti di completamento automatico";
+"settings.autocomplete" = "Suggerimenti di ricerca";
+
+/* Settings label for enabling or disabling recently visited sites */
+"settings.autocomplete.recentlyvisited" = "Siti visitati di recente";
+
+/* Settings label for enabling or disabling recently visited sites */
+"settings.autocomplete.recentlyvisited.subtitle" = "Mostra i siti visitati di recente nei suggerimenti di ricerca. Questi siti sono privati, vengono memorizzati solo sul tuo dispositivo e possono essere rimossi con il Fire Button.";
+
+/* Subtitle for Search Suggestions setting */
+"settings.autocomplete.subtitle" = "Visualizza i suggerimenti di ricerca mentre digiti, inclusi i tuoi segnalibri. Tutte le ricerche sono private.";
 
 /* Settings screen cell text for Application Lock */
 "settings.autolock" = "Blocco applicazione";
 
 /* Section footer Autolock description */
-"settings.autolock.description" = "Se hai impostato Touch ID, Face ID o un codice di accesso al sistema, ti verrà richiesto di sbloccare l'app all'apertura.";
+"settings.autolock.description" = "Se hai attivato Touch ID, Face ID o un passcode di sistema, ti verrà chiesto di sbloccare l'app al momento dell'apertura.";
+
+/* Settings cell for Browser Feedback */
+"settings.browser.feedback" = "Feedback sul browser";
 
 /* Settings screen cell text for Automatically Clearing Data */
 "settings.clear.data" = "Cancellazione automatica dei dati";
+
+/* The name of Settings category in Privacy Features related to configuration of the privacy feature related to cookie pop-ups */
+"settings.cookie.pop-up-protection.protection" = "Protezione pop-up dei cookie";
+
+/* Explanation in Settings how the cookie pop up protection feature works */
+"settings.cookie.pop.up.protection.explanation" = "DuckDuckGo cercherà di selezionare le impostazioni con la massima privacy e nasconderà questi popup per te.[Scopri di più](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/privacy/web-tracking-protections/#cookie-pop-up-management)";
 
 /* Settings screen cell text for Cookie popups */
 "settings.cookie.popups" = "Gestione popup dei cookie";
@@ -1843,14 +2267,33 @@
 /* Settings title for the customize section */
 "settings.customize" = "Personalizza";
 
-/* Settings screen cell text for setting the app as default browser */
-"settings.default.browser" = "Imposta come browser predefinito";
+/* The name of a settings subsection related to the data clearing */
+"settings.data.clearing" = "Cancellazione dati";
 
-/* Settings cell for Email Protection */
-"settings.emailProtection" = "Protezione email";
+/* Settings screen cell text for setting the app as default browser
+   The name of Settings category in Privacy Features related to configuration of the default browser */
+"settings.default.browser" = "Browser predefinito";
+
+/* Label of a button disabling email protection */
+"settings.disable.email.protection.autofill" = "Disattiva la compilazione automatica di Email Protection";
+
+/* Settings cell to link users to other products by DuckDuckGo */
+"settings.duckduckgo.on.other.platforms" = "DuckDuckGo su altre piattaforme";
+
+/* Explanation in Settings how the email protection feature works */
+"settings.email.protection.explanation" = "Blocca i sistemi di tracciamento delle e-mail e nascondi il tuo indirizzo, senza cambiare il provider di posta elettronica.\n[Scopri di più](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/email-protection/what-is-duckduckgo-email-protection/)";
+
+/* Alert presented to user after clicking on 'Sign out' in Email Protection Settings */
+"settings.email.protection.signing.out.alert" = "La disconnessione dal tuo account Email Protection disabiliterà la compilazione automatica di Duck Address in questo browser. Puoi comunque utilizzare questi indirizzi e ricevere le e-mail inoltrate come al solito.";
 
 /* Settings cell for Email Protection */
 "settings.emailProtection.description" = "Blocca i sistemi di tracciamento delle email e nascondi il tuo indirizzo";
+
+/* Label of a button enabling the email protection feature */
+"settings.enable.email.protection" = "Abilita Email Protection";
+
+/* Settings screen cell text for enabling voice search */
+"settings.enable.voice.search" = "Abilita ricerca vocale";
 
 /* Settings cell for Feedback */
 "settings.feedback" = "Condividi feedback";
@@ -1861,6 +2304,9 @@
 /* Settings screen cell text for Fireproof Sites */
 "settings.fireproof.sites" = "Siti protetti";
 
+/* The name of the settings subsection containing general settings */
+"settings.general" = "Generale";
+
 /* Settings screen cell text for GPC */
 "settings.gpc" = "Global Privacy Control (GPC)";
 
@@ -1870,14 +2316,41 @@
 /* Settings screen cell for Keyboard */
 "settings.keyboard" = "Tastiera";
 
+/* Switch button label. */
+"settings.let.duckduckgo.manage.cookie.consent.popups" = "Consenti a DuckDuckGo di gestire i popup per il consenso ai cookie";
+
 /* Settings screen cell text for passwords */
 "settings.logins" = "Password";
+
+/* The name of the settings section containing main settings */
+"settings.main.settings" = "Impostazioni principali";
+
+/* Label of a button managing email protection account */
+"settings.manage.account" = "Gestisci account";
 
 /* Settings title for the 'More' section */
 "settings.more" = "Ulteriori informazioni su DuckDuckGo";
 
+/* Button navigating to other settings related to search */
+"settings.more.search.settings" = "Altre impostazioni di ricerca";
+
+/* Subtitle of the 'More Search Settings' button */
+"settings.more.search.settings.explanation" = "Personalizza la lingua, la regione e altro ancora";
+
+/* The name of a settings category listing next steps */
+"settings.next.steps" = "Passaggi successivi";
+
+/* Label describing a feature which is turned off */
+"settings.off" = "Off";
+
+/* Label describing a feature which is turned on */
+"settings.on" = "On";
+
 /* Product name for the subscription bundle */
 "settings.ppro" = "Privacy Pro";
+
+/* Title for Link in the Footer of Privacy Pro section */
+"settings.ppro.footer" = "Privacy policy e Termini di servizio";
 
 /* Settings screen cell for long press previews */
 "settings.previews" = "Anteprime con pressione prolungata";
@@ -1885,11 +2358,77 @@
 /* Settings title for the privacy section */
 "settings.privacy" = "Privacy";
 
+/* The name of Settings category in Privacy Features related to configuration of the search */
+"settings.private.search" = "Ricerca privata";
+
+/* Explanation in Settings how the private search feature works */
+"settings.private.search.explanation" = "DuckDuckGo Private Search è il tuo motore di ricerca predefinito, quindi puoi effettuare ricerche sul Web senza essere tracciato.";
+
+/* Header of settings related to search */
+"settings.search.settings" = "Impostazioni di ricerca";
+
+/* Settings cell for Send Crash Reports */
+"settings.send.crash.reports" = "Invia segnalazioni di arresto anomalo";
+
+/* Explanation of Send Crash Reports settings option */
+"settings.send.crash.reports.description" = "Invia automaticamente le segnalazioni di arresto anomalo a DuckDuckGo.";
+
+/* Settings screen cell text for setting address bar position */
+"settings.set.your.address.bar.position" = "Imposta la posizione della barra degli indirizzi";
+
+/* Privacy pro description subtitle in settings when the is activating */
+"settings.subscription.activating" = "Attivazione in corso…";
+
+/* Subscription activation pending description */
+"settings.subscription.activation.pending.description" = "Richiede più tempo del solito, ricontrolla più tardi.";
+
+/* Data Broker protection cell subtitle for privacy pro */
+"settings.subscription.DBP.subtitle" = "Rimuovi le tue info dai siti che le vendono";
+
+/* Data Broker protection cell title for privacy pro */
+"settings.subscription.DBP.title" = "Personal Information Removal";
+
+/* I have a Subscription button text for privacy pro */
+"settings.subscription.existing.subscription" = "Ho un abbonamento";
+
+/* Subscription expired description */
+"settings.subscription.expired.comment" = "Iscriviti di nuovo per continuare a utilizzare Privacy Pro";
+
+/* Subscription expired tittle message */
+"settings.subscription.expired.title" = "Il tuo abbonamento Privacy Pro è scaduto";
+
+/* Identity theft restoration cell subtitle for privacy pro */
+"settings.subscription.ITR.subtitle" = "Se la tua identità viene rubata, ti aiuteremo a ripristinarla";
+
+/* Identity theft restoration cell title for privacy pro */
+"settings.subscription.ITR.title" = "Identity Theft Restoration";
+
+/* Get Privacy Pro button text for privacy pro */
+"settings.subscription.learn.more" = "Ottieni Privacy Pro";
+
+/* Subscription Settings button text for privacy pro */
+"settings.subscription.manage" = "Impostazioni dell'abbonamento";
+
+/* Privacy Pro description subtitle in settings */
+"settings.subscription.row.description" = "Include i nostri servizi di VPN e Identity Theft Restoration.";
+
+/* Call to action title for Privacy Pro settings */
+"settings.subscription.subscribe" = "Proteggi la tua connessione e la tua identità con Privacy Pro";
+
+/* Privacy pro description subtitle in settings */
+"settings.subscription.us.description" = "Includi VPN, Personal Information Removal e Identity Theft Restoration.";
+
+/* VPN cell title for privacy pro */
+"settings.subscription.VPN.title" = "VPN";
+
+/* Label of a button navigating to the Support page */
+"settings.support" = "Supporto";
+
 /* Settings screen cell text for sync and backup */
 "settings.sync" = "Sincronizzazione e backup";
 
 /* Settings screen cell text for text size */
-"settings.text.size" = "Dimensione testo";
+"settings.text.size" = "Zoom testo predefinito";
 
 /* Settings screen cell text for theme */
 "settings.theme" = "Tema";
@@ -1905,6 +2444,27 @@
 
 /* Settings screen cell for voice search */
 "settings.voice.search" = "Ricerca vocale privata";
+
+/* The name of Settings category in Privacy Features related to configuration of the web tracking protection feature */
+"settings.web.tracking.protection" = "Protezione dal tracciamento web";
+
+/* Explanation in Settings how the web tracking protection feature works */
+"settings.web.tracking.protection.explanation" = "DuckDuckGo blocca automaticamente i sistemi di tracciamento nascosti mentre navighi sul web.\n[Scopri di più](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/privacy/web-tracking-protections/)";
+
+/* Description on a report broken site page. */
+"site.not.working.description" = "Seleziona l'opzione che meglio descrive il problema riscontrato.";
+
+/* Dismiss button */
+"site.not.working.dismiss" = "Ignora";
+
+/* Button that triggers flow to report broken site */
+"site.not.working.report.broken.site" = "Segnala sito danneggiato";
+
+/* Prompt asking user to send report to us if we suspect site may be broken */
+"site.not.working.subtitle" = "Questo ci aiuta a migliorare il browser.";
+
+/* Prompt asking user to send report to us if we suspect site may be broken */
+"site.not.working.title" = "Il sito non funziona? Comunicalo a DuckDuckGo.";
 
 /* Report a Broken Site screen confirmation button */
 "siteFeedback.buttonText" = "Invia segnalazione";
@@ -1924,6 +2484,234 @@
 /* No comment provided by engineer. */
 "siteFeedback.urlPlaceholder" = "Quale sito web è danneggiato?";
 
+/* Subscription Activation Info */
+"subscription.activate..header.description" = "Accedi al tuo abbonamento Privacy Pro su questo dispositivo tramite ID Apple o un indirizzo e-mail.";
+
+/* Button for adding email address to subscription */
+"subscription.activate.add.email.button" = "Aggiungi e-mail";
+
+/* Apple ID option for activation */
+"subscription.activate.appleid" = "ID Apple";
+
+/* Button text for restoring purchase via Apple ID */
+"subscription.activate.appleid.button" = "Ripristina acquisto";
+
+/* Description for Apple ID activation */
+"subscription.activate.appleid.description" = "Ripristina il tuo acquisto per attivare l'abbonamento su questo dispositivo.";
+
+/* Subscription Activation Info */
+"subscription.activate.description" = "Il tuo abbonamento è automaticamente disponibile in DuckDuckGo su qualsiasi dispositivo connesso al tuo ID Apple.";
+
+/* Button for editing email address added to subscription */
+"subscription.activate.edit.email.button" = "Modifica email";
+
+/* View Title for editing your email account */
+"subscription.activate.edit.email.title" = "Modifica email";
+
+/* Email option for activation */
+"subscription.activate.email" = "Email";
+
+/* Restore button title for Email */
+"subscription.activate.email.button" = "Inserisci l'e-mail";
+
+/* Description for Email activation */
+"subscription.activate.email.description" = "Usa la tua e-mail per attivare l'abbonamento su questo dispositivo.";
+
+/* Activate subscription title */
+"subscription.activate.email.title" = "Attiva abbonamento";
+
+/* Button title for cancelling email deletion */
+"subscription.activate.manage.email.cancel" = "Annulla";
+
+/* Button title for confirming email deletion */
+"subscription.activate.manage.email.OK" = "OK";
+
+/* Restore button title for AppleID */
+"subscription.activate.restore.apple" = "Ripristina acquisto";
+
+/* Subscription Activation Title */
+"subscription.activate.title" = "Attiva il tuo abbonamento su questo dispositivo";
+
+/* Resend activation instructions button */
+"subscription.add.device.resend.instructions" = "Invia nuovamente le istruzioni";
+
+/* Add email to an existing subscription */
+"subscription.add.email" = "Aggiungi un indirizzo e-mail per attivare il tuo abbonamento sugli altri dispositivi. Utilizzeremo questo indirizzo solo per verificare l'abbonamento.";
+
+/* View title for adding email to subscription */
+"subscription.add.email.title" = "Aggiungi e-mail";
+
+/* Subscription availability message on Apple devices */
+"subscription.available.apple" = "Privacy Pro è disponibile su qualsiasi dispositivo connesso allo stesso ID Apple.";
+
+/* Text for the manage billing page */
+"subscription.billing.google.text" = "Il tuo abbonamento è stato acquistato tramite Google Play Store. Per effettuare il rinnovo, accedi alle impostazioni dell'abbonamento di Google Play Store su un dispositivo collegato allo stesso account Google utilizzato per effettuare l'acquisto originale dell'abbonamento.";
+
+/* Title for the manage billing page */
+"subscription.billing.google.title" = "Piani di abbonamento";
+
+/* Subscription Removal confirmation message */
+"subscription.cancel.message" = "Il tuo abbonamento è stato rimosso da questo dispositivo.";
+
+/* Change plan or cancel title */
+"subscription.change.plan" = "Aggiorna o o annulla il piano";
+
+/* Navigation Button for closing subscription view */
+"subscription.close" = "Chiudi";
+
+/* Title for Confirm messages */
+"subscription.confirm.title" = "Procedere?";
+
+/* Header for section for activating subscription on other devices */
+"subscription.devices.header" = "Attiva sugli altri dispositivi";
+
+/* Footer for section for activating subscription on other devices when email was not yet added */
+"subscription.devices.no.email.footer" = "Aggiungi un'e-mail opzionale al tuo abbonamento per accedere a Privacy Pro su altri dispositivi. **[Scopri di più](https://duckduckgo.com/duckduckgo-help-pages/privacy-pro/adding-email/)**";
+
+/* Footer for section for activating subscription on other devices when email is added */
+"subscription.devices.with.email.footer" = "Usa questa e-mail per attivare il tuo abbonamento in Impostazioni > Privacy Pro nell'app DuckDuckGo sugli altri tuoi dispositivi. **[Scopri di più](https://duckduckgo.com/duckduckgo-help-pages/privacy-pro/adding-email/)**";
+
+/* Alert content for not found subscription */
+"subscription.email.inactive.alert.message" = "L'abbonamento associato a questa e-mail non è più attivo.";
+
+/* Alert title for not found subscription */
+"subscription.email.inactive.alert.title" = "Abbonamento non trovato";
+
+/* Alert content for not found subscription */
+"subscription.expired.alert.message" = "L'abbonamento associato a questo ID Apple non è più attivo.";
+
+/* FAQ Button */
+"subscription.faq" = "Domande frequenti e assistenza";
+
+/* FAQ Description */
+"subscription.faq.description" = "Ottieni risposte alle domande frequenti o contatta l'assistenza di Privacy Pro dalle nostre pagine di assistenza.";
+
+/* Send Feedback Button */
+"subscription.feedback" = "Invia feedback";
+
+/* Cancel action for the existing subscription dialog */
+"subscription.found.cancel" = "Annulla";
+
+/* Restore action for the existing subscription dialog */
+"subscription.found.restore" = "Ripristina";
+
+/* Message for the existing subscription dialog */
+"subscription.found.text" = "Abbiamo trovato un abbonamento associato a questo ID Apple.";
+
+/* Title for the existing subscription dialog */
+"subscription.found.title" = "Abbonamento trovato";
+
+/* Help and support Section header */
+"subscription.help" = "Aiuto e assistenza";
+
+/* Manage Plan header */
+"subscription.manage.plan" = "Gestisci il piano";
+
+/* Header for the subscription section */
+"subscription.manage.title" = "Abbonamento";
+
+/* Alert content for not found subscription */
+"subscription.notFound.alert.message" = "Nessun abbonamento associato a questo ID Apple.";
+
+/* Alert title for not found subscription */
+"subscription.notFound.alert.title" = "Abbonamento non trovato";
+
+/* View plans button text */
+"subscription.notFound.view.plans" = "Visualizza i piani";
+
+/* Hero Text for Personal information removal */
+"subscription.pir.hero" = "Attiva Privacy Pro sul desktop per impostare Personal Information Removal";
+
+/* Description on how to use Personal information removal in desktop. The first placeholder references a location in the Desktop application. <i.e: Settings > Privacy Pro>, and the second, the menu entry. i.e. <I have a Subscription> */
+"subscription.pir.heroText" = "Nel browser DuckDuckGo per desktop, vai a %1$@ e fai clic su %2$@ per iniziare.";
+
+/* Settings references a menu in the Desktop app, Privacy Pro, references our product name */
+"subscription.pir.heroTextLocation" = "Impostazioni > Privacy Pro";
+
+/* Menu item for enabling Personal Information Removal on Desktop */
+"subscription.pir.heroTextMenyEntry" = "Ho un abbonamento";
+
+/* Text for the 'macOS' button */
+"subscription.pir.macos" = "Mac";
+
+/* Text for the 'Windows' button */
+"subscription.pir.windows" = "Windows";
+
+/* Progress view title when completing the purchase */
+"subscription.progress.view.completing.purchase" = "Stiamo completando l'acquisto...";
+
+/* Progress view title when starting the purchase */
+"subscription.progress.view.purchasing.subscription" = "Acquisto in corso...";
+
+/* Progress view title when restoring past subscription purchase */
+"subscription.progress.view.restoring.subscription" = "Stiamo ripristinando l'abbonamento...";
+
+/* Remove from this device button */
+"subscription.remove.from.device.button" = "Rimuovi da questo dispositivo";
+
+/* Remove from device confirmation dialog text */
+"subscription.remove.from.device.text" = "Non potrai più accedere al tuo abbonamento Privacy Pro su questo dispositivo. Questo non annulla il tuo abbonamento, che rimane attivo sugli altri tuoi dispositivi.";
+
+/* Remove from device confirmation dialog title */
+"subscription.remove.from.device.title" = "Rimuovere da questo dispositivo?";
+
+/* Remove subscription button text */
+"subscription.remove.subscription" = "Rimuovi abbonamento";
+
+/* Remove subscription cancel button text */
+"subscription.remove.subscription.cancel" = "Annulla";
+
+/* Button text for general error message */
+"subscription.restore.backend.error.button" = "Torna a Impostazioni";
+
+/* Alert for general error message */
+"subscription.restore.backend.error.message" = "Stiamo riscontrando problemi di connessione. Riprova più tardi.";
+
+/* Alert for general error title */
+"subscription.restore.backend.error.title" = "Si è verificato un errore";
+
+/* Alert for general error message */
+"subscription.restore.general.error.message" = "L'App Store non è riuscito a elaborare l'acquisto. Riprova in seguito.";
+
+/* Alert for general error title */
+"subscription.restore.general.error.title" = "Si è verificato un errore";
+
+/* Alert button text for restored purchase alert */
+"subscription.restore.success.alert.button" = "OK";
+
+/* Alert message for restored purchase */
+"subscription.restore.success.alert.message" = "I tuoi acquisti sono stati ripristinati.";
+
+/* Alert title for restored purchase */
+"subscription.restore.success.alert.title" = "Tutto pronto.";
+
+/* Subtitle in header when subscribed */
+"subscription.subscribed" = "Iscritto";
+
+/* Subscription Expired Data. This reads as 'Your subscription expired on (date)' */
+"subscription.subscription.expired.caption" = "Il tuo abbonamento è scaduto il % @";
+
+/* Monthly subscription expiration info where parameter is expiration date. This reads as 'Your monthly subscription expires on (date)' */
+"subscription.subscription.expiring.monthly.caption" = "Il tuo abbonamento mensile scade il %@.";
+
+/* Unknown period subscription expiration info where parameter is expiration date. This reads as 'Your subscription expires on (date)' */
+"subscription.subscription.expiring.unknown.caption" = "Il tuo abbonamento scade il %@.";
+
+/* Annual subscription expiration info where parameter is expiration date. This reads as 'Your annual subscription expires on (date)' */
+"subscription.subscription.expiring.yearly.caption" = "Il tuo abbonamento annuale scade il %@.";
+
+/* Monthly subscription renewal info where parameter is renewal date. This reads as 'Your monthly subscription renews on (date)' */
+"subscription.subscription.renewing.monthly.caption" = "Il tuo abbonamento mensile si rinnova il %@.";
+
+/* Unknown period subscription renewal info where parameter is renewal date. This reads as 'Your subscription renews on (date)' */
+"subscription.subscription.renewing.unknown.caption" = "Il tuo abbonamento si rinnova il %@.";
+
+/* Annual subscription renewal info where parameter is renewal date. This reads as 'Your annual subscription renews on (date)' */
+"subscription.subscription.renewing.yearly.caption" = "Il tuo abbonamento annuale si rinnova il %@.";
+
+/* Navigation bar Title for subscriptions */
+"subscription.title" = "Privacy Pro";
+
 /* Message confirming that recovery code was copied to clipboard */
 "sync.code.copied" = "Codice di recupero copiato negli appunti";
 
@@ -1935,6 +2723,24 @@
 
 /* Title of the dialog to confirm deleting Sync server data */
 "sync.delete.all.confirm.title" = "Eliminare i dati del server?";
+
+/* Message for the Sync Promotion banner when user has bookmarks that can be synced */
+"sync.promo.bookmarks.message" = "Non è necessario un account. Con la crittografia end-to-end, nessuno, a parte te, può vedere i tuoi segnalibri, nemmeno noi.";
+
+/* Title for the Sync Promotion banner */
+"sync.promo.bookmarks.title" = "Sincronizza ed esegui il backup dei tuoi segnalibri";
+
+/* Title for a button in the Sync Promotion banner to set up Sync */
+"sync.promo.confirm.action" = "Configura la sincronizzazione";
+
+/* Title for a button in the Sync Promotion banner to dismiss Sync promotion banner */
+"sync.promo.dismiss.action" = "No, grazie";
+
+/* Message for the Sync Promotion banner when user has passwords that can be synced */
+"sync.promo.passwords.message" = "Non è necessario un account. Con la crittografia end-to-end, nessuno a parte te può vedere le tue password, nemmeno noi.";
+
+/* Title for the Sync Promotion banner */
+"sync.promo.passwords.title" = "Sincronizza e fai il backup delle password";
 
 /* Caption for a button to remove device from Sync */
 "sync.remove-device.action" = "Rimuovi";
@@ -1954,14 +2760,14 @@
 /* Title of the dialog to confirm turning off Sync */
 "sync.turn.off.confirm.title" = "Disattivare la sincronizzazione?";
 
+/* Reason for auth when setting up Sync */
+"sync.user.auth.reason" = "Sblocca il dispositivo per configurare Sync & Backup";
+
 /* Data syncing unavailable warning message */
 "sync.warning.data.syncing.disabled" = "Siamo spiacenti, ma Sincronizzazione e backup non è attualmente disponibile. Riprova più tardi.";
 
 /* Data syncing unavailable warning message */
 "sync.warning.data.syncing.disabled.upgrade.required" = "Siamo spiacenti, ma Sincronizzazione e Backup non è più disponibile in questa versione dell'app. Per continuare, aggiorna DuckDuckGo all'ultima versione.";
-
-/* Title of the warning message */
-"sync.warning.sync.paused" = "Sincronizzazione e Backup è in pausa";
 
 /* Accessibility label on remove button */
 "tab.close.home" = "Chiudi la scheda Home";
@@ -1979,7 +2785,7 @@
 "tab.switcher.accessibility.label" = "Selettore schede";
 
 /* Description text for the text size adjustment setting */
-"textSize.description" = "Scegli le dimensioni del testo che preferisci. I siti web che visualizzi su DuckDuckGo si adatteranno a questa impostazione.";
+"textSize.description" = "Aumenta o diminuisci la dimensione del testo in tutti i siti.";
 
 /* Replacement string is a current percent value e.g. '120%' */
 "textSize.footer" = "Dimensione testo - %@";
@@ -2002,8 +2808,14 @@
 /* Light Theme entry */
 "theme.name.light" = "Chiaro";
 
+/* No comment provided by engineer. */
+"This list contains messages that have been shown plus at most 1 message that is scheduled for showing. There may be more messages in the config that will be presented, but they haven't been processed yet." = "Questo elenco contiene i messaggi visualizzati, più al massimo 1 messaggio pianificato per la visualizzazione. La configurazione potrebbe contenere altri messaggi che saranno presentati, ma non sono ancora stati elaborati.";
+
 /* Confirmation of an action - populated with a domain name */
 "toast.protection.disabled" = "Tutela della privacy disattivata per %@";
+
+/* Confirmation of an action - populated with a domain name */
+"toast.protection.disabled.and.toggle.report.sent" = "Protezioni della Privacy disattivate per %@ e segnalazione inviata.";
 
 /* Confirmation of an action - populated with a domain name */
 "toast.protection.enabled" = "Tutela della privacy attivata per %@";
@@ -2036,7 +2848,124 @@
 "voiceSearch.cancel" = "Annulla";
 
 /* Voice-search footer note with on-device privacy warning */
-"voiceSearch.footer.note" = "L'audio viene elaborato sul dispositivo e non viene memorizzato né condiviso con altri utenti, nemmeno con DuckDuckGo.";
+"voiceSearch.footer.note" = "Aggiungi l'opzione di ricerca vocale alla barra degli indirizzi. L'audio non viene memorizzato né condiviso, nemmeno con DuckDuckGo.";
+
+/* Voice-search footer note with on-device privacy warning */
+"voiceSearch.footer.note.old" = "L'audio viene elaborato sul dispositivo e non viene memorizzato né condiviso con altri utenti, nemmeno con DuckDuckGo.";
+
+/* Cancel action for the alert when the subscription expires */
+"vpn.access-revoked.alert.action.cancel" = "Ignora";
+
+/* Primary action for the alert when the subscription expires */
+"vpn.access-revoked.alert.action.subscribe" = "Iscriviti";
+
+/* Alert message for the alert when the Privacy Pro subscription expiress */
+"vpn.access-revoked.alert.message" = "Iscriviti a Privacy Pro per riconnettere la VPN di DuckDuckGo.";
+
+/* Alert title for the alert when the Privacy Pro subscription expires */
+"vpn.access-revoked.alert.title" = "La VPN si è scollegata a causa di un abbonamento scaduto";
+
+/* Title for the VPN widget onboarding screen */
+"vpn.addWidget.settings.title" = "Trova e seleziona DuckDuckGo. Quindi scorri fino a VPN e seleziona Aggiungi widget.";
+
+/* Title for the Cancel button of the VPN feedback form */
+"vpn.feedback-form.button.cancel" = "Annulla";
+
+/* Title for the Done button of the VPN feedback form */
+"vpn.feedback-form.button.done" = "Fatto";
+
+/* Title for the Submit button of the VPN feedback form */
+"vpn.feedback-form.button.submit" = "Invia";
+
+/* Title for the Submitting state of the VPN feedback form */
+"vpn.feedback-form.button.submitting" = "Invio in corso...";
+
+/* Title for the browser crash/freeze category of the VPN feedback form */
+"vpn.feedback-form.category.browser-crash-or-freeze" = "La VPN causa l'arresto anomalo o il blocco del browser";
+
+/* Title for the 'VPN fails to connect' category of the VPN feedback form */
+"vpn.feedback-form.category.fails-to-connect" = "La VPN non si connette";
+
+/* Title for the 'VPN feature request' category of the VPN feedback form */
+"vpn.feedback-form.category.feature-request" = "Richiesta di funzionalità VPN";
+
+/* Title for the category 'VPN causes issues with other apps or websites' category of the VPN feedback form */
+"vpn.feedback-form.category.issues-with-apps" = "La VPN causa problemi con altre app o siti web";
+
+/* Title for the local device connectivity category of the VPN feedback form */
+"vpn.feedback-form.category.local-device-connectivity" = "Non mi consente di connettermi al dispositivo locale";
+
+/* Title for the 'other VPN feedback' category of the VPN feedback form */
+"vpn.feedback-form.category.other" = "Altri feedback sulla VPN";
+
+/* Title for the category selection state of the VPN feedback form */
+"vpn.feedback-form.category.select-category" = "SELEZIONA UNA CATEGORIA";
+
+/* Title for the 'VPN is too slow' category of the VPN feedback form */
+"vpn.feedback-form.category.too-slow" = "La connessione VPN è troppo lenta";
+
+/* Title for the 'unable to install' category of the VPN feedback form */
+"vpn.feedback-form.category.unable-to-install" = "Impossibile installare la VPN";
+
+/* Title for the feedback sent view description of the VPN feedback form */
+"vpn.feedback-form.sending-confirmation.description" = "La tua opinione ci aiuterà a migliorare la VPN DuckDuckGo.";
+
+/* Title for the feedback sending error text of the VPN feedback form */
+"vpn.feedback-form.sending-confirmation.error" = "Non siamo riusciti a inviare il tuo feedback in questo momento, riprova.";
+
+/* Title for the feedback sent view title of the VPN feedback form */
+"vpn.feedback-form.sending-confirmation.title" = "Grazie!";
+
+/* Toast message when the VPN feedback form is submitted successfully */
+"vpn.feedback-form.submitted.message" = "Grazie! Il feedback è stato inviato.";
+
+/* Text for the body of the VPN feedback form */
+"vpn.feedback-form.text-1" = "Descrivi cosa sta succedendo, cosa ti aspettavi che accadesse e i passaggi che hanno portato al problema:";
+
+/* Text for the body of the VPN feedback form */
+"vpn.feedback-form.text-2" = "Oltre ai dettagli inseriti in questo modulo, la segnalazione sui problemi dell'app conterrà le seguenti informazioni:";
+
+/* Bullet text for the body of the VPN feedback form */
+"vpn.feedback-form.text-3" = "• Comunicherà se specifiche funzioni di DuckDuckGo sono attive";
+
+/* Bullet text for the body of the VPN feedback form */
+"vpn.feedback-form.text-4" = "• Aggregherà le diagnostiche dell'app DuckDuckGo";
+
+/* Text for the body of the VPN feedback form */
+"vpn.feedback-form.text-5" = "Toccando \"Invia\" accetto che DuckDuckGo possa usare le informazioni in questo rapporto per migliorare le funzionalità dell'app.";
+
+/* Title for each screen of the VPN feedback form */
+"vpn.feedback-form.title" = "Aiuta a migliorare la VPN di DuckDuckGo";
+
+/* VPN settings screen cell text for adding the VPN widget to the home screen */
+"vpn.settings.add.widget" = "Aggiungi il widget VPN alla schermata iniziale";
+
+/* Disclaimer for the DNS Server section on the DNS Server screen */
+"vpn.settings.dns.section-disclaimer" = "L'utilizzo di un server DNS personalizzato può incidere sulla velocità di navigazione ed esporre la tua attività a terzi se il server non è sicuro o affidabile.";
+
+/* Header text for the DNS section on the VPN Settings screen */
+"vpn.settings.dns.section-header" = "dns";
+
+/* Title for the Apply button on the DNS Server setting screen */
+"vpn.settings.dns.server.apply.button.title" = "Applica";
+
+/* Default value for the DNS Server row on the VPN Settings screen */
+"vpn.settings.dns.server.default.value" = "DuckDuckGo";
+
+/* Title for the IPv4 Address setting */
+"vpn.settings.dns.server.ipv4.title" = "Indirizzo IPv4";
+
+/* Custom option for the DNS Server setting */
+"vpn.settings.dns.server.option.custom" = "Personalizzato";
+
+/* Recommended option for the DNS Server setting */
+"vpn.settings.dns.server.option.default" = "DuckDuckGo (consigliato)";
+
+/* Title for the DNS Server setting screen */
+"vpn.settings.dns.server.screen.title" = "Server DNS";
+
+/* Title for the DNS Server row on the VPN Settings screen */
+"vpn.settings.dns.server.title" = "Server DNS";
 
 /* Title for the button to enable push notifications in system settings */
 "waitlist.allow-notifications" = "Consenti notifiche";
@@ -2116,38 +3045,11 @@
 /* No comment provided by engineer. */
 "Welcome to the Duck Side!" = "Dax the Duck ti dà il benvenuto!";
 
-/* Title for the Windows waitlist notification */
-"windows-waitlist.available.notification.title" = "Prova DuckDuckGo per Windows.";
-
-/* Description on the invite screen */
-"windows-waitlist.invite-screen.step-1.description" = "Visita questo URL sul tuo dispositivo Windows per scaricarlo:";
-
-/* Description on the invite screen */
-"windows-waitlist.invite-screen.step-2.description" = "Apri l'installer DuckDuckGo in Download, seleziona Installa, quindi inserisci il tuo codice di invito.";
-
-/* Subtitle for the Windows Waitlist Invite screen */
-"windows-waitlist.invite-screen.subtitle" = "Vuoi usare DuckDuckGo su Windows?";
-
 /* Title for the Windows waitlist button redirecting to Mac waitlist */
 "windows-waitlist.join-waitlist-screen.mac-waitlist" = "Cerchi la versione per Mac?";
 
-/* Title for the Join Windows Waitlist screen */
-"windows-waitlist.join-waitlist-screen.try-duckduckgo-for-windows" = "Ottieni l'accesso anticipato per provare DuckDuckGo per Windows!";
-
-/* Message for the alert to confirm enabling notifications */
-"windows-waitlist.joined.no-notification.get-notification-confirmation-message" = "Ti invieremo una notifica quando la tua copia di DuckDuckGo per Windows sarà pronta per il download. ";
-
-/* Label text for the Joined Waitlist state with notifications declined */
-"windows-waitlist.joined.notifications-declined" = "L'invito a provare DuckDuckGo per Windows arriverà qui. Torna a trovarci a breve, oppure possiamo inviarti una notifica non appena sarà il tuo turno.";
-
-/* Label text for the Joined Waitlist state with notifications enabled */
-"windows-waitlist.joined.notifications-enabled" = "Ti invieremo una notifica quando la tua copia di DuckDuckGo per Windows sarà pronta per il download.";
-
 /* Title for the settings subtitle */
 "windows-waitlist.settings.browse-privately" = "Naviga privatamente con la nostra app per Windows";
-
-/* Message used when sharing to iMessage. Parameter is an eight digit invite code. */
-"windows-waitlist.share-sheet.invite-code-message" = "Hai ricevuto un invito!\n\nVuoi usare DuckDuckGo su Windows?Passaggio 1 \n Visita questo URL sul tuo dispositivo Windows per effettuare il download:\n https://duckduckgo.com/windows\n\nPassaggio 2\nApri l'installer DuckDuckGo in Download, seleziona Installa, quindi inserisci il tuo codice di invito.\n\nCodice invito: %@";
 
 /* Message used when sharing to iMessage */
 "windows-waitlist.share-sheet.message" = "Vuoi iniziare a navigare su Windows mantenendo la tua privacy?\n\nVisita questo URL dal tuo computer per effettuare il download:\nhttps://duckgo.com/windows";

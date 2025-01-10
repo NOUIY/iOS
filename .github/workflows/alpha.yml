@@ -31,7 +31,7 @@ on:
 
 jobs:
   make-alpha:
-    runs-on: macos-13-xlarge
+    runs-on: macos-15-xlarge
     name: Make TestFlight Alpha Build
     timeout-minutes: 30
 
@@ -39,13 +39,6 @@ jobs:
       destination: ${{ github.event.inputs.destination || inputs.destination }}
 
     steps:
-
-    - name: Assert main branch
-      run: |
-        case "${{ github.ref }}" in
-          *main) ;;
-          *) echo "👎 Not main branch"; exit 1 ;;
-        esac
 
     - name: Register SSH keys for access to certificates
       uses: webfactory/ssh-agent@v0.7.0

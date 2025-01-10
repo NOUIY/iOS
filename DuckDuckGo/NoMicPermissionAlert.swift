@@ -26,11 +26,10 @@ struct NoMicPermissionAlert {
         let alertController = UIAlertController(title: UserText.noVoicePermissionAlertTitle,
                                                 message: UserText.noVoicePermissionAlertMessage,
                                                 preferredStyle: .alert)
-        alertController.overrideUserInterfaceStyle()
 
         let openSettingsButton = UIAlertAction(title: UserText.noVoicePermissionActionSettings, style: .default) { _ in
             let url = URL(string: UIApplication.openSettingsURLString)!
-            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            UIApplication.shared.open(url)
         }
         let cancelAction = UIAlertAction(title: UserText.actionCancel, style: .cancel, handler: nil)
 

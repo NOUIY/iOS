@@ -17,7 +17,6 @@
 //  limitations under the License.
 //
 
-#if SUBSCRIPTION
 import SwiftUI
 import Foundation
 import DesignResourcesKit
@@ -33,11 +32,10 @@ struct SubscriptionActivityViewController: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
-@available(iOS 15.0, *)
 struct SubscriptionITPView: View {
         
     @Environment(\.dismiss) var dismiss
-    @StateObject var viewModel = SubscriptionITPViewModel()
+    @StateObject var viewModel = SubscriptionITPViewModel(subscriptionManager: AppDependencyProvider.shared.subscriptionManager)
     @State private var shouldShowNavigationBar = false
     @State private var isShowingActivityView = false
     
@@ -143,11 +141,8 @@ struct SubscriptionITPView: View {
 }
 
 // Commented out because CI fails if a SwiftUI preview is enabled https://app.asana.com/0/414709148257752/1206774081310425/f
-// @available(iOS 15.0, *)
 // struct SubscriptionITPView_Previews: PreviewProvider {
 //    static var previews: some View {
 //        SubscriptionITPView()
 //    }
 // }
-
-#endif

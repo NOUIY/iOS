@@ -2,7 +2,7 @@
 "%@" = "%@";
 
 /* No comment provided by engineer. */
-"%@ [%@](https://form.asana.com/?k=_wNLt6YcT5ILpQjDuW0Mxw&d=137249556945)" = "%1$@ [%2$@](https://form.asana.com/?k=_wNLt6YcT5ILpQjDuW0Mxw&d=137249556945)";
+"%@ " = "%@ ";
 
 /* Buton label for Edit action */
 "action.generic.edit" = "Redigera";
@@ -15,6 +15,18 @@
 
 /* Button label for managing favorites */
 "action.manage.favorites" = "Hantera";
+
+/* Button label for OK action */
+"action.ok" = "OK";
+
+/* Title for text zoom menu item.  %d%% is replaced with percent, e.g. 56% so do not change that please. */
+"action.text-zoom-menu-item" = "Zoom (%d%%)";
+
+/* Text zoom menu item */
+"action.text-zoom-sheet-menu-item" = "Zoom";
+
+/* Title for text zoom sheet view.  %d%% is replaced with percent, e.g. 56% so do not change that please. */
+"action.text-zoom-sheet-title" = "Textzoom (%d%%)";
 
 /* Add action - button shown in alert */
 "action.title.add" = "Lägg till";
@@ -133,14 +145,20 @@
 /* No comment provided by engineer. */
 "alert.message.bookmarkAll" = "Befintliga bokmärken kommer inte att kopieras.";
 
+/* Description for alert shown when sync error occurs because of bad bookmarks data */
+"alert.sync-bookmarks-bad-data-error-description" = "Vissa bokmärken är felaktigt formaterade eller för långa och synkroniserades inte.";
+
 /* Description for alert shown when sync bookmarks paused for too many items */
-"alert.sync-bookmarks-paused-description" = "Du har överskridit gränsen för bokmärkessynkronisering. Ta bort några bokmärken. Dina bokmärken kommer inte att säkerhetskopieras förrän detta har åtgärdats.";
+"alert.sync-bookmarks-paused-description" = "Du har nått det maximala antalet bokmärken. Ta bort några bokmärken för att återuppta synkroniseringen.";
 
 /* Title for alert shown when sync bookmarks paused for too many items */
 "alert.sync-bookmarks-paused-title" = "Bokmärkessynkronisering är pausad";
 
+/* Description for alert shown when sync error occurs because of bad credentials data */
+"alert.sync-credentials-bad-data-error-description" = "Vissa lösenord är felaktigt formaterade eller för långa och synkroniserades inte.";
+
 /* Description for alert shown when sync credentials paused for too many items */
-"alert.sync-credentials-paused-description" = "Du har överskridit gränsen för lösenordssynkronisering. Ta bort några lösenord. Dina lösenord kommer inte att säkerhetskopieras förrän detta har åtgärdats.";
+"alert.sync-credentials-paused-description" = "Du har nått det maximala antalet lösenord. Ta bort några lösenord för att återuppta synkroniseringen.";
 
 /* Title for alert shown when sync credentials paused for too many items */
 "alert.sync-credentials-paused-title" = "Lösenordssynkronisering är pausad";
@@ -148,11 +166,29 @@
 /* Title for sync error alert */
 "alert.sync-error" = "Synkroniserings- och säkerhetskopieringsfel";
 
+/* Sync error alert action button title, takes the user to the sync settings page. */
+"alert.sync-error-action" = "Synkronisera inställningar";
+
+/* Description for alert shown when user logged off from sync */
+"alert.sync-invalid-login-error-description" = "Synkroniseringen har pausats. Om du vill fortsätta att synkronisera den här enheten ansluter du igen från en annan enhet eller med din återställningskod.";
+
 /* Learn more button in alert */
 "alert.sync-paused-alert-learn-more-button" = "Läs mer";
 
 /* Confirmation button in alert */
 "alert.sync-paused-alert-ok-button" = "OK";
+
+/* Title for alert shown when sync paused for an error */
+"alert.sync-paused-title" = "Synkroniseringen är pausad";
+
+/* Description for alert shown when sync error occurs because of too many requests */
+"alert.sync-too-many-requests-error-description" = "Sync & Backup är inte tillgängligt just nu.";
+
+/* Title of the warning message that tells the user that there was an error with the sync feature. */
+"alert.sync.warning.sync-error" = "Synkroniseringsfel";
+
+/* Title of the warning message */
+"alert.sync.warning.sync-paused" = "Synkronisering och säkerhetskopiering har pausats";
 
 /* Question from confirmation dialog */
 "alert.title.bookmarkAll" = "Bokmärk alla flikar?";
@@ -196,225 +232,6 @@
 /* Shown on authentication screen */
 "app.authentication.unlock" = "Lås upp DuckDuckGo.";
 
-/* First part of about page content (note the trailing space) */
-"appTP.about.content1" = "You’ve probably heard about companies like Google and Facebook tracking you behind the scenes on third-party websites. But did you know they also track your personal information through apps on your device?\n\nIn 2022, DuckDuckGo found that ";
-
-/* Second part of about page content (note the trailing space) */
-"appTP.about.content2" = "over 85% of free iOS apps tested contained hidden trackers from other companies.";
-
-/* Third part of about page content (note the leading space) */
-"appTP.about.content3" = " Of the 395 apps tested, 60% sent data to Google. This happens even while you’re not using your device.\n\nTrackers in apps may have access to a lot more information than their website tracker cousins, such as your location down to which floor of a building you're on, how often you play games while at work, and when and how long you sleep each day. Even if you haven’t given apps explicit permission to collect data, they can still take it without your knowledge.\n\nTracking networks like Facebook and Google use these little pieces of information to build a digital profile about you. With it, tracking networks can manipulate what you see online and allow advertisers to bid on access to you based on your data.\n\nTrackers in apps is a BIG problem for privacy. But DuckDuckGo has a solution that can help.\n\nWhen enabled in the DuckDuckGo Privacy Browser app, App Tracking Protection blocks many trackers in other apps, not just the trackers we find on websites when you browse. These dual layers of protection reduce what companies know about you overall, so you can use your apps with more peace of mind, knowing you’re more protected.";
-
-/* Navigation Title for AppTP about page */
-"appTP.about.navTitle" = "About App Trackers";
-
-/* Title for AppTP about page */
-"appTP.about.title" = "What Are App Trackers?";
-
-/* Title for 'Report an Issue' button in the activity view. */
-"appTP.activityView.reportIssue" = "Report Issue";
-
-/* Text label for switch that turns blocking on or off for a tracker */
-"appTP.blockTrackerText" = "Block this Tracker";
-
-/* Detail string describing what AppTP is */
-"appTP.cell.detail" = "Blockera appspårare på din enhet";
-
-/* String indicating AppTP is disabled when viewed from the settings screen */
-"appTP.cell.disabled" = "Inaktiverad";
-
-/* String indicating AppTP is enabled when viewed from the settings screen */
-"appTP.cell.enabled" = "Aktiverad";
-
-/* Info string informing the user what App Tracking Protection does. */
-"appTP.empty.disabled.info" = "Aktivera App Tracking Protection så att vi kan blockera irriterande spårare i andra appar.";
-
-/* Info string informing the user we're looking for trackers in other apps. */
-"appTP.empty.enabled.heading" = "We’re blocking hidden trackers";
-
-/* Info string informing the user we're looking for trackers in other apps. */
-"appTP.empty.enabled.info" = "Come back soon to see a list of all the app trackers we’ve blocked.";
-
-/* First answer for AppTP FAQ page */
-"appTP.faq.answer1" = "App Tracking Protection blocks app trackers from other companies, like when Facebook tries to track you in a banking app. Companies may still track you in apps they own.";
-
-/* Second answer for AppTP FAQ page */
-"appTP.faq.answer2" = "Yes! App Tracking Protection works across all apps on your device to block the most common hidden trackers we find trying to collect your personal info.";
-
-/* Third answer for AppTP FAQ page */
-"appTP.faq.answer3" = "We currently only block the most common trackers that we find on iOS. This helps us to comprehensively test App Tracking Protection and lower frequency of app breakage, while blocking up to 70% of all tracking requests.";
-
-/* Fourth answer for AppTP FAQ page */
-"appTP.faq.answer4" = "You’ll be asked to set up a virtual private network (VPN) connection, but you don't need to install a VPN app for App Tracking Protection to work.\n\nThis permission, which works only on your device, allows App Tracking Protection to monitor network traffic so that it can block known trackers.";
-
-/* Fifth answer for AppTP FAQ page */
-"appTP.faq.answer5" = "You can use App Tracking Protection at the same time as using an IKEv2 protocol VPN app on an iOS device. You won’t be able to use App Tracking Protection on an iOS device if you’re using a VPN app that uses a different type of protocol, like WireGuard or OpenVPN type VPNs.";
-
-/* Sixth answer for AppTP FAQ page */
-"appTP.faq.answer6" = "A VPN sends your data from the device to its own server, where it secures and anonymizes your data from prying eyes. However, this allows the VPN company to see your network traffic.\n\nApp Tracking Protection is different. Instead of sending your data to a VPN server, App Tracking Protection works only on your device, sitting between your apps and the servers they talk to.\n\nWhenever App Tracking Protection recognizes a known tracker, it blocks the tracker from sending personal information (such as your IP address, activity, and device details) off your device. All other traffic reaches its destination, so your apps work normally.";
-
-/* Seventh answer for AppTP FAQ page */
-"appTP.faq.answer7" = "App Tracking Protection works only on your device and doesn’t send your data off your device to DuckDuckGo. We don’t collect or store any data from your apps.";
-
-/* First question for AppTP FAQ page */
-"appTP.faq.question1" = "How does App Tracking Protection work?";
-
-/* Second question for AppTP FAQ page */
-"appTP.faq.question2" = "Does App Tracking Protection block trackers in all apps on my device?";
-
-/* Third question for AppTP FAQ page */
-"appTP.faq.question3" = "Does App Tracking Protection block all app trackers?";
-
-/* Fourth question for AppTP FAQ page */
-"appTP.faq.question4" = "Why does App Tracking Protection use a VPN connection?";
-
-/* Fifth question for AppTP FAQ page */
-"appTP.faq.question5" = "Will App Tracking Protection work if I also use a VPN app?";
-
-/* Sixth question for AppTP FAQ page */
-"appTP.faq.question6" = "How is App Tracking Protection different from a VPN?";
-
-/* Seventh question for AppTP FAQ page */
-"appTP.faq.question7" = "Is my data private?";
-
-/* Title for AppTP FAQ page */
-"appTP.faq.title" = "App Tracking Protection FAQ";
-
-/* Do not translate. StringsDict entry -- Count part of string 'App Tracking Protection blocked x tracking attempts today' */
-"appTP.home.blockedCount" = "appTP.home.blockedCount";
-
-/* Prefix of string 'App Tracking Protection blocked x tracking attempts today' (note the trailing space) */
-"appTP.home.blockedPrefix" = "App Tracking Protection har blockerat ";
-
-/* Prefix of string 'App Tracking Protection blocked x tracking attempts today' (note the leading space) */
-"appTP.home.blockedSuffix" = " i dina appar idag.";
-
-/* Prefix of string 'App Tracking Protection disabled. Tap to re-enable.' (note the trailing space) */
-"appTP.home.disabledPrefix" = "App Tracking Protection disabled. ";
-
-/* Suffix of string 'App Tracking Protection disabled. Tap to re-enable.' */
-"appTP.home.disabledSuffix" = "Tap to continue blocking tracking attempts across your apps.";
-
-/* Text indicating the tracking event occured 'just now'. Example: Last attempt 'just now' */
-"appTP.justNow" = "Nyss";
-
-/* View to manage trackers for AppTP. Allows the user to turn trackers on or off. */
-"appTP.manageTrackers" = "Hantera spårare";
-
-/* Button title for AppTP onboarding */
-"appTP.onboarding.continueButton" = "Continue";
-
-/* Button title for AppTP onboarding to enable AppTP */
-"appTP.onboarding.enableeButton" = "Enable App Tracking Protection";
-
-/* Button title for AppTP onboarding to learn more about AppTP */
-"appTP.onboarding.learnMoreButton" = "Learn More";
-
-/* First part of info on the first AppTP onboarding page */
-"appTP.onboarding.page1Info1" = "Over 85% of free iOS apps";
-
-/* Second part of info on the first AppTP onboarding page (note the leading space) */
-"appTP.onboarding.page1Info2" = " we’ve tested allow other companies to track your personal information, even when you’re sleeping.";
-
-/* Third part of info on the first AppTP onboarding page */
-"appTP.onboarding.page1Info3" = "See who we catch trying to track you in your apps and take back control.";
-
-/* First part of info on the second AppTP onboarding page (note the trailing space) */
-"appTP.onboarding.page2Info1" = "App Tracking Protection ";
-
-/* Second part of info on the second AppTP onboarding page */
-"appTP.onboarding.page2Info2" = "detects and blocks app trackers from other companies,";
-
-/* Third part of info on the second AppTP onboarding page (note the leading space) */
-"appTP.onboarding.page2Info3" = " like when Google attempts to track you in a health app.";
-
-/* Fourth part of info on the second AppTP onboarding page */
-"appTP.onboarding.page2Info4" = "It’s free,";
-
-/* Fifth part of info on the second AppTP onboarding page (note the leading and trailing space) */
-"appTP.onboarding.page2Info5" = " and you can enjoy your apps as you normally would. Working in the background, it helps ";
-
-/* Sixth part of info on the second AppTP onboarding page */
-"appTP.onboarding.page2Info6" = "protect you night and day.";
-
-/* First part of info on the third AppTP onboarding page */
-"appTP.onboarding.page3Info1" = "App Tracking Protection is not a VPN.";
-
-/* Second part of info on the third AppTP onboarding page (note the leading space) */
-"appTP.onboarding.page3Info2" = " However, your device will recognize it as one. This is because it uses a local VPN connection to work.";
-
-/* Third part of info on the third AppTP onboarding page (note the trailing space) */
-"appTP.onboarding.page3Info3" = "App Tracking Protection is different. ";
-
-/* Fourth part of info on the third AppTP onboarding page */
-"appTP.onboarding.page3Info4" = "It never routes app data through an external server.";
-
-/* Title for first AppTP onboarding page */
-"appTP.onboarding.title1" = "One easy step for better app privacy!";
-
-/* Title for second AppTP onboarding page */
-"appTP.onboarding.title2" = "How does it work?";
-
-/* Title for third AppTP onboarding page */
-"appTP.onboarding.title3" = "Who sees your data?";
-
-/* Breakage report app name label */
-"appTP.report.appLabel" = "Which app is having issues?";
-
-/* Breakage report app name placeholder */
-"appTP.report.appPlaceholder" = "App name";
-
-/* Breakage report category label */
-"appTP.report.categoryLabel" = "Vad har hänt?";
-
-/* Breakage report comment label */
-"appTP.report.commentLabel" = "Comments";
-
-/* Breakage report comment placeholder */
-"appTP.report.commentPlaceholder" = "Add additional details";
-
-/* Breakage report footer explaining what is collected in the breakage report */
-"appTP.report.footer" = "In addition to the details entered into this form, your app issue report will contain:\n• A list of trackers blocked in the last 10 min\n• Whether App Tracking Protection is enabled\n• Aggregate DuckDuckGo app diagnostics";
-
-/* Breakage report submit button */
-"appTP.report.submit" = "Skicka";
-
-/* Breakage report form title */
-"appTP.report.title" = "Report Issue";
-
-/* Breakage report succcess message */
-"appTP.report.toast" = "Tack! Återkopplingen har skickats.";
-
-/* Cancel button for 'Report an Issue' alert. */
-"appTP.reportAlert.cancel" = "Inte nu";
-
-/* Confirm button for 'Report an Issue' alert. */
-"appTP.reportAlert.confirm" = "Rapportera problem";
-
-/* Message for 'Report an Issue' alert. */
-"appTP.reportAlert.message" = "Let us know if you disabled App Tracking Protection for this specific tracker because it caused app issues. Your feedback helps us improve!";
-
-/* Title for 'Report an Issue' alert. */
-"appTP.reportAlert.title" = "Report Issue?";
-
-/* Toast notification diplayed after restoring the blocklist to default settings */
-"appTP.restoreDefaultsToast" = "Default settings restored";
-
-/* Button to restore the blocklist to its default state. */
-"appTP.restoreDefualts" = "Återställ standardinställningar";
-
-/* Title for the App Tracking Protection feature */
-"appTP.title" = "Skydd mot appspårning";
-
-/* Text indicating when the tracker was last allowed. Example: Last attempt allowed (timeString) */
-"appTP.trackerAllowedTimestamp" = "Senaste försöket tilläts %@";
-
-/* Text indicating when the tracker was last blocked. Example: Last attempt blocked (timeString) */
-"appTP.trackerBlockedTimestamp" = "Senaste försöket blockerades %@";
-
-/* Do not translate. StringsDict entry -- Subtitle for tracking attempts in App Tracking Protection Activity View. Example: (count) tracking attempts */
-"appTP.trackingattempts" = "appTP.trackingattempts";
-
 /* Authentication Alert Sign In Button */
 "auth.alert.login.button" = "Logga in";
 
@@ -439,6 +256,18 @@
 /* No comment provided by engineer. */
 "autoclear.on" = "På";
 
+/* Subtitle for search history items */
+"autocomplete.history.search.duckduckgo" = "Sök med DuckDuckGo";
+
+/* The message text shown in suggestions */
+"autocomplete.history.warning.message" = "Sökförslag inkluderar nu dina nyligen besökta webbplatser. Stäng av funktionen i inställningarna, eller rensa när som helst med 🔥 Fire Button.";
+
+/* Title for message show in suggestions */
+"autocomplete.history.warning.title" = "Samma integritet.\nBättre sökförslag!";
+
+/* Switch to tab hint */
+"autocomplete.switch.to.tab" = "Byt till flik";
+
 /* Autoconsent for Cookie Management Setting state */
 "autoconsent.disabled" = "Inaktiverad";
 
@@ -460,23 +289,59 @@
 /* Do not translate - stringsdict entry */
 "autofill.delete.all.passwords.sync.confirmation.body" = "autofill.delete.all.passwords.sync.confirmation.body";
 
+/* Open Settings action for disabling autofill in Settings */
+"autofill.disable.prompt.action.open-settings" = "Öppna inställningar";
+
+/* Message for informing user that they can disable autofill in Settings */
+"autofill.disable.prompt.message" = "Du kan stänga av lösenordssparande när som helst.";
+
 /* Text link to email protection website */
 "autofill.enable.email.protection" = "Aktivera Email Protection";
 
 /* Accessibility title for a Hide Password button replacing displayed password with ***** */
 "autofill.hide-password" = "Dölj lösenord";
 
+/* Button label to get link to download the desktop browser */
+"autofill.import.passwords.get-browser-button" = "Hämta webbläsare för dator";
+
+/* Step 1 for instructions to import passwords */
+"autofill.import.passwords.instructions.step1" = "Öppna DuckDuckGo på Mac eller Windows";
+
+/* Step 2 for instructions to import passwords. This reads as 'Go to Settings > Passwords' */
+"autofill.import.passwords.instructions.step2" = "Gå till %1$@ > %2$@";
+
+/* second parameter for autofill.import.passwords.instructions.step2 */
+"autofill.import.passwords.instructions.step2.passwords" = "Lösenord";
+
+/* first parameter for autofill.import.passwords.instructions.step2 */
+"autofill.import.passwords.instructions.step2.settings" = "Inställningar";
+
+/* Step 3 for instructions to import passwords. This reads as 'Select Import Passwords and follow the steps' */
+"autofill.import.passwords.instructions.step3" = "Välj %@ och följ anvisningarna för att importera";
+
+/* Parameter for autofill.import.passwords.instructions.step3 */
+"autofill.import.passwords.instructions.step3.import" = "Importera lösenord …";
+
+/* Step 4 for instructions to import passwords: Once imported on your computer you can set up sync on this iPhone|iPad|device */
+"autofill.import.passwords.instructions.step4" = "När du har importerat till din dator kan du ställa in synkronisering på denna %@";
+
+/* Title for section with instructions to import passwords */
+"autofill.import.passwords.instructions.title" = "Importera från webbläsare för dator:";
+
+/* Subtitle for screen to import passwords */
+"autofill.import.passwords.subtitle" = "Importera lösenord i versionen av DuckDuckGo-webbläsaren för dator och synkronisera sedan mellan enheter.";
+
+/* Button label to sync passwords with desktop browser */
+"autofill.import.passwords.sync-button" = "Synkronisera med dator";
+
+/* Title for screen to import passwords */
+"autofill.import.passwords.title" = "Så här importerar du lösenord";
+
 /* Disable action for alert when asking the user if they want to keep using autofill */
 "autofill.keep-enabled.alert.disable" = "Inaktivera";
 
-/* Confirm action for alert when asking the user if they want to keep using autofill */
-"autofill.keep-enabled.alert.keep-using" = "Fortsätt att spara";
-
-/* Message for alert when asking the user if they want to keep using autofill */
-"autofill.keep-enabled.alert.message" = "Du kan inaktivera det här när som helst i inställningarna.";
-
-/* Title for alert when asking the user if they want to keep using autofill */
-"autofill.keep-enabled.alert.title" = "Vill du fortsätta spara lösenord?";
+/* A link that takes the user to the DuckDuckGo help pages explaining password managers */
+"autofill.learn.more.link.title" = "Läs mer";
 
 /* Button displayed after saving/updating an autofill login that takes the user to the saved login */
 "autofill.login-save-action-button.toast" = "Visa";
@@ -568,8 +433,11 @@
 /* Username label for login details on autofill */
 "autofill.logins.details.username" = "Användarnamn";
 
-/* Subtitle for view displayed when autofill has no items */
-"autofill.logins.empty-view.subtitle" = "Lösenord lagras säkert på din enhet.";
+/* Title for button to Import Passwords when autofill has no items */
+"autofill.logins.empty-view.button.title" = "Importera lösenord";
+
+/* Subtitle for view displayed when no autofill passwords have been saved */
+"autofill.logins.empty-view.subtitle.first.paragraph" = "Du kan importera sparade lösenord från andra webbläsare till DuckDuckGo.";
 
 /* Title for view displayed when autofill has no items */
 "autofill.logins.empty-view.title" = "Inga lösenord sparade ännu";
@@ -588,6 +456,9 @@
 
 /* Title for a toggle that enables autofill */
 "autofill.logins.list.enable" = "Spara och fyll i lösenord automatiskt";
+
+/* Footer label displayed below table section with option to enable autofill */
+"autofill.logins.list.enable.footer" = "Lösenord lagras säkert på din enhet.";
 
 /* Toast message when a login item is deleted */
 "autofill.logins.list.login-deleted-message" = "Lösenord för %@ har raderats";
@@ -610,6 +481,12 @@
 /* Placeholder for search field on autofill login listing */
 "autofill.logins.list.search-placeholder" = "Sök lösenord";
 
+/* Subtext under Autofill Settings briefly explaining security to alleviate user concerns. */
+"autofill.logins.list.settings.footer.fallback" = "Lösenorden är krypterade. Ingen annan än du kan se dem, inte ens vi.";
+
+/* Subtext under Autofill Settings briefly explaining security to alleviate user concerns. Has a URL link by clicking Learn More. */
+"autofill.logins.list.settings.footer.markdown" = "Lösenorden är krypterade. Ingen annan än du kan se dem, inte ens vi. [Läs mer](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/sync-and-backup/password-manager-security/)";
+
 /* Section title for group of suggested saved logins */
 "autofill.logins.list.suggested" = "Förslag";
 
@@ -626,7 +503,7 @@
 "autofill.logins.prompt.auth.cancel" = "Avbryt";
 
 /* Reason for auth during login prompt */
-"autofill.logins.prompt.auth.reason" = "Lås upp för att använda sparat lösenord";
+"autofill.logins.prompt.auth.reason" = "Lås upp enheten för att använda sparat lösenord";
 
 /* Title for section of autofill logins that are an exact match to the current website */
 "autofill.logins.prompt.exact.match.title" = "Från den här webbplatsen";
@@ -651,6 +528,37 @@
 
 /* Do not translate - stringsdict entry */
 "autofill.number.of.passwords" = "autofill.number.of.passwords";
+
+/* Description of autofill onboarding prompt's secure storage feature
+   Description of autofill onboarding prompt's secure storage feature with a string describing the available biometry + passcode as a parameter */
+"autofill.onboarding.key-features.secure-storage.description" = "Lösenord krypteras och förvaras på enheten, och du låser upp dem med %@.";
+
+/* Parameter for the description of autofill onboarding prompt's secure storage feature describing Face ID biometry + passcode */
+"autofill.onboarding.key-features.secure-storage.description.parameter.face-id" = "Face ID eller lösenkod";
+
+/* Parameter for the description of autofill onboarding prompt's secure storage feature describing passcode only if no biometry are available */
+"autofill.onboarding.key-features.secure-storage.description.parameter.passcode" = "lösenkod";
+
+/* Parameter for the description of autofill onboarding prompt's secure storage feature describing Touch ID biometry + passcode */
+"autofill.onboarding.key-features.secure-storage.description.parameter.touch-id" = "Touch ID eller lösenkod";
+
+/* Title of autofill onboarding prompt's secure storage feature */
+"autofill.onboarding.key-features.secure-storage.title" = "Säker förvaring";
+
+/* Description of autofill onboarding prompt's sign-in feature */
+"autofill.onboarding.key-features.sign-ins.description" = "Du behöver inte komma ihåg inloggningsuppgifter.";
+
+/* Title of autofill onboarding prompt's sign-in feature */
+"autofill.onboarding.key-features.sign-ins.title" = "Smidiga inloggningar";
+
+/* Description of autofill onboarding prompt's sync feature */
+"autofill.onboarding.key-features.sync.description" = "End-to-end-krypterat och enkelt att ställa in när du är redo.";
+
+/* Title of autofill onboarding prompt's sync feature */
+"autofill.onboarding.key-features.sync.title" = "Synkronisering mellan enheter";
+
+/* Title of autofill onboarding prompt's features list */
+"autofill.onboarding.key-features.title" = "Viktiga funktioner";
 
 /* Subtitle for prompt to use suggested strong password for creating a login */
 "autofill.password-generation-prompt.subtitle" = "Lösenord lagras säkert på din enhet.";
@@ -697,20 +605,41 @@
 /* CTA displayed on modal asking if the user never wants to be prompted to save a login for this website agin */
 "autofill.save-login.never-prompt.CTA" = "Fråga aldrig för den här webbplatsen";
 
-/* Message displayed on modal asking for the user to save the login for the first time */
-"autofill.save-login.new-user.message" = "Lösenord lagras säkert på din enhet.";
-
 /* Title displayed on modal asking for the user to save the login for the first time */
-"autofill.save-login.new-user.title" = "Vill du att DuckDuckGo ska spara ditt lösenord?";
+"autofill.save-login.new-user.title" = "Spara det här lösenordet?";
 
-/* Cancel CTA displayed on modal asking for the user to save the login */
-"autofill.save-login.not-now.CTA" = "Spara inte";
+/* CTA displayed on modal asking if the user wants to dismiss the save login action for now */
+"autofill.save-login.no-thanks.CTA" = "Nej tack";
+
+/* Message displayed on modal asking for the user to save the login for the first time */
+"autofill.save-login.security.message" = "Förvara ditt lösenord säkert på enheten med DuckDuckGo Lösenord och autofyll.";
 
 /* Title displayed on modal asking for the user to save the login */
 "autofill.save-login.title" = "Spara lösenord?";
 
 /* Confirm CTA displayed on modal asking for the user to save the password */
 "autofill.save-password.save.CTA" = "Spara lösenord";
+
+/* Title for the button to report that autofill is not working on a site in autofill settings */
+"autofill.settings.report.not.working.button.title" = "Rapportera ett problem med automatisk ifyllning";
+
+/* Button title for the confirmation prompt when reporting autofill is not working for a website */
+"autofill.settings.report.not.working.confirmation.button" = "Skicka anmälan";
+
+/* Message for the confirmation prompt when reporting autofill is not working for a website */
+"autofill.settings.report.not.working.confirmation.message" = "Rapporter som skickas till DuckDuckGo är anonyma och innehåller inte ditt användarnamn, lösenord eller någon annan personligt identifierbar information.\n\nRapporten innehåller endast webbplatsens webbadress och status för vissa inställningar för automatisk ifyllning.";
+
+/* Title for the confirmation prompt when reporting autofill is not working for a website */
+"autofill.settings.report.not.working.confirmation.title" = "Rapportera att automatisk ifyllning inte fungerar på %@?";
+
+/* Message shown to user when they submit a report that autofill is not working for a website */
+"autofill.settings.report.not.working.sent.confirmation" = "Tack! Din rapport hjälper oss att göra DuckDuckGo bättre för alla.";
+
+/* Subtitle for the row to report that autofill is not working on a site in autofill settings */
+"autofill.settings.report.not.working.subtitle" = "Rapportera anonymt att automatisk ifyllning inte fungerar på den här webbplatsen. Lösenord delas aldrig.";
+
+/* Title for the row to report that autofill is not working on a site in autofill settings */
+"autofill.settings.report.not.working.title" = "Automatisk ifyllning fungerar inte?";
 
 /* Accessibility title for a Show Password button displaying actial password instead of ***** */
 "autofill.show-password" = "Visa lösenord";
@@ -752,7 +681,7 @@
 "bookmark.delete.alert.message" = "Ditt bokmärke för %@ kommer att raderas";
 
 /* Delete bookmark alert title */
-"bookmark.delete.alert.title" = "Delete?";
+"bookmark.delete.alert.title" = "Ta bort?";
 
 /* The message shown after a bookmark has been deleted */
 "bookmark.deleted.toast" = "Bokmärke raderat";
@@ -780,6 +709,9 @@
 
 /* More options button text */
 "bookmark.moreButton" = "Mer";
+
+/* Placeholder in the bookmarks search bar */
+"bookmark.searchbar.placeholder" = "Sök";
 
 /* Placeholder in the add bookmark form */
 "bookmark.title.placeholder" = "Webbplatsens rubrik";
@@ -823,8 +755,146 @@
 /* Title of prompt for users where they can choose to import or export an HTML file containing webpage bookmarks */
 "bookmarks.importExport.title" = "Importera en HTML-fil med bokmärken från en annan webbläsare eller exportera dina befintliga bokmärken.";
 
-/* No comment provided by engineer. */
-"bucket: %@" = "bucket: %@";
+/* Button to open report form */
+"broken.site.report.menu.title" = "Rapportera ett problem med den här webbplatsen";
+
+/* Acknowledge button */
+"broken.site.report.missing.description.alert.button" = "Jag fattar";
+
+/* It appears as an alert after user tries to send a report without submitting any details */
+"broken.site.report.missing.description.alert.description" = "Beskriv problemet du upplevde på den här webbplatsen så att vi bättre kan förstå hur vi ska åtgärda det.";
+
+/* It appears as an alert after user tries to send a report without submitting any details */
+"broken.site.report.missing.description.alert.title" = "Beskrivning krävs";
+
+/* Message that appears after submitting report */
+"broken.site.report.success.toast" = "Din rapport hjälper till att göra DuckDuckGo bättre för alla!";
+
+/* Button to answer question 'Did turning off protections resolve the issue on this site?' */
+"broken.site.report.toggle.alert.no.button" = "Nej";
+
+/* An alert that appears after user turns off the privacy protection */
+"broken.site.report.toggle.alert.title" = "Löstes problemet på den här webbplatsen genom att stänga av integritetsskydd?";
+
+/* Button to answer question 'Did turning off protections resolve the issue on this site?' */
+"broken.site.report.toggle.alert.yes.button" = "Ja";
+
+/* Button to continue the onboarding process */
+"contextual.onboarding.addToDock.buttons.skip" = "Hoppa över";
+
+/* Button on the last screen of the onboarding, it will dismiss the onboarding screen. */
+"contextual.onboarding.addToDock.buttons.startBrowsing" = "Börja bläddra";
+
+/* Button of the onboarding dialog. On click it shows a dialog with a tutorial video about how to add the DDG browser icon to the device dock. */
+"contextual.onboarding.addToDock.buttons.tutorial" = "Visa mig hur";
+
+/* Message of the last screen of the onboarding that promotes adding the DDG browser icon to the dock. */
+"contextual.onboarding.addToDock.promo.contextual.message" = "Kom ihåg att varje gång du surfar med mig förlorar en påträngande annons sina vingar.\n\nSå spara mig i din Dock för ditt dagliga surfande.";
+
+/* The message of the onboarding dialog popup that promotes adding the DDG browser icon to the dock. */
+"contextual.onboarding.addToDock.promo.intro.message" = "Jag kommer att hålla mig nära för allt ditt dagliga surfande.";
+
+/* The title of the onboarding dialog popup that promotes adding the DDG browser icon to the dock. */
+"contextual.onboarding.addToDock.promo.title" = "Lägg till mig i din Dock!";
+
+/* The message of the onboarding dialog popup that explains how to add the DDG browser icon to the dock. */
+"contextual.onboarding.addToDock.tutorial.message" = "Leta upp DuckDuckGo-ikonen på hemskärmen. Tryck och dra den därefter på plats. Sen är det klart!";
+
+/* The title of the onboarding dialog popup that explains how to add the DDG browser icon to the dock. */
+"contextual.onboarding.addToDock.tutorial.title" = "Det är enkelt att lägga till mig i din Dock.";
+
+/* First parameter is a count of additional trackers, second and third are names of the tracker networks (strings) */
+"contextual.onboarding.browsing.multiple.trackers" = "contextual.onboarding.browsing.multiple.trackers";
+
+/* Parameter is domain name (string) */
+"contextual.onboarding.browsing.one.tracker" = "*%1$@* försökte spåra dig här. Jag blockerade det!\n\n☝️ Tryck på skölden för mer info.";
+
+/* Button on the last screen of the onboarding, it will dismiss the onboarding screen. */
+"contextual.onboarding.final-screen.button" = "High Five!";
+
+/* Message of the last screen of the onboarding to the browser app. */
+"contextual.onboarding.final-screen.message" = "Kom ihåg: varje gång du surfar med mig förlorar en läskig annons sina vingar. 👌";
+
+/* Title of the last screen of the onboarding to the browser app */
+"contextual.onboarding.final-screen.title" = "Du klarar det här!";
+
+/* After the user performs their first search using the browser, this dialog explains the advantages of using DuckDuckGo */
+"contextual.onboarding.first-search-done.message" = "Det är DuckDuckGo Search. Privat. Snabbt. Färre annonser.";
+
+/* During onboarding steps this button is shown and takes either to the next steps or closes the onboarding. */
+"contextual.onboarding.got-it.button" = "Jag förstår!";
+
+/* Message of the last screen of the onboarding to the browser app. */
+"contextual.onboarding.highlights.final-screen.message" = "Kom ihåg: varje gång du surfar med mig förlorar en läskig annons sina vingar.";
+
+/* After the user performs their first search using the browser, this dialog explains the advantages of using DuckDuckGo */
+"contextual.onboarding.highlights.first-search-done.message" = "Det är DuckDuckGo Search! Privat. Snabbt. Färre annonser.";
+
+/* Message of a popover on the browser that invites the user to try a search explaining that their searches are private */
+"contextual.onboarding.highlights.try-a-search.message" = "Dina DuckDuckGo-sökningar är alltid privata.";
+
+/* Browser Search query for baby ducklings */
+"contextual.onboarding.highlights.try-search.surprise-me" = "ankungar";
+
+/* Title of a popover on the new tab page browser that invites the user to try a visiting a website */
+"contextual.onboarding.ntp.try-a-site.title" = "Prova att besöka en webbplats!";
+
+/* Message of a popover on the browser that invites the user to try a search explaining that their searches are anonymous */
+"contextual.onboarding.try-a-search.message" = "Dina DuckDuckGo-sökningar är alltid anonyma.";
+
+/* Title of a popover on the browser that invites the user to try a search */
+"contextual.onboarding.try-a-search.title" = "Är du redo att komma igång?\nProva att söka!";
+
+/* Message of a popover on the browser that invites the user to try visiting a website to explain that we block trackers */
+"contextual.onboarding.try-a-site.message" = "Jag blockerar trackers så att de inte kan spionera på dig.";
+
+/* Title of a popover on the browser that invites the user to try a visiting a website */
+"contextual.onboarding.try-a-site.title" = "Prova sedan att besöka en webbplats!";
+
+/* Message of a popover on the browser that invites the user to try visiting the browser Fire Button. Please leave the line break */
+"contextual.onboarding.try-fire-button.message" = "Rensa omedelbart din surfaktivitet med Fire Button.\n\nProva! 🔥";
+
+/* Browser Search query for how to say duck in english */
+"contextual.onboarding.try-search.option1-English" = "vad heter ”anka” på spanska";
+
+/* Browser Search query for how to say duck in english */
+"contextual.onboarding.try-search.option1international" = "hur säger man ”anka” på engelska";
+
+/* Search query for the cast of Mighty Ducks */
+"contextual.onboarding.try-search.option2-english" = "medverkande i mighty ducks";
+
+/* Search query for the cast of Avatar */
+"contextual.onboarding.try-search.option2-international" = "rollbesättningen för avatar";
+
+/* Browser Search query for local weather */
+"contextual.onboarding.try-search.option3" = "lokalt väder";
+
+/* Browser Search query for chocolate chip cookie recipes */
+"contextual.onboarding.try-search.surprise-me-english" = "recept på chokladkakor";
+
+/* Browser Search query for dinner recipes */
+"contextual.onboarding.try-search.surprise-me-international" = "middagsrecept";
+
+/* Title for a button that triggers an unknown search query for the user. */
+"contextual.onboarding.try-search.surprise-me-title" = "Överraska mig!";
+
+/* Crash Report always send button title */
+"crash.report.dialog.always.send" = "Skicka alltid kraschrapporter";
+
+/* Crash Report hide details button title */
+"crash.report.dialog.hide.details" = "Dölj";
+
+/* Crash Report dialog message */
+"crash.report.dialog.message" = "Kraschrapporter hjälper DuckDuckGo att diagnostisera problem och förbättra sina produkter. De innehåller ingen personligt identifierbar information.";
+
+/* Crash Report never send button title */
+"crash.report.dialog.never.send" = "Skicka aldrig";
+
+/* Crash Report show details button title */
+"crash.report.dialog.show.details" = "Se vad som skickats";
+
+/* Crash Report dialog title */
+"crash.report.dialog.title" = "Skicka kraschrapporter automatiskt?";
 
 /* Title for a section containing only items from past month */
 "date.range.past-month" = "Senaste månaden";
@@ -837,18 +907,6 @@
 
 /* Title for a section containing only items from yesterday */
 "date.range.yesterday" = "Igår";
-
-/* Button title accepting to enable feature to automatically manage cookie popups */
-"dax.cookie-consent.button.accept" = "Hantera popup-fönster för cookies";
-
-/* Button title rejecting to enable feature to automatically manage cookie popups */
-"dax.cookie-consent.button.reject" = "Nej tack";
-
-/* First part of text displayed on Dax dialog for enabling Autoconsent for Cookie Management feature */
-"dax.cookie-consent.first" = "Den här webbplatsen verkar ha ett popup-fönster för godkännande av cookies👇";
-
-/* Second part of text displayed on Dax dialog for enabling Autoconsent for Cookie Management feature */
-"dax.cookie-consent.second" = "Vill du att jag ska hantera dessa åt dig? Jag kan försöka minimera cookies, maximera integriteten och dölja sådana här popup-fönster.";
 
 /* No comment provided by engineer. */
 "dax.hide.button" = "Dölj tipsen för alltid";
@@ -920,10 +978,16 @@
 "dax.onboarding.home.subsequent" = "Du klarar det här!\n\nKom ihåg: varje gång du surfar med mig förlorar en läskig annons sina vingar. 👍";
 
 /* No comment provided by engineer. */
-"dax.onboarding.message" = "Internet kan vara lite läskigt.\n\nOroa dig inte! Att söka och surfa privat är lättare än du tror.";
+"Debug" = "Felsökning";
 
-/* No comment provided by engineer. */
-"Debug" = "Debug";
+/* Default string used if users device is not iPhone or iPad */
+"device.type.default" = "enhet";
+
+/* Device type is iPhone */
+"device.type.iphone" = "iPhone";
+
+/* Device type is iPad */
+"device.type.pad" = "iPad";
 
 /* GPC Setting state */
 "donotsell.disabled" = "Inaktiverad";
@@ -940,17 +1004,20 @@
 /* Alert action for starting a file dowload */
 "downloads.alert.action.save-to-downloads" = "Spara till Nerladdningar";
 
-/* Cancel download action for alert when trying to cancel the file download */
+/* Cancel download action for downloads */
 "downloads.cancel-download.alert.cancel" = "Avbryt";
 
 /* Message for alert when trying to cancel the file download */
 "downloads.cancel-download.alert.message" = "Är du säker på att du vill avbryta denna nerladdning?";
 
-/* Resume download action for alert when trying to cancel the file download */
-"downloads.cancel-download.alert.resume" = "Återuppta";
+/* Confirm action for alert when trying to cancel the file download */
+"downloads.cancel-download.alert.no" = "Nej";
 
 /* Title for alert when trying to cancel the file download */
 "downloads.cancel-download.alert.title" = "Vill du avbryta nerladdningen?";
+
+/* Confirm action for for alert when trying to cancel the file download */
+"downloads.cancel-download.alert.yes" = "Ja";
 
 /* Button for deleting all items on downloads list */
 "downloads.downloads-list.delete-all" = "Radera allt";
@@ -987,6 +1054,57 @@
 
 /* No comment provided by engineer. */
 "Duck Address" = "Duck Address";
+
+/* Title for message explaining to the user that Duck Player is not available */
+"duck-player.contingency-title" = "Duck Player är inte tillgänglig";
+
+/* Button for the message explaining to the user that Duck Player is not available so the user can learn more */
+"duck-player.video-contingency-cta" = "Läs mer";
+
+/* Message explaining to the user that Duck Player is not available */
+"duck-player.video-contingency-message" = "De senaste ändringarna på YouTube har påverkat funktionaliteten hos Duck Player. Vi arbetar för att åtgärda problemen och tackar för din förståelse.";
+
+/* No comment provided by engineer. */
+"DuckDuckGo for iOS" = "DuckDuckGo för iOS";
+
+/* Text displayed when DuckPlayer is always enabled */
+"duckPlayer.alwaysEnabled.label" = "Alltid";
+
+/* Text displayed when DuckPlayer is in 'Ask' mode. */
+"duckPlayer.ask.label" = "Fråga varje gång";
+
+/* Text displayed when DuckPlayer is in off. */
+"duckPlayer.never.label" = "Aldrig";
+
+/* Body text for the modal feature explanation */
+"duckplayer.presentation.modal.body" = "Med Duck Player kan du titta på YouTube utan riktade annonser i DuckDuckGo, och dina rekommendationer påverkas inte av vad du tittar på.";
+
+/* Button that will dismiss the modal */
+"duckplayer.presentation.modal.dismiss-button" = "Jag förstår!";
+
+/* Two line title (separated by \n) for the feature explanation */
+"duckplayer.presentation.modal.title" = "Drunknar du i annonser på YouTube? Prova Duck Player!";
+
+/* Two line title (separated by \n) for the feature explanation */
+"duckplayer.presentation.modal.title.youtube" = "Drunknar du i annonser på YouTube? Inte med Duck Player!";
+
+/* Footer label in the settings screen for Duck Player */
+"duckplayer.settings.footer" = "DuckDuckGo tillhandahåller allt du behöver för att skydda dig själv när du surfar på webben.";
+
+/* Text explaining what Duck Player is in the settings screen. */
+"duckplayer.settings.info-text" = "Med Duck Player kan du titta på YouTube utan riktade annonser i DuckDuckGo, och dina rekommendationer påverkas inte av vad du tittar på.";
+
+/* Button that takes the user to learn more about Duck Player. */
+"duckplayer.settings.learn-more" = "Läs mer";
+
+/* Settings screen cell text for DuckPlayer settings to open in new tab */
+"duckplayer.settings.open-new-tab-label" = "Öppna Duck Player på en ny flik";
+
+/* Settings screen cell text for DuckPlayer settings */
+"duckplayer.settings.open-videos-in" = "Öppna YouTube-videor i Duck Player";
+
+/* Settings screen cell text for DuckPlayer settings */
+"duckplayer.settings.title" = "Duck Player";
 
 /* Email protection service offered by DuckDuckGo */
 "email-protection" = "E-postskydd";
@@ -1060,9 +1178,6 @@
 /* Empty search placeholder on bookmarks search */
 "empty.search" = "Inga träffar hittades";
 
-/* No comment provided by engineer. */
-"Error" = "Fel";
-
 /* Button title to Sign In */
 "error.email-protection-sign-in.action" = "Logga in";
 
@@ -1091,7 +1206,7 @@
 "error.preemptive-crash.title" = "Problem med appen har upptäckts";
 
 /* Generic error message on a dialog for when the cause is not known. */
-"error.unknown.try.again" = "An unknown error has occurred";
+"error.unknown.try.again" = "Ett okänt fel har inträffat";
 
 /* No comment provided by engineer. */
 "favorite" = "Favorit";
@@ -1207,6 +1322,39 @@
 /* Confirmation button */
 "feedback.form.submit" = "Skicka";
 
+/* Title of the feedback form */
+"feedback.form.title" = "Hjälp till att förbättra Privacy Pro";
+
+/* Category for Identity Theft Restoration feedback */
+"feedback.general.category.itr" = "Identity Theft Restoration";
+
+/* Category for Personal Info Removal feedback */
+"feedback.general.category.pir" = "Personal Info Removal";
+
+/* Category for subscription and payments feedback */
+"feedback.general.category.ppro" = "Abonnemang och betalningar";
+
+/* Prompt to select a category for general feedback */
+"feedback.general.category.select" = "VÄLJ EN KATEGORI";
+
+/* Category for VPN feedback */
+"feedback.general.category.vpn" = "VPN";
+
+/* Category for access code issues */
+"feedback.itr.category.access-code" = "Problem med åtkomstkod";
+
+/* Category for issues contacting an advisor */
+"feedback.itr.category.cant-contact-advisor" = "Det går inte att kontakta rådgivaren";
+
+/* Prompt to select a category for Identity Theft Restoration feedback */
+"feedback.itr.category.select" = "VÄLJ EN KATEGORI";
+
+/* Category for other Identity Theft Restoration issues */
+"feedback.itr.category.something-else" = "Övrigt";
+
+/* Category for unhelpful advisor calls */
+"feedback.itr.category.unhelpful" = "Samtal till rådgivare var inte hjälpsamt";
+
 /* No comment provided by engineer. */
 "feedback.negative.form.genericPlaceholder" = "Beskriv så noggrant som möjligt";
 
@@ -1246,6 +1394,24 @@
 /* No comment provided by engineer. */
 "feedback.performance.slowLoading" = "Webbsidor eller sökresultat laddas långsamt";
 
+/* Category for when scan finds incorrect records */
+"feedback.pir.category.not-me" = "Skanningen hittade poster som inte är mina";
+
+/* Category for when scan doesn't find info on a specific site */
+"feedback.pir.category.nothing-on-site" = "Skanningen hittade inte mina uppgifter på en specifik webbplats";
+
+/* Category for other Personal Info Removal issues */
+"feedback.pir.category.other" = "Övrigt";
+
+/* Category for when the removal process is stuck */
+"feedback.pir.category.removal-stuck" = "Borttagningsprocessen har fastnat";
+
+/* Category for when the scan is stuck */
+"feedback.pir.category.scan-stuck" = "Skanningen efter poster har fastnat";
+
+/* Prompt to select a category for Personal Info Removal feedback */
+"feedback.pir.category.select" = "VÄLJ EN KATEGORI";
+
 /* Header above input field */
 "feedback.positive.form.header" = "Berätta mer om dina upplevelser";
 
@@ -1263,6 +1429,15 @@
 
 /* Button encouraging uses to share details aboout their feedback */
 "feedback.positive.submit" = "Berätta mer om dina upplevelser";
+
+/* Category for other Privacy Pro issues */
+"feedback.ppro.category.other" = "Övrigt";
+
+/* Category for one-time password issues */
+"feedback.ppro.category.otp" = "Problem med engångslösenord";
+
+/* Prompt to select a category for Privacy Pro feedback */
+"feedback.ppro.category.select" = "VÄLJ EN KATEGORI";
 
 /* No comment provided by engineer. */
 "feedback.start.footer" = "Din anonyma återkoppling är viktig för oss.";
@@ -1309,6 +1484,21 @@
 /* No comment provided by engineer. */
 "fireButtonAnimation.waterSwirl.name" = "Virvel";
 
+/* Description text above the Share Link button */
+"get.browser.on-your-desktop-go-to" = "På din dator går du till:";
+
+/* Title for the Share Download Link button */
+"get.browser.share-link" = "Dela nedladdningslänk";
+
+/* Message displayed in the share action when sharing via email */
+"get.browser.share-link.message" = "Sök privat och blockera spårare med DuckDuckGo-webbläsaren för datorn. Gå till denna länk på din dator för att ladda ner den idag.";
+
+/* Title displayed in the share action */
+"get.browser.share-link.title" = "Hämta DuckDuckGo-webbläsaren för Mac eller Windows";
+
+/* Title for the get desktop browser feature */
+"get.browser.title" = "Hämta DuckDuckGo för Mac eller Windows";
+
 /* No comment provided by engineer. */
 "home.row.onboarding.header" = "Lägg till DuckDuckGo på din hemskärm!";
 
@@ -1323,6 +1513,9 @@
 
 /* Home tab title */
 "homeTab.title" = "Hem";
+
+/* No comment provided by engineer. */
+"ID: %@ | %@ | %@" = "ID: %1$@ | %2$@ | %3$@";
 
 /* OK title for invite screen alert dismissal button */
 "invite.alert.ok.button" = "OK";
@@ -1396,12 +1589,6 @@
 /* No comment provided by engineer. */
 "keyCommandShowAllTabs" = "Visa alla flikar";
 
-/* Please preserve newline character */
-"launchscreenWelcomeMessage" = "Välkommen till\nDuckDuckGo!";
-
-/* No comment provided by engineer. */
-"LOREM IPSUM" = "LOREM IPSUM";
-
 /* Summary text for the macOS browser waitlist */
 "mac-browser.waitlist.summary" = "DuckDuckGo för Mac har hastigheten du behöver, webbläsarfunktionerna du förväntar dig och våra många förstklassiga integritetsfunktioner.";
 
@@ -1422,9 +1609,6 @@
 
 /* Title for the Join Waitlist screen */
 "mac-waitlist.join-waitlist-screen.try-duckduckgo-for-mac" = "Skaffa DuckDuckGo för Mac!";
-
-/* Disclaimer for the Join Waitlist screen */
-"mac-waitlist.join-waitlist-screen.windows" = "Windows kommer snart!";
 
 /* Title for the macOS waitlist button redirecting to Windows waitlist */
 "mac-waitlist.join-waitlist-screen.windows-waitlist" = "Letar du efter Windows-versionen?";
@@ -1456,167 +1640,146 @@
 /* Edit button */
 "navigation.title.edit" = "Redigera";
 
-/* String indicating NetP is connected when viewed from the settings screen */
-"netP.cell.connected" = "Connected";
+/* String indicating NetP is snoozing when viewed from the settings screen */
+"netP.cell.snoozing" = "Snoozar";
 
-/* String indicating NetP is disconnected when viewed from the settings screen */
-"netP.cell.disconnected" = "Not connected";
+/* Title for the DuckDuckGo VPN feature */
+"netP.title" = "DuckDuckGo VPN";
 
-/* Title for the Network Protection feature */
-"netP.title" = "Network Protection";
+/* Button title for tooltip about adding VPN widget */
+"network.protection.addwidget.tip.action" = "Lägg till widget";
 
-/* Privacy Policy title for Network Protection */
-"network-protection.privacy-policy.title" = "Integritetspolicy";
+/* Message for tooltip about adding VPN widget */
+"network.protection.addwidget.tip.message" = "Slå på och av VPN direkt från startskärmen.";
 
-/* Title text for the Network Protection terms and conditions accept button */
-"network-protection.waitlist.agree-and-continue" = "Acceptera och fortsätt";
+/* Title for tooltip about adding VPN widget */
+"network.protection.addwidget.tip.title" = "Lägg till VPN-widget";
 
-/* Availability disclaimer for Network Protection join waitlist screen */
-"network-protection.waitlist.availability-disclaimer" = "Du får kostnadsfri tidigare tillgång till Network Protection.";
+/* The body of the notification when Privacy Pro subscription expired */
+"network.protection.entitlement.expired.notification.body" = "VPN har kopplats från på grund av att abonnemanget har gått ut. Prenumerera på Privacy Pro för att återansluta DuckDuckGo VPN.";
 
-/* Agree and Continue button for Network Protection join waitlist screen */
-"network-protection.waitlist.button.agree-and-continue" = "Godkänn och fortsätt";
+/* The body of the notification shown when VPN fails to reconnect */
+"network.protection.failure.notification.body" = "DuckDuckGo VPN kunde inte ansluta. Försök igen senare.";
 
-/* Enable Notifications button for Network Protection joined waitlist screen */
-"network-protection.waitlist.button.enable-notifications" = "Aktivera aviseringar";
+/* Title for the VPN FAQ screen. */
+"network.protection.faq.title" = "Vanliga frågor om DuckDuckGo VPN";
 
-/* Button title for users who already have an invite code */
-"network-protection.waitlist.button.existing-invite-code" = "Jag har en inbjudningskod";
+/* Message for tooltip about geoswitching */
+"network.protection.geoswitching.tip.message" = "Du kan anpassa din VPN-plats genom att ansluta till någon av våra servrar som finns över hela världen.";
 
-/* Join Waitlist button for Network Protection join waitlist screen */
-"network-protection.waitlist.button.join-waitlist" = "Skriv upp dig på väntelistan";
+/* Title for tooltip about geoswitching */
+"network.protection.geoswitching.tip.title" = "Ändra din plats";
 
-/* Button title text for the Network Protection waitlist confirmation prompt */
-"network-protection.waitlist.get-started" = "Kom igång";
-
-/* Subtitle for section 1 of the Network Protection invited screen */
-"network-protection.waitlist.invited.section-1.subtitle" = "Kryptera onlinetrafik i alla dina webbläsare och appar.";
-
-/* Title for section 1 of the Network Protection invited screen */
-"network-protection.waitlist.invited.section-1.title" = "Fullständig täckning av enheter";
-
-/* Subtitle for section 2 of the Network Protection invited screen */
-"network-protection.waitlist.invited.section-2.subtitle" = "Ingen separat app behövs. Anslut med ett klick för en snabböversikt av din anslutningsstatus.";
-
-/* Title for section 2 of the Network Protection invited screen */
-"network-protection.waitlist.invited.section-2.title" = "Snabb, pålitlig och enkel att använda";
-
-/* Subtitle for section 3 of the Network Protection invited screen */
-"network-protection.waitlist.invited.section-3.subtitle" = "Vi loggar och sparar ingen data som kan koppla dig till din aktivitet online.";
-
-/* Title for section 3 of the Network Protection invited screen */
-"network-protection.waitlist.invited.section-3.title" = "Strikt policy mot loggning";
-
-/* Subtitle for Network Protection invited screen */
-"network-protection.waitlist.invited.subtitle" = "Få ett extra skyddslager online med ett VPN som är byggt för att fungera snabbt och enkelt. Kryptera din internetanslutning i hela enheten. Dölj din plats och IP-adress från webbplatser du besöker.";
-
-/* Title for Network Protection invited screen */
-"network-protection.waitlist.invited.title" = "Du är inbjuden att prova \n Network Protection med tidigare tillgång!";
-
-/* First subtitle for Network Protection join waitlist screen */
-"network-protection.waitlist.join.subtitle.1" = "Gör din anslutning säker när och var som helst med DuckDuckGos VPN, Network Protection.";
-
-/* Second subtitle for Network Protection join waitlist screen */
-"network-protection.waitlist.join.subtitle.2" = "Skriv upp dig på väntelistan så meddelar vi dig när det är din tur.";
-
-/* Title for Network Protection join waitlist screen */
-"network-protection.waitlist.join.title" = "Network Protection Early Access";
-
-/* Title for Network Protection joined waitlist screen */
-"network-protection.waitlist.joined.title" = "Du står på listan!";
-
-/* Subtitle 1 for Network Protection joined waitlist screen when notifications are enabled */
-"network-protection.waitlist.joined.with-notifications.subtitle.1" = "Nya inbjudningar skickas ut med några dagars mellanrum enligt principen först till kvarn.";
-
-/* Subtitle 2 for Network Protection joined waitlist screen when notifications are enabled */
-"network-protection.waitlist.joined.with-notifications.subtitle.2" = "Vi meddelar dig när din inbjudan är klar.";
-
-/* Body text for the alert to enable notifications */
-"network-protection.waitlist.notification-alert.description" = "Vi skickar ett meddelande till dig när din inbjudan att testa Network Protection är klar.";
-
-/* Subtitle for the alert to confirm enabling notifications */
-"network-protection.waitlist.notification-prompt-description" = "Få ett meddelande när ditt exemplar av tidigare tillgång till Network Protection är klart.";
-
-/* Title for the alert to confirm enabling notifications */
-"network-protection.waitlist.notification-prompt-title" = "Få reda på det genast när du bjuds in";
-
-/* Title for Network Protection waitlist notification */
-"network-protection.waitlist.notification.text" = "Öppna din inbjudan";
-
-/* Title for Network Protection waitlist notification */
-"network-protection.waitlist.notification.title" = "Network Protection är klart!";
-
-/* Subtitle text for the Network Protection settings row */
-"network-protection.waitlist.settings-subtitle.joined-and-invited" = "Din inbjudan är klar!";
-
-/* Subtitle text for the Network Protection settings row */
-"network-protection.waitlist.settings-subtitle.joined-but-not-invited" = "Du står på listan!";
-
-/* Subtitle text for the Network Protection settings row */
-"network-protection.waitlist.settings-subtitle.waitlist-not-joined" = "Ställ dig i den privata väntelistan";
+/* The body of the notification shown when VPN connection is interrupted */
+"network.protection.interrupted.notification.body" = "DuckDuckGo VPN avbröts. Försöker återuppta kontakten nu ...";
 
 /* Message for the network protection invite dialog */
-"network.protection.invite.dialog.message" = "Enter your invite code to get started.";
+"network.protection.invite.dialog.message" = "Ange din inbjudningskod för att komma igång.";
 
 /* Title for the network protection invite screen */
-"network.protection.invite.dialog.title" = "Du är inbjuden att prova Network Protection";
+"network.protection.invite.dialog.title" = "Du är inbjuden att prova DuckDuckGo VPN";
 
 /* Prompt for the network protection invite code text field */
-"network.protection.invite.field.prompt" = "Invite Code";
+"network.protection.invite.field.prompt" = "Inbjudningskod";
 
 /* Message for the network protection invite success view */
-"network.protection.invite.success.message" = "Hide your location from websites and conceal your online activity from Internet providers and others on your network.";
+"network.protection.invite.success.message" = "Dölj din plats från webbtjänster och dölj din onlineaktivitet från internetleverantörer och andra som är på samma nätverk.";
 
 /* Title for the network protection invite success view */
-"network.protection.invite.success.title" = "Success! You’re in.";
+"network.protection.invite.success.title" = "Klart! Du är inne.";
+
+/* The title of the notifications shown from VPN */
+"network.protection.notification.title" = "DuckDuckGo";
 
 /* Title text for an iOS quick action that opens VPN settings */
 "network.protection.quick-action.open-vpn" = "Öppna VPN";
 
+/* Button title for tooltip about VPN snooze mode */
+"network.protection.snooze.tip.action" = "Läs mer";
+
+/* Message for tooltip about VPN snooze mode */
+"network.protection.snooze.tip.message" = "Du pausa VPN-anslutningen för att använda webbplatser eller appar som blockerar VPN-trafik.";
+
+/* Title for tooltip about VPN snooze mode */
+"network.protection.snooze.tip.title" = "Undvik VPN-konflikter";
+
+/* The body of the notification when the VPN is snoozed, with a duration string as parameter (e.g, 30 minutes) */
+"network.protection.snoozed.notification.body" = "VPN har pausats i %@";
+
 /* The label for when NetP VPN is connected plus the length of time connected as a formatter HH:MM:SS string */
-"network.protection.status.connected.format" = "Connected - %@";
+"network.protection.status.connected.format" = "Ansluten · %@";
 
 /* The label for the NetP VPN when connecting */
-"network.protection.status.connecting" = "Connecting...";
+"network.protection.status.connecting" = "Ansluter …";
 
 /* The label for the NetP VPN when disconnected */
-"network.protection.status.disconnected" = "Not connected";
+"network.protection.status.disconnected" = "Ej ansluten";
 
 /* The label for the NetP VPN when disconnecting */
-"network.protection.status.disconnecting" = "Disconnecting...";
+"network.protection.status.disconnecting" = "Kopplar från ...";
 
-/* Message label text for the netP status view */
-"network.protection.status.header.message" = "DuckDuckGo's VPN secures all of your device's Internet traffic anytime, anywhere.";
+/* Message label text for the status view when VPN is disconnected */
+"network.protection.status.header.message.off" = "Anslut för att säkra all internettrafik\nför din enhet.";
 
-/* Header title label text for the status view when netP is disconnected */
-"network.protection.status.header.title.off" = "Network Protection is Off";
+/* Message label text for the status view when VPN is disconnected */
+"network.protection.status.header.message.on" = "All internettrafik för enheten\nsäkras genom VPN.";
 
-/* Header title label text for the status view when netP is connected */
-"network.protection.status.header.title.on" = "Network Protection is On";
+/* Header title label text for the status view when VPN is disconnected */
+"network.protection.status.header.title.off" = "DuckDuckGo VPN är Av";
+
+/* Header title label text for the status view when VPN is connected */
+"network.protection.status.header.title.on" = "DuckDuckGo VPN är På";
+
+/* Header title label text for the status view when VPN is snoozing */
+"network.protection.status.header.title.snoozed" = "DuckDuckGo VPN har pausats";
 
 /* The status view 'Share Feedback' button which is shown inline on the status view after the temporary free use footer text */
-"network.protection.status.menu.share.feedback" = "Share Feedback";
+"network.protection.status.menu.share.feedback" = "Berätta vad du tycker";
+
+/* The label for the NetP VPN when paused */
+"network.protection.status.paused" = "Pausad";
+
+/* The label for when NetP VPN is snoozing plus the length of time remaining formatted as '0:00' */
+"network.protection.status.snoozing.format" = "Snoozar, %@ kvar";
+
+/* Snooze button title shown in NetworkProtection's status view. */
+"network.protection.status.view.action.snooze" = "Snooza i 20 minuter";
+
+/* Wake Up button title shown in NetworkProtection's status view. */
+"network.protection.status.view.action.wake-up" = "Väck";
 
 /* Connection details label shown in NetworkProtection's status view. */
-"network.protection.status.view.connection.details" = "Connection Details";
+"network.protection.status.view.connection.details" = "Anslutningsinformation";
+
+/* Custom DNS label shown in NetworkProtection's status view. */
+"network.protection.status.view.custom.dns" = "DNS-server";
 
 /* Generic connection failed error message shown in NetworkProtection's status view. */
-"network.protection.status.view.error.connection.failed.message" = "Please try again later.";
+"network.protection.status.view.error.connection.failed.message" = "Försök igen senare.";
 
 /* Generic connection failed error title shown in NetworkProtection's status view. */
-"network.protection.status.view.error.connection.failed.title" = "Failed to Connect.";
+"network.protection.status.view.error.connection.failed.title" = "Det gick inte att ansluta.";
 
 /* IP Address label shown in NetworkProtection's status view. */
-"network.protection.status.view.ip.address" = "IP Address";
+"network.protection.status.view.ip.address" = "IP-adress";
 
 /* Location label shown in NetworkProtection's status view. */
-"network.protection.status.view.location" = "Location";
+"network.protection.status.view.location" = "Plats";
 
 /* Label shown on the title of the settings section in NetworkProtection's status view. */
 "network.protection.status.view.settings.section.title" = "Hantera";
 
 /* Title label text for the status view when netP is disconnected */
-"network.protection.status.view.title" = "Network Protection";
+"network.protection.status.view.title" = "VPN";
+
+/* The body of the notification shown when VPN reconnects successfully */
+"network.protection.success.notification.body" = "DuckDuckGo VPN är på. Din plats och onlineaktivitet är skyddad.";
+
+/* The body of the notification shown when VPN connects successfully with the city + state/country as formatted parameter */
+"network.protection.success.notification.subtitle.including.serverLocation" = "Dirigera enhetstrafik genom %@.";
+
+/* The body of the notification shown when VPN connects successfully with the city + state/country as formatted parameter */
+"network.protection.success.notification.subtitle.snooze.ended.including.serverLocation" = "VPN-pausen har avslutats. Dirigerar enhetstrafik via %@.";
 
 /* Title for the button to link to the iOS app settings and enable notifications app-wide. */
 "network.protection.turn.on.notifications.button.title" = "Aktivera aviseringar";
@@ -1624,32 +1787,50 @@
 /* Footer text under the button to link to the iOS app settings and enable notifications app-wide. */
 "network.protection.turn.on.notifications.section.footer" = "Tillåt DuckDuckGo att meddela dig om din anslutning bryts eller VPN-statusen ändras.";
 
+/* Title of the About section in the VPN status screen */
+"network.protection.vpn.about" = "Om";
+
+/* Section header for the toggle for VPN notifications. */
+"network.protection.vpn.alerts.section.header" = "Meddelanden";
+
 /* List section footer for the toggle for VPN alerts. */
 "network.protection.vpn.alerts.toggle.section.footer" = "Få en avisering om din anslutning bryts eller om VPN-statusen ändras.";
 
-/* Title for the toggle for VPN alerts. */
-"network.protection.vpn.alerts.toggle.title" = "VPN-varningar";
+/* Title for the toggle for VPN notifications. */
+"network.protection.vpn.alerts.toggle.title" = "VPN-aviseringar";
+
+/* Title for the data volume section in the VPN status screen */
+"network.protection.vpn.data-volume" = "Datavolym";
 
 /* Footer text for the Exclude Local Networks setting item. */
 "network.protection.vpn.exclude.local.networks.setting.footer" = "Låt lokal trafik kringgå VPN och ansluta till enheter i ditt lokala nätverk, t.ex. skrivare.";
+
+/* Header text for the Exclude Local Networks setting item. */
+"network.protection.vpn.exclude.local.networks.setting.header" = "Allmänt";
 
 /* Title for the Exclude Local Networks setting item. */
 "network.protection.vpn.exclude.local.networks.setting.title" = "Uteslut lokala nätverk";
 
 /* Title for the VPN Location screen's All Countries section. */
-"network.protection.vpn.location.all.countries.section.title" = "All Countries";
+"network.protection.vpn.location.all.countries.section.title" = "Alla länder";
+
+/* Description of the location type in the VPN status screen */
+"network.protection.vpn.location.connected" = "Ansluten plats";
 
 /* Subtitle of countries item when there are multiple cities, example : */
 "network.protection.vpn.location.country.item.formatted.cities.count" = "%d orter";
 
-/* Title for the VPN Location screen's Nearest Available selection item. */
-"network.protection.vpn.location.nearest.available.item.title" = "Nearest Available";
+/* Description of the location type in the VPN status screen */
+"network.protection.vpn.location.nearest" = "(Närmast)";
 
 /* Footer describing the VPN Location screen's Recommended section which just has Nearest Available. */
 "network.protection.vpn.location.recommended.section.footer" = "Anslut automatiskt till den närmaste servern vi kan hitta.";
 
 /* Title for the VPN Location screen's Recommended section. */
-"network.protection.vpn.location.recommended.section.title" = "Recommended";
+"network.protection.vpn.location.recommended.section.title" = "Rekommenderas";
+
+/* Description of the location type in the VPN status screen */
+"network.protection.vpn.location.selected" = "Vald plats";
 
 /* Subtitle for the preferred location item that formats a city and country. E.g Chicago, United States */
 "network.protection.vpn.location.subtitle.formatted.city.and.country" = "%1$@, %2$@";
@@ -1661,28 +1842,154 @@
 "network.protection.vpn.notifications.title" = "VPN-aviseringar";
 
 /* Label for the Preferred Location VPN Settings item when the nearest available location is selected. */
-"network.protection.vpn.preferred.location.nearest" = "Nearest Available";
+"network.protection.vpn.preferred.location.nearest" = "Närmaste plats";
 
 /* Title for the Preferred Location VPN Settings item. */
-"network.protection.vpn.preferred.location.title" = "Preferred Location";
+"network.protection.vpn.preferred.location.title" = "Önskad plats";
 
-/* Footer text for the Always on VPN setting item. */
-"network.protection.vpn.secure.dns.setting.footer" = "Vårt VPN använder Secure DNS för att hålla din onlineaktivitet privat. Det betyder att din internetleverantör inte kan se vilka webbplatser du besöker.";
+/* Footer text for the DNS server setting item. */
+"network.protection.vpn.secure.dns.setting.footer" = "DuckDuckGo dirigerar DNS-förfrågningar via våra DNS-servrar så att din internetleverantör inte kan se vilka webbplatser du besöker.";
+
+/* Title for the FAQ row in the VPN status screen. */
+"network.protection.vpn.settings.faq" = "Vanliga frågor och support";
+
+/* Title for the feedback row in the VPN status screen. */
+"network.protection.vpn.settings.share-feedback" = "Dela VPN-feedback";
 
 /* Title for the VPN Settings screen. */
 "network.protection.vpn.settings.title" = "VPN-inställningar";
 
+/* Information message about New Tab Page redesign */
+"new.tab.page.intro.message.body" = "Anpassa dina favoriter och funktioner. Ordna om saker och ting eller göm dem för att hålla layouten minimalistisk.";
+
+/* Title of information message about New Tab Page redesign */
+"new.tab.page.intro.message.title" = "Din nya fliksida är... ny!";
+
+/* Name of favorites section setting */
+"new.tab.page.settings.section.name.favorites" = "Favoriter";
+
+/* Name of shortcuts section setting */
+"new.tab.page.settings.section.name.shortcuts" = "Genvägar";
+
+/* Footer of the group allowing for setting up new tab page sections */
+"new.tab.page.settings.sections.description" = "Visa, dölja och ändra ordning på avsnitt på den nya fliksidan";
+
+/* Header title of the group allowing for setting up new tab page sections */
+"new.tab.page.settings.sections.header.title" = "AVSNITT";
+
+/* Header title of the shortcuts in New Tab Page preferences. */
+"new.tab.page.settings.shortcuts.header.title" = "GENVÄGAR";
+
+/* Title of New Tab Page preferences page. */
+"new.tab.page.settings.title" = "Anpassa sidan Ny flik";
+
+/* Shortcut title leading to AI Chat */
+"new.tab.page.shortcut.ai.chat" = "AI-chatt";
+
+/* Shortcut title leading to Bookmarks */
+"new.tab.page.shortcut.bookmarks" = "Bokmärken";
+
+/* Shortcut title leading to Downloads */
+"new.tab.page.shortcut.downloads" = "Nerladdningar";
+
+/* Shortcut title leading to Passwords */
+"new.tab.page.shortcut.passwords" = "Lösenord";
+
+/* Shortcut title leading to app settings */
+"new.tab.page.shortcut.settings" = "Inställningar";
+
+/* Text shown on the favorites info tooltip */
+"new.tab.page.tooltip.body" = "Öppna menyn ••• på valfri webbplats och välj **Lägg till favorit** för att lägga till den på din nya fliksida.";
+
 /* Do not translate - stringsdict entry */
 "number.of.tabs" = "number.of.tabs";
-
-/* No comment provided by engineer. */
-"Ok" = "OK";
 
 /* Text displayed on notification appearing in the address bar when the browser  dismissed the cookie popup automatically rejecting it */
 "omnibar.notification.cookies-managed" = "Cookies hanteras";
 
 /* Text displayed on notification appearing in the address bar when the browser  hides a cookie popup */
 "omnibar.notification.popup-hidden" = "Popup-fönster dolt";
+
+/* Button on the Add to Dock tutorial screen of the onboarding, it will proceed to the next step of the onboarding. */
+"onboarding.addToDock.buttons.gotIt" = "Jag fattar";
+
+/* Button to change the default browser */
+"onboarding.browsers.cta" = "Välj din webbläsare";
+
+/* Message to highlight how the browser allows you to block cookie pop-ups */
+"onboarding.browsers.features.cookiePopups.title" = "Blockera popup-fönster för cookies";
+
+/* Message to highlight browser capability of blocking creepy ads */
+"onboarding.browsers.features.creepyAds.title" = "Blockera påträngande annonser";
+
+/* Message to highlight browser capability of swiftly erase browsing data */
+"onboarding.browsers.features.eraseBrowsingData.title" = "Rensa snabbt surfdata";
+
+/* Message to highlight browser capability of private searches */
+"onboarding.browsers.features.privateSearch.title" = "Sök privat som standard";
+
+/* Message to highlight browser capability ofblocking 3rd party trackers */
+"onboarding.browsers.features.trackerBlocker.title" = "Blockera spårare från tredje part";
+
+/* The title of the dialog to show the privacy features that DuckDuckGo offers */
+"onboarding.browsers.title" = "Integritetsskydd aktiverat!";
+
+/* The message of the option to set the address bar to the bottom. */
+"onboarding.highlights.addressBarPosition.bottom.message" = "Lätt att nå";
+
+/* The title of the option to set the address bar to the bottom. */
+"onboarding.highlights.addressBarPosition.bottom.title" = "Botten";
+
+/* The title of the CTA to progress to the next onboarding screen. */
+"onboarding.highlights.addressBarPosition.cta" = "Nästa";
+
+/* Indicates what address bar option (Top/Bottom) is the default one. E.g. Top (Default) */
+"onboarding.highlights.addressBarPosition.default" = "(standard)";
+
+/* The title of the onboarding dialog popup to select the preferred address bar position. */
+"onboarding.highlights.addressBarPosition.title" = "Var ska jag placera adressfältet?";
+
+/* The message of the option to set the address bar to the top. */
+"onboarding.highlights.addressBarPosition.top.message" = "Lätt att se";
+
+/* The title of the option to set the address bar to the top. */
+"onboarding.highlights.addressBarPosition.top.title" = "Topp";
+
+/* The title of the CTA to progress to the next onboarding screen. */
+"onboarding.highlights.appIconSelection.cta" = "Nästa";
+
+/* The subheader of the onboarding dialog popup to select the preferred App icon. */
+"onboarding.highlights.appIconSelection.message" = "Välj appikon:";
+
+/* The title of the onboarding dialog popup to select the preferred App icon. */
+"onboarding.highlights.appIconSelection.title" = "Vilken färg passar bäst på mig?";
+
+/* Message to highlight how the browser allows you to block cookie pop-ups */
+"onboarding.highlights.browsers.features.cookiePopups.title" = "Blockera förfrågningar och popup-fönster för cookies";
+
+/* Message to highlight browser capability of blocking creepy ads */
+"onboarding.highlights.browsers.features.creepyAds.title" = "Blockera riktade annonser";
+
+/* Message to highlight browser capability of swiftly erase browsing data */
+"onboarding.highlights.browsers.features.eraseBrowsingData.title" = "Radera webbläsardata snabbt";
+
+/* Message to highlight browser capability ofblocking 3rd party trackers */
+"onboarding.highlights.browsers.features.trackerBlocker.title" = "Blockera spårare från tredje part";
+
+/* The title of the dialog to show the privacy features that DuckDuckGo offers */
+"onboarding.highlights.browsers.title" = "Skydd aktiverat!";
+
+/* The title of the fire button CTA to skip erasing the data. */
+"onboarding.highlights.fireDialog.cta.skip" = "Hoppa över";
+
+/* The title of the onboarding dialog popup */
+"onboarding.highlights.intro.title" = "Hej!\n\nÄr du redo för en snabbare webbläsare som också skyddar dig?";
+
+/* Button to continue the onboarding process */
+"onboarding.intro.cta" = "Vi kör!";
+
+/* The title of the onboarding dialog popup */
+"onboarding.intro.title" = "Hej!\n\nÄr du redo för ett bättre, mer privat internet?";
 
 /* No comment provided by engineer. */
 "onboarding.widgets.continueButton" = "Lägg till widget";
@@ -1717,17 +2024,94 @@
 /* ’Link’ is link on a website */
 "open.externally.failed" = "Kan inte hitta appen som krävs för att öppna den här länken";
 
-/* No comment provided by engineer. */
-"Please enter which app on your device is broken." = "Ange vilken app som inte fungerar på din enhet.";
-
 /* Activate button */
-"pm.activate" = "Reactivate";
+"pm.activate" = "Återaktivera";
 
 /* Cancel button */
-"pm.cancel" = "Cancel";
+"pm.cancel" = "Avbryt";
 
 /* Deactivate button */
-"pm.deactivate" = "Deactivate";
+"pm.deactivate" = "Inaktivera";
+
+/* Label for the email form in the Privacy Pro feedback form */
+"ppro.feedback-form.email.label" = "E-postadress (valfritt)";
+
+/* Placeholder for the email form in the Privacy Pro feedback form */
+"ppro.feedback-form.email.placeholder" = "namn@epost.com";
+
+/* Placeholder for the General Feedback step in the Privacy Pro feedback form */
+"ppro.feedback-form.general-feedback.placeholder" = "Ge din feedback ...";
+
+/* Title for the General Feedback step in the Privacy Pro feedback form */
+"ppro.feedback-form.general-feedback.title" = "Allmän feedback";
+
+/* Title for the ITR category in the Privacy Pro feedback form */
+"ppro.feedback-form.report-itr-problem.title" = "Identity Theft Restoration";
+
+/* Title for the PIR category in the Privacy Pro feedback form */
+"ppro.feedback-form.report-pir-problem.title" = "Personal Information Removal";
+
+/* Title for the Subscriptions and Payments category in the Privacy Pro feedback form */
+"ppro.feedback-form.report-ppro-problem.title" = "Abonnemang och betalningar";
+
+/* Placeholder for the Report a Problem step in the Privacy Pro feedback form */
+"ppro.feedback-form.report-problem.placeholder" = "Berätta för oss vad som händer …";
+
+/* Title for the Report a Problem step in the Privacy Pro feedback form */
+"ppro.feedback-form.report-problem.title" = "Rapportera ett problem";
+
+/* Title for the VPN category in the Privacy Pro feedback form */
+"ppro.feedback-form.report-vpn-problem.title" = "VPN";
+
+/* Placeholder for the Feature Request step in the Privacy Pro feedback form */
+"ppro.feedback-form.request-feature.placeholder" = "Vilken funktion vill du ha?";
+
+/* Title for the Feature Request step in the Privacy Pro feedback form */
+"ppro.feedback-form.request-feature.title" = "Utvecklingsförfrågan";
+
+/* Title for the category selection section in the Privacy Pro feedback form */
+"ppro.feedback-form.select-category.title" = "VÄLJ EN KATEGORI";
+
+/* Text for the body of the PPro feedback form */
+"ppro.feedback-form.text-1" = "Har du hittat ett problem som inte täcks av vårt [hjälpcenter](duck://)? Vi vill definitivt veta mer om det.\n\nAnge en e-postadress om du vill att vi kontaktar dig angående problemet (vi kanske inte kan svara på alla problem):";
+
+/* Text for the body of the PPro feedback form */
+"ppro.feedback-form.text-2" = "Förutom de uppgifter som anges ovan skickar vi viss anonymiserad information med din feedback:";
+
+/* Bullet text for the body of the PPro feedback form */
+"ppro.feedback-form.text-3" = "• Om vilka webbläsarfunktioner som är aktiva";
+
+/* Bullet text for the body of the PPro feedback form */
+"ppro.feedback-form.text-4" = "• Sammanställd appdiagnostik (t.ex. felkoder)";
+
+/* Text for the body of the PPro feedback form */
+"ppro.feedback-form.text-5" = "Genom att trycka på ”Skicka” godkänner du att DuckDuckGo får använda den inskickade informationen för att förbättra appen.";
+
+/* Title for the text box in the Privacy Pro feedback form */
+"ppro.feedback-form.text-box.title" = "Feedback";
+
+/* Title for the Privacy Pro feedback form */
+"ppro.feedback-form.title" = "Skicka återkoppling";
+
+/* Button title for sync bookmarks limits exceeded warning to go to manage bookmarks */
+"prefrences.sync.bookmarks-limit-exceeded-action" = "Hantera bokmärken";
+
+/* Description for sync bookmarks limits exceeded warning */
+"prefrences.sync.bookmarks-limit-exceeded-description" = "Du har nått det maximala antalet bokmärken. Ta bort några för att återuppta synkronisering.";
+
+/* Button title for sync credentials limits exceeded warning to go to manage passwords */
+"prefrences.sync.credentials-limit-exceeded-action" = "Hantera lösenord…";
+
+/* Description for sync credentials limits exceeded warning */
+"prefrences.sync.credentials-limit-exceeded-description" = "Du har nått det maximala antalet lösenord. Ta bort några för att återuppta synkroniseringen.";
+
+/* Description invalid credentials error when syncing.
+   Description of incorrectly formatted data error when syncing.
+   Description of too many requests error when syncing. */
+"prefrences.sync.invalid-login-description" = "Det inträffade ett fel under synkroniseringen. Prova att inaktivera synkronisering på den här enheten och anslut sedan på nytt från en annan enhet eller med din återställningskod.";
+
+/* Title for sync limits exceeded warning */
+"prefrences.sync.limit-exceeded-title" = "Synkronisering pausad";
 
 /* No comment provided by engineer. */
 "preserveLogins.domain.list.footer" = "Webbplatser använder kakor för att hålla dig inloggad. Om du brandsäkrar en webbplats kommer kakor inte att raderas och du förblir inloggad även efter att du har använt brännarknappen. Vi blockerar fortfarande tredje parters spårare som finns på brandsäkrade webbplatser.";
@@ -1765,6 +2149,9 @@
 /* Confirmation button in alert */
 "preserveLogins.remove.all.ok" = "OK";
 
+/* No comment provided by engineer. */
+"Privacy Protections" = "Integritetsskydd";
+
 /* Privacy Icon accessibility title */
 "privacy.icon.dax" = "DuckDuckGos logotyp";
 
@@ -1795,6 +2182,18 @@
 /* No comment provided by engineer. */
 "section.title.favorites" = "Favoriter";
 
+/* Name of the option the user can chose to give general browser feedback */
+"send.browser.feedback.general-feedback" = "Allmän feedback";
+
+/* Name of the option the user can chose to give browser feedback about a problem they enountered */
+"send.browser.feedback.report-problem" = "Rapportera ett problem";
+
+/* Name of the option the user can chose to give browser feedback about a feature they would like */
+"send.browser.feedback.request-feature" = "Begär en funktion";
+
+/* Title of the picker where the user can chose the category of the feedback they want ot send. */
+"send.browser.feedback.select-category" = "VÄLJ EN KATEGORI";
+
 /* Settings cell for About DDG */
 "settings.about.ddg" = "Om DuckDuckGo";
 
@@ -1804,17 +2203,24 @@
 /* about page */
 "settings.about.text" = "DuckDuckGo är det oberoende integritetsskyddsföretaget som grundades 2008 för alla som är trötta på att bli spårade online och vill ha en enkel lösning. Vi är beviset på att man kan få riktigt integritetsskydd på nätet utan att kompromissa.\n\nDuckDuckGo-webbläsaren har de funktioner du förväntar dig av en vanlig webbläsare, som bokmärken, flikar, lösenord och mer, plus över [ett dussin kraftfulla integritetsskydd](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/privacy/web-tracking-protections/) som inte ingår som standard i de flesta populära webbläsare. Den här omfattande uppsättningen av integritetsskydd hjälper dig att skydda dina onlineaktiviteter, från sökning och surfning till e-post och mycket mer.\n\nVårt integritetsskydd fungerar utan att du behöver känna till de tekniska detaljerna eller ta itu med komplicerade inställningar. Det enda du behöver göra är att byta webbläsare till DuckDuckGo på alla dina enheter för att få integritet som standard.\n\nMen om du * verkligen* vill ta en titt under huven hittar du mer information om hur DuckDuckGos integritetsskydd fungerar på våra [hjälpsidor](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/).";
 
+/* Settings screen accessibility section title */
+"settings.accessibility" = "Tillgänglighet";
+
 /* Settings screen cell text for adding the app to the dock */
 "settings.add.to.dock" = "Lägg till app i din Dock";
 
 /* Settings screen cell text for add widget to the home screen */
 "settings.add.widget" = "Lägg till widget på startsidan";
 
-/* Settings screen cell text for addess bar position */
-"settings.address.bar" = "Adressfältsläge";
+/* Name of the settings subsection related to the address bar
+   Settings screen cell text for addess bar position */
+"settings.address.bar" = "Adressfält";
 
 /* Settings screen cell title for toggling full URL visibility in address bar */
 "settings.address.full.url" = "Visa hela webbplatsadressen";
+
+/* Label describing a feature which is turned on always */
+"settings.always.on" = "Alltid på";
 
 /* Settings screen appearance section title */
 "settings.appearance" = "Utseende";
@@ -1826,16 +2232,34 @@
 "settings.associated.apps.description" = "Inaktivera för att förhindra att länkar automatiskt öppnas i andra installerade appar.";
 
 /* Settings screen cell for autocomplete */
-"settings.autocomplete" = "Visa Autoslutför förslag";
+"settings.autocomplete" = "Sökförslag";
+
+/* Settings label for enabling or disabling recently visited sites */
+"settings.autocomplete.recentlyvisited" = "Senast besökta webbplatser";
+
+/* Settings label for enabling or disabling recently visited sites */
+"settings.autocomplete.recentlyvisited.subtitle" = "Visa nyligen besökta webbplatser i sökförslag. Nyligen besökta webbplatser är privata. De lagras endast på din enhet och kan rensas med Fire Button.";
+
+/* Subtitle for Search Suggestions setting */
+"settings.autocomplete.subtitle" = "Visa sökförslag medan du skriver, inklusive dina bokmärken. Alla sökningar är privata.";
 
 /* Settings screen cell text for Application Lock */
 "settings.autolock" = "App-lås";
 
 /* Section footer Autolock description */
-"settings.autolock.description" = "Om Touch ID, Face ID eller ett systemlösenord har konfigurerats ombes du låsa upp appen när du öppnar.";
+"settings.autolock.description" = "Om Touch ID, Face ID eller ett systemlösenord har aktiverats blir du ombedd att låsa upp appen när du öppnar den.";
+
+/* Settings cell for Browser Feedback */
+"settings.browser.feedback" = "Webbläsarfeedback";
 
 /* Settings screen cell text for Automatically Clearing Data */
 "settings.clear.data" = "Rensa data automatiskt";
+
+/* The name of Settings category in Privacy Features related to configuration of the privacy feature related to cookie pop-ups */
+"settings.cookie.pop-up-protection.protection" = "Skydd mot popup-fönster för cookies";
+
+/* Explanation in Settings how the cookie pop up protection feature works */
+"settings.cookie.pop.up.protection.explanation" = "DuckDuckGo kommer att försöka välja de mest privata inställningarna som finns tillgängliga och dölja dessa popup-fönster åt dig.\n[Läs mer](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/privacy/web-tracking-protections/#cookie-pop-up-management)";
 
 /* Settings screen cell text for Cookie popups */
 "settings.cookie.popups" = "Hantera popup-fönster för cookies";
@@ -1843,14 +2267,33 @@
 /* Settings title for the customize section */
 "settings.customize" = "Anpassa";
 
-/* Settings screen cell text for setting the app as default browser */
-"settings.default.browser" = "Ställ in som standardwebbläsare";
+/* The name of a settings subsection related to the data clearing */
+"settings.data.clearing" = "Datarensning";
 
-/* Settings cell for Email Protection */
-"settings.emailProtection" = "E-postskydd";
+/* Settings screen cell text for setting the app as default browser
+   The name of Settings category in Privacy Features related to configuration of the default browser */
+"settings.default.browser" = "Standardwebbläsare";
+
+/* Label of a button disabling email protection */
+"settings.disable.email.protection.autofill" = "Inaktivera automatisk ifyllning för Email Protection";
+
+/* Settings cell to link users to other products by DuckDuckGo */
+"settings.duckduckgo.on.other.platforms" = "DuckDuckGo på andra plattformar";
+
+/* Explanation in Settings how the email protection feature works */
+"settings.email.protection.explanation" = "Blockera e-postspårare och dölj din adress utan att byta e-postleverantör.\n[Läs mer](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/email-protection/what-is-duckduckgo-email-protection/)";
+
+/* Alert presented to user after clicking on 'Sign out' in Email Protection Settings */
+"settings.email.protection.signing.out.alert" = "Om du loggar ut från ditt Email Protection-konto inaktiveras automatisk ifyllning av Duck Address i den här webbläsaren. Du kan fortfarande använda de här adresserna och ta emot vidarebefordrad e-post som vanligt.";
 
 /* Settings cell for Email Protection */
 "settings.emailProtection.description" = "Blockera e-postspårare och dölj din adress";
+
+/* Label of a button enabling the email protection feature */
+"settings.enable.email.protection" = "Aktivera Email Protection";
+
+/* Settings screen cell text for enabling voice search */
+"settings.enable.voice.search" = "Aktivera röstsökning";
 
 /* Settings cell for Feedback */
 "settings.feedback" = "Berätta vad du tycker";
@@ -1861,6 +2304,9 @@
 /* Settings screen cell text for Fireproof Sites */
 "settings.fireproof.sites" = "Brandsäkra webbplatser";
 
+/* The name of the settings subsection containing general settings */
+"settings.general" = "Allmänt";
+
 /* Settings screen cell text for GPC */
 "settings.gpc" = "Global Privacy Control (GPC)";
 
@@ -1870,14 +2316,41 @@
 /* Settings screen cell for Keyboard */
 "settings.keyboard" = "Tangentbord";
 
+/* Switch button label. */
+"settings.let.duckduckgo.manage.cookie.consent.popups" = "Låt DuckDuckGo hantera popup-fönster för godkännande av cookies";
+
 /* Settings screen cell text for passwords */
 "settings.logins" = "Lösenord";
+
+/* The name of the settings section containing main settings */
+"settings.main.settings" = "Huvudinställningar";
+
+/* Label of a button managing email protection account */
+"settings.manage.account" = "Hantera konto";
 
 /* Settings title for the 'More' section */
 "settings.more" = "Mer från DuckDuckGo";
 
+/* Button navigating to other settings related to search */
+"settings.more.search.settings" = "Fler sökinställningar";
+
+/* Subtitle of the 'More Search Settings' button */
+"settings.more.search.settings.explanation" = "Anpassa ditt språk, din region med mera";
+
+/* The name of a settings category listing next steps */
+"settings.next.steps" = "Nästa steg";
+
+/* Label describing a feature which is turned off */
+"settings.off" = "Av";
+
+/* Label describing a feature which is turned on */
+"settings.on" = "På";
+
 /* Product name for the subscription bundle */
 "settings.ppro" = "Privacy Pro";
+
+/* Title for Link in the Footer of Privacy Pro section */
+"settings.ppro.footer" = "Integritetspolicy och användarvillkor";
 
 /* Settings screen cell for long press previews */
 "settings.previews" = "Förhandsvisning vid nedhållning";
@@ -1885,11 +2358,77 @@
 /* Settings title for the privacy section */
 "settings.privacy" = "Sekretess";
 
+/* The name of Settings category in Privacy Features related to configuration of the search */
+"settings.private.search" = "Privatsökning";
+
+/* Explanation in Settings how the private search feature works */
+"settings.private.search.explanation" = "DuckDuckGo Private Search är din standardsökmotor, så att du kan söka på webben utan att bli spårad.";
+
+/* Header of settings related to search */
+"settings.search.settings" = "Sökinställningar";
+
+/* Settings cell for Send Crash Reports */
+"settings.send.crash.reports" = "Skicka kraschrapporter";
+
+/* Explanation of Send Crash Reports settings option */
+"settings.send.crash.reports.description" = "Skicka kraschrapporter automatiskt till DuckDuckGo.";
+
+/* Settings screen cell text for setting address bar position */
+"settings.set.your.address.bar.position" = "Ange din adressfältsposition";
+
+/* Privacy pro description subtitle in settings when the is activating */
+"settings.subscription.activating" = "Aktiverar";
+
+/* Subscription activation pending description */
+"settings.subscription.activation.pending.description" = "Det här tar längre tid än vanligt, kom tillbaka senare.";
+
+/* Data Broker protection cell subtitle for privacy pro */
+"settings.subscription.DBP.subtitle" = "Ta bort dina uppgifter från webbplatser som säljer dem";
+
+/* Data Broker protection cell title for privacy pro */
+"settings.subscription.DBP.title" = "Personal Information Removal";
+
+/* I have a Subscription button text for privacy pro */
+"settings.subscription.existing.subscription" = "Jag har ett abonnemang";
+
+/* Subscription expired description */
+"settings.subscription.expired.comment" = "Prenumerera igen för att fortsätta använda Privacy Pro";
+
+/* Subscription expired tittle message */
+"settings.subscription.expired.title" = "Din prenumeration på Privacy Pro har gått ut";
+
+/* Identity theft restoration cell subtitle for privacy pro */
+"settings.subscription.ITR.subtitle" = "Om din identitet blir stulen hjälper vi dig att återställa den";
+
+/* Identity theft restoration cell title for privacy pro */
+"settings.subscription.ITR.title" = "Identity Theft Restoration";
+
+/* Get Privacy Pro button text for privacy pro */
+"settings.subscription.learn.more" = "Skaffa Privacy Pro";
+
+/* Subscription Settings button text for privacy pro */
+"settings.subscription.manage" = "Abonnemangsinställningar";
+
+/* Privacy Pro description subtitle in settings */
+"settings.subscription.row.description" = "Inkluderar vårt VPN och Identity Theft Restoration.";
+
+/* Call to action title for Privacy Pro settings */
+"settings.subscription.subscribe" = "Skydda din anslutning och identitet med Privacy Pro";
+
+/* Privacy pro description subtitle in settings */
+"settings.subscription.us.description" = "Det inkluderar vårt VPN, Personal Information Removal och Identity Theft Restoration.";
+
+/* VPN cell title for privacy pro */
+"settings.subscription.VPN.title" = "VPN";
+
+/* Label of a button navigating to the Support page */
+"settings.support" = "Support";
+
 /* Settings screen cell text for sync and backup */
 "settings.sync" = "Synkronisering och säkerhetskopiering";
 
 /* Settings screen cell text for text size */
-"settings.text.size" = "Textstorlek";
+"settings.text.size" = "Standardzoom för text";
 
 /* Settings screen cell text for theme */
 "settings.theme" = "Tema";
@@ -1905,6 +2444,27 @@
 
 /* Settings screen cell for voice search */
 "settings.voice.search" = "Privat röstsökning";
+
+/* The name of Settings category in Privacy Features related to configuration of the web tracking protection feature */
+"settings.web.tracking.protection" = "Web Tracking Protection";
+
+/* Explanation in Settings how the web tracking protection feature works */
+"settings.web.tracking.protection.explanation" = "DuckDuckGo blockerar automatiskt dolda spårare när du surfar på webben.\n[Läs mer](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/privacy/web-tracking-protections/)";
+
+/* Description on a report broken site page. */
+"site.not.working.description" = "Välj det alternativ som bäst beskriver det problem som du har stött på.";
+
+/* Dismiss button */
+"site.not.working.dismiss" = "Avvisa";
+
+/* Button that triggers flow to report broken site */
+"site.not.working.report.broken.site" = "Rapportera skadad webbplats";
+
+/* Prompt asking user to send report to us if we suspect site may be broken */
+"site.not.working.subtitle" = "Det hjälper oss att förbättra webbläsaren.";
+
+/* Prompt asking user to send report to us if we suspect site may be broken */
+"site.not.working.title" = "Fungerar inte webbplatsen? Informera DuckDuckGo.";
 
 /* Report a Broken Site screen confirmation button */
 "siteFeedback.buttonText" = "Skicka in rapport";
@@ -1924,6 +2484,234 @@
 /* No comment provided by engineer. */
 "siteFeedback.urlPlaceholder" = "Vilken webbplats är skadad?";
 
+/* Subscription Activation Info */
+"subscription.activate..header.description" = "Kom åt ditt Privacy Pro-abonnemang på den här enheten via Apple-ID eller en e-postadress.";
+
+/* Button for adding email address to subscription */
+"subscription.activate.add.email.button" = "Lägg till e-postadress";
+
+/* Apple ID option for activation */
+"subscription.activate.appleid" = "Apple-ID";
+
+/* Button text for restoring purchase via Apple ID */
+"subscription.activate.appleid.button" = "Återställ köp";
+
+/* Description for Apple ID activation */
+"subscription.activate.appleid.description" = "Återställ ditt köp för att aktivera abonnemanget på den här enheten.";
+
+/* Subscription Activation Info */
+"subscription.activate.description" = "Ditt abonnemang är automatiskt tillgängligt i DuckDuckGo på alla enheter som är inloggade på ditt Apple-ID.";
+
+/* Button for editing email address added to subscription */
+"subscription.activate.edit.email.button" = "Redigera e-postadress";
+
+/* View Title for editing your email account */
+"subscription.activate.edit.email.title" = "Redigera e-postadress";
+
+/* Email option for activation */
+"subscription.activate.email" = "E-post";
+
+/* Restore button title for Email */
+"subscription.activate.email.button" = "Ange e-postadress";
+
+/* Description for Email activation */
+"subscription.activate.email.description" = "Använd din e-postadress för att aktivera abonnemanget på den här enheten.";
+
+/* Activate subscription title */
+"subscription.activate.email.title" = "Aktivera abonnemang";
+
+/* Button title for cancelling email deletion */
+"subscription.activate.manage.email.cancel" = "Avbryt";
+
+/* Button title for confirming email deletion */
+"subscription.activate.manage.email.OK" = "OK";
+
+/* Restore button title for AppleID */
+"subscription.activate.restore.apple" = "Återställ köp";
+
+/* Subscription Activation Title */
+"subscription.activate.title" = "Aktivera ditt abonnemang på den här enheten";
+
+/* Resend activation instructions button */
+"subscription.add.device.resend.instructions" = "Skicka instruktionerna igen";
+
+/* Add email to an existing subscription */
+"subscription.add.email" = "Lägg till en e-postadress för att aktivera abonnemanget på dina andra enheter. Vi använder enbart adressen för att bekräfta abonnemanget.";
+
+/* View title for adding email to subscription */
+"subscription.add.email.title" = "Lägg till e-postadress";
+
+/* Subscription availability message on Apple devices */
+"subscription.available.apple" = "Privacy Pro är tillgängligt på alla enheter som är inloggade med samma Apple-ID.";
+
+/* Text for the manage billing page */
+"subscription.billing.google.text" = "Ditt abonnemang köptes genom Google Play-butiken. För att förnya abonnemanget öppnar du abonnemangsinställningarna för Google Play-butiken på en enhet som är inloggad på samma Google-konto som användes för att köpa ditt abonnemang.";
+
+/* Title for the manage billing page */
+"subscription.billing.google.title" = "Abonnemangstyper";
+
+/* Subscription Removal confirmation message */
+"subscription.cancel.message" = "Ditt abonnemang har tagits bort från den här enheten.";
+
+/* Change plan or cancel title */
+"subscription.change.plan" = "Uppdatera abonnemang eller avbryt";
+
+/* Navigation Button for closing subscription view */
+"subscription.close" = "Stäng";
+
+/* Title for Confirm messages */
+"subscription.confirm.title" = "Är du säker?";
+
+/* Header for section for activating subscription on other devices */
+"subscription.devices.header" = "Aktivera på andra enheter";
+
+/* Footer for section for activating subscription on other devices when email was not yet added */
+"subscription.devices.no.email.footer" = "Lägg till en valfri e-postadress till ditt abonnemang för att få tillgång till Privacy Pro på andra enheter. **[Läs mer](https://duckduckgo.com/duckduckgo-help-pages/privacy-pro/adding-email/)**";
+
+/* Footer for section for activating subscription on other devices when email is added */
+"subscription.devices.with.email.footer" = "Använd den här e-postadressen för att aktivera ditt abonnemang i Inställningar > Privacy Pro i DuckDuckGo-appen på dina andra enheter. **[Läs mer](https://duckduckgo.com/duckduckgo-help-pages/privacy-pro/adding-email/)**";
+
+/* Alert content for not found subscription */
+"subscription.email.inactive.alert.message" = "Abonnemanget som är kopplat till den här e-postadressen är inte längre aktivt.";
+
+/* Alert title for not found subscription */
+"subscription.email.inactive.alert.title" = "Det gick inte att hitta abonnemanget";
+
+/* Alert content for not found subscription */
+"subscription.expired.alert.message" = "Abonnemanget som är kopplat till detta Apple-ID är inte längre aktivt.";
+
+/* FAQ Button */
+"subscription.faq" = "Vanliga frågor och support";
+
+/* FAQ Description */
+"subscription.faq.description" = "Få svar på vanliga frågor eller kontakta supporten för Privacy Pro på våra hjälpsidor.";
+
+/* Send Feedback Button */
+"subscription.feedback" = "Skicka återkoppling";
+
+/* Cancel action for the existing subscription dialog */
+"subscription.found.cancel" = "Avbryt";
+
+/* Restore action for the existing subscription dialog */
+"subscription.found.restore" = "Återställ";
+
+/* Message for the existing subscription dialog */
+"subscription.found.text" = "Vi hittade ett abonnemang som är kopplat till detta Apple-ID.";
+
+/* Title for the existing subscription dialog */
+"subscription.found.title" = "Abonnemang hittades";
+
+/* Help and support Section header */
+"subscription.help" = "Hjälp och support";
+
+/* Manage Plan header */
+"subscription.manage.plan" = "Hantera abonnemang";
+
+/* Header for the subscription section */
+"subscription.manage.title" = "Abonnemang";
+
+/* Alert content for not found subscription */
+"subscription.notFound.alert.message" = "Det finns inget abonnemang som är kopplat till detta Apple-ID.";
+
+/* Alert title for not found subscription */
+"subscription.notFound.alert.title" = "Det gick inte att hitta abonnemanget";
+
+/* View plans button text */
+"subscription.notFound.view.plans" = "Visa abonnemang";
+
+/* Hero Text for Personal information removal */
+"subscription.pir.hero" = "Aktivera Privacy Pro på en dator för att konfigurera Personal Information Removal";
+
+/* Description on how to use Personal information removal in desktop. The first placeholder references a location in the Desktop application. <i.e: Settings > Privacy Pro>, and the second, the menu entry. i.e. <I have a Subscription> */
+"subscription.pir.heroText" = "I DuckDuckGo-webbläsaren för datorn går du till %1$@ och klickar på %2$@ för att komma igång.";
+
+/* Settings references a menu in the Desktop app, Privacy Pro, references our product name */
+"subscription.pir.heroTextLocation" = "Inställningar > Privacy Pro";
+
+/* Menu item for enabling Personal Information Removal on Desktop */
+"subscription.pir.heroTextMenyEntry" = "Jag har ett abonnemang";
+
+/* Text for the 'macOS' button */
+"subscription.pir.macos" = "Mac";
+
+/* Text for the 'Windows' button */
+"subscription.pir.windows" = "Windows";
+
+/* Progress view title when completing the purchase */
+"subscription.progress.view.completing.purchase" = "Slutför köpet ...";
+
+/* Progress view title when starting the purchase */
+"subscription.progress.view.purchasing.subscription" = "Köp pågår ...";
+
+/* Progress view title when restoring past subscription purchase */
+"subscription.progress.view.restoring.subscription" = "Återställer abonnemang ...";
+
+/* Remove from this device button */
+"subscription.remove.from.device.button" = "Ta bort från den här enheten";
+
+/* Remove from device confirmation dialog text */
+"subscription.remove.from.device.text" = "Du kommer inte längre att kunna komma åt ditt Privacy Pro-abonnemang på den här enheten. Det här kommer inte att avsluta ditt abonnemang utan det förblir aktivt på dina andra enheter.";
+
+/* Remove from device confirmation dialog title */
+"subscription.remove.from.device.title" = "Ta bort från den här enheten?";
+
+/* Remove subscription button text */
+"subscription.remove.subscription" = "Ta bort abonnemang";
+
+/* Remove subscription cancel button text */
+"subscription.remove.subscription.cancel" = "Avbryt";
+
+/* Button text for general error message */
+"subscription.restore.backend.error.button" = "Tillbaka till Inställningar";
+
+/* Alert for general error message */
+"subscription.restore.backend.error.message" = "Det gick inte att ansluta. Försök igen senare.";
+
+/* Alert for general error title */
+"subscription.restore.backend.error.title" = "Något gick fel";
+
+/* Alert for general error message */
+"subscription.restore.general.error.message" = "App Store kunde inte behandla ditt köp. Försök igen senare.";
+
+/* Alert for general error title */
+"subscription.restore.general.error.title" = "Något gick fel";
+
+/* Alert button text for restored purchase alert */
+"subscription.restore.success.alert.button" = "OK";
+
+/* Alert message for restored purchase */
+"subscription.restore.success.alert.message" = "Dina köp har återställts.";
+
+/* Alert title for restored purchase */
+"subscription.restore.success.alert.title" = "Nu är du redo.";
+
+/* Subtitle in header when subscribed */
+"subscription.subscribed" = "Prenumererad";
+
+/* Subscription Expired Data. This reads as 'Your subscription expired on (date)' */
+"subscription.subscription.expired.caption" = "Din prenumeration gick ut den %@";
+
+/* Monthly subscription expiration info where parameter is expiration date. This reads as 'Your monthly subscription expires on (date)' */
+"subscription.subscription.expiring.monthly.caption" = "Ditt månadsabonnemang löper ut den %@.";
+
+/* Unknown period subscription expiration info where parameter is expiration date. This reads as 'Your subscription expires on (date)' */
+"subscription.subscription.expiring.unknown.caption" = "Ditt abonnemang löper ut den %@.";
+
+/* Annual subscription expiration info where parameter is expiration date. This reads as 'Your annual subscription expires on (date)' */
+"subscription.subscription.expiring.yearly.caption" = "Ditt årsabonnemang löper ut den %@.";
+
+/* Monthly subscription renewal info where parameter is renewal date. This reads as 'Your monthly subscription renews on (date)' */
+"subscription.subscription.renewing.monthly.caption" = "Ditt månadsabonnemang förnyas den %@.";
+
+/* Unknown period subscription renewal info where parameter is renewal date. This reads as 'Your subscription renews on (date)' */
+"subscription.subscription.renewing.unknown.caption" = "Ditt abonnemang förnyas den %@.";
+
+/* Annual subscription renewal info where parameter is renewal date. This reads as 'Your annual subscription renews on (date)' */
+"subscription.subscription.renewing.yearly.caption" = "Ditt årsabonnemang förnyas den %@.";
+
+/* Navigation bar Title for subscriptions */
+"subscription.title" = "Privacy Pro";
+
 /* Message confirming that recovery code was copied to clipboard */
 "sync.code.copied" = "Återställningskoden har kopierats till urklipp";
 
@@ -1935,6 +2723,24 @@
 
 /* Title of the dialog to confirm deleting Sync server data */
 "sync.delete.all.confirm.title" = "Radera serverdata?";
+
+/* Message for the Sync Promotion banner when user has bookmarks that can be synced */
+"sync.promo.bookmarks.message" = "Inget konto behövs. End-to-end-kryptering innebär att ingen annan än du kan se dina bokmärken, inte ens vi.";
+
+/* Title for the Sync Promotion banner */
+"sync.promo.bookmarks.title" = "Synka och säkerhetskopiera dina bokmärken";
+
+/* Title for a button in the Sync Promotion banner to set up Sync */
+"sync.promo.confirm.action" = "Ställ in synk";
+
+/* Title for a button in the Sync Promotion banner to dismiss Sync promotion banner */
+"sync.promo.dismiss.action" = "Nej tack";
+
+/* Message for the Sync Promotion banner when user has passwords that can be synced */
+"sync.promo.passwords.message" = "Inget konto behövs. End-to-end-kryptering innebär att ingen annan än du kan se dina lösenord, inte ens vi.";
+
+/* Title for the Sync Promotion banner */
+"sync.promo.passwords.title" = "Synka och säkerhetskopiera dina lösenord";
 
 /* Caption for a button to remove device from Sync */
 "sync.remove-device.action" = "Ta bort";
@@ -1954,14 +2760,14 @@
 /* Title of the dialog to confirm turning off Sync */
 "sync.turn.off.confirm.title" = "Vill du inaktivera synkronisering?";
 
+/* Reason for auth when setting up Sync */
+"sync.user.auth.reason" = "Lås upp enheten för att konfigurera Sync & Backup.";
+
 /* Data syncing unavailable warning message */
 "sync.warning.data.syncing.disabled" = "Tyvärr är synkronisering och säkerhetskopiering inte tillgängliga för närvarande. Försök igen senare.";
 
 /* Data syncing unavailable warning message */
 "sync.warning.data.syncing.disabled.upgrade.required" = "Tyvärr är synkronisering och säkerhetskopiering inte längre tillgängliga i den här appversionen. Uppdatera DuckDuckGo till den senaste versionen för att fortsätta.";
-
-/* Title of the warning message */
-"sync.warning.sync.paused" = "Synkronisering och säkerhetskopiering har pausats";
 
 /* Accessibility label on remove button */
 "tab.close.home" = "Stäng hemfliken";
@@ -1979,7 +2785,7 @@
 "tab.switcher.accessibility.label" = "Flikväxlare";
 
 /* Description text for the text size adjustment setting */
-"textSize.description" = "Välj önskad textstorlek. Webbplatser som du visar i DuckDuckGo anpassas efter din inställning.";
+"textSize.description" = "Öka eller minska textstorleken på alla webbplatser.";
 
 /* Replacement string is a current percent value e.g. '120%' */
 "textSize.footer" = "Textstorlek – %@";
@@ -2002,8 +2808,14 @@
 /* Light Theme entry */
 "theme.name.light" = "Ljus";
 
+/* No comment provided by engineer. */
+"This list contains messages that have been shown plus at most 1 message that is scheduled for showing. There may be more messages in the config that will be presented, but they haven't been processed yet." = "Den här listan innehåller meddelanden som har visats, samt högst ett meddelande som är schemalagt att visas. Det kan finnas fler meddelanden i konfigurationen som kommer att visas, men de har inte bearbetats ännu.";
+
 /* Confirmation of an action - populated with a domain name */
 "toast.protection.disabled" = "Integritetsskydd inaktiverat för %@";
+
+/* Confirmation of an action - populated with a domain name */
+"toast.protection.disabled.and.toggle.report.sent" = "Integritetsskydd inaktiverat för %@ och rapport skickad.";
 
 /* Confirmation of an action - populated with a domain name */
 "toast.protection.enabled" = "Integritetsskydd aktiverat för %@";
@@ -2036,7 +2848,124 @@
 "voiceSearch.cancel" = "Avbryt";
 
 /* Voice-search footer note with on-device privacy warning */
-"voiceSearch.footer.note" = "Ljudet bearbetas på enheten. Det lagras inte och delas inte med någon, inte ens DuckDuckGo.";
+"voiceSearch.footer.note" = "Lägg till alternativet privat röstsökning i adressfältet Ljud lagras inte och delas inte med någon, inte ens DuckDuckGo.";
+
+/* Voice-search footer note with on-device privacy warning */
+"voiceSearch.footer.note.old" = "Ljudet bearbetas på enheten. Det lagras inte och delas inte med någon, inte ens DuckDuckGo.";
+
+/* Cancel action for the alert when the subscription expires */
+"vpn.access-revoked.alert.action.cancel" = "Avvisa";
+
+/* Primary action for the alert when the subscription expires */
+"vpn.access-revoked.alert.action.subscribe" = "Prenumerera";
+
+/* Alert message for the alert when the Privacy Pro subscription expiress */
+"vpn.access-revoked.alert.message" = "Prenumerera på Privacy Pro för att återansluta DuckDuckGo VPN.";
+
+/* Alert title for the alert when the Privacy Pro subscription expires */
+"vpn.access-revoked.alert.title" = "VPN har kopplats från på grund av att abonnemanget har gått ut";
+
+/* Title for the VPN widget onboarding screen */
+"vpn.addWidget.settings.title" = "Hitta och välj DuckDuckGo. Svep sedan till VPN och välj Lägg till widget.";
+
+/* Title for the Cancel button of the VPN feedback form */
+"vpn.feedback-form.button.cancel" = "Avbryt";
+
+/* Title for the Done button of the VPN feedback form */
+"vpn.feedback-form.button.done" = "Klart";
+
+/* Title for the Submit button of the VPN feedback form */
+"vpn.feedback-form.button.submit" = "Skicka";
+
+/* Title for the Submitting state of the VPN feedback form */
+"vpn.feedback-form.button.submitting" = "Skickar ...";
+
+/* Title for the browser crash/freeze category of the VPN feedback form */
+"vpn.feedback-form.category.browser-crash-or-freeze" = "VPN får webbläsaren att krascha eller låsa sig";
+
+/* Title for the 'VPN fails to connect' category of the VPN feedback form */
+"vpn.feedback-form.category.fails-to-connect" = "VPN kan inte ansluta";
+
+/* Title for the 'VPN feature request' category of the VPN feedback form */
+"vpn.feedback-form.category.feature-request" = "VPN-utvecklingsförfrågan";
+
+/* Title for the category 'VPN causes issues with other apps or websites' category of the VPN feedback form */
+"vpn.feedback-form.category.issues-with-apps" = "VPN orsakar problem med andra appar eller webbplatser";
+
+/* Title for the local device connectivity category of the VPN feedback form */
+"vpn.feedback-form.category.local-device-connectivity" = "VPN hindrar mig från att ansluta till en lokal enhet";
+
+/* Title for the 'other VPN feedback' category of the VPN feedback form */
+"vpn.feedback-form.category.other" = "Annan VPN-feedback";
+
+/* Title for the category selection state of the VPN feedback form */
+"vpn.feedback-form.category.select-category" = "VÄLJ EN KATEGORI";
+
+/* Title for the 'VPN is too slow' category of the VPN feedback form */
+"vpn.feedback-form.category.too-slow" = "VPN-anslutningen är för långsam";
+
+/* Title for the 'unable to install' category of the VPN feedback form */
+"vpn.feedback-form.category.unable-to-install" = "Det går inte att installera VPN";
+
+/* Title for the feedback sent view description of the VPN feedback form */
+"vpn.feedback-form.sending-confirmation.description" = "Din feedback hjälper oss att förbättra\nDuckDuckGo VPN.";
+
+/* Title for the feedback sending error text of the VPN feedback form */
+"vpn.feedback-form.sending-confirmation.error" = "Vi kunde inte skicka din feedback just nu, försök igen.";
+
+/* Title for the feedback sent view title of the VPN feedback form */
+"vpn.feedback-form.sending-confirmation.title" = "Tack!";
+
+/* Toast message when the VPN feedback form is submitted successfully */
+"vpn.feedback-form.submitted.message" = "Tack! Återkopplingen har skickats.";
+
+/* Text for the body of the VPN feedback form */
+"vpn.feedback-form.text-1" = "Beskriv vad som händer, vad du väntade dig skulle hända och vilka steg som ledde till problemet:";
+
+/* Text for the body of the VPN feedback form */
+"vpn.feedback-form.text-2" = "Förutom de uppgifter som anges i det här formuläret kommer din anmälan om problem med appen att innehålla:";
+
+/* Bullet text for the body of the VPN feedback form */
+"vpn.feedback-form.text-3" = "• Om specifika DuckDuckGo-funktioner är aktiverade eller inte";
+
+/* Bullet text for the body of the VPN feedback form */
+"vpn.feedback-form.text-4" = "• Sammanställd DuckDuckGo-appdiagnostik";
+
+/* Text for the body of the VPN feedback form */
+"vpn.feedback-form.text-5" = "Genom att trycka på Skicka godkänner jag att DuckDuckGo använder informationen i den här rapporten i syfte att förbättra appens funktioner.";
+
+/* Title for each screen of the VPN feedback form */
+"vpn.feedback-form.title" = "Hjälp till att förbättra DuckDuckGo VPN";
+
+/* VPN settings screen cell text for adding the VPN widget to the home screen */
+"vpn.settings.add.widget" = "Lägg till VPN-widget på startsidan";
+
+/* Disclaimer for the DNS Server section on the DNS Server screen */
+"vpn.settings.dns.section-disclaimer" = "När du använder en anpassad DNS-server kan det påverka surfhastigheten och exponera din aktivitet för tredje part om servern inte är säker eller tillförlitlig.";
+
+/* Header text for the DNS section on the VPN Settings screen */
+"vpn.settings.dns.section-header" = "DNS";
+
+/* Title for the Apply button on the DNS Server setting screen */
+"vpn.settings.dns.server.apply.button.title" = "Tillämpa";
+
+/* Default value for the DNS Server row on the VPN Settings screen */
+"vpn.settings.dns.server.default.value" = "DuckDuckGo";
+
+/* Title for the IPv4 Address setting */
+"vpn.settings.dns.server.ipv4.title" = "IPv4-adress";
+
+/* Custom option for the DNS Server setting */
+"vpn.settings.dns.server.option.custom" = "Anpassat";
+
+/* Recommended option for the DNS Server setting */
+"vpn.settings.dns.server.option.default" = "DuckDuckGo (rekommenderas)";
+
+/* Title for the DNS Server setting screen */
+"vpn.settings.dns.server.screen.title" = "DNS-server";
+
+/* Title for the DNS Server row on the VPN Settings screen */
+"vpn.settings.dns.server.title" = "DNS-server";
 
 /* Title for the button to enable push notifications in system settings */
 "waitlist.allow-notifications" = "Tillåt aviseringar";
@@ -2116,38 +3045,11 @@
 /* No comment provided by engineer. */
 "Welcome to the Duck Side!" = "Välkommen till Duck-sidan!";
 
-/* Title for the Windows waitlist notification */
-"windows-waitlist.available.notification.title" = "Testa DuckDuckGo för Windows!";
-
-/* Description on the invite screen */
-"windows-waitlist.invite-screen.step-1.description" = "Gå till den här webbadressen på din Windows-enhet för att ladda ner:";
-
-/* Description on the invite screen */
-"windows-waitlist.invite-screen.step-2.description" = "Öppna installationsprogrammet för DuckDuckGo i Nerladdningar, välj Installera och ange din inbjudningskod.";
-
-/* Subtitle for the Windows Waitlist Invite screen */
-"windows-waitlist.invite-screen.subtitle" = "Är du redo att använda DuckDuckGo på Windows?";
-
 /* Title for the Windows waitlist button redirecting to Mac waitlist */
 "windows-waitlist.join-waitlist-screen.mac-waitlist" = "Letar du efter Mac-versionen?";
 
-/* Title for the Join Windows Waitlist screen */
-"windows-waitlist.join-waitlist-screen.try-duckduckgo-for-windows" = "Få tidigare tillgång och prova DuckDuckGo för Windows!";
-
-/* Message for the alert to confirm enabling notifications */
-"windows-waitlist.joined.no-notification.get-notification-confirmation-message" = "Vi skickar ett meddelande till dig när ditt exemplar av DuckDuckGo för Mac är klar att laddas ner. ";
-
-/* Label text for the Joined Waitlist state with notifications declined */
-"windows-waitlist.joined.notifications-declined" = "Din inbjudan att prova DuckDuckGo för Mac visas här. Kom tillbaka igen snart. Vi kan också skicka dig ett meddelande när det är din tur.";
-
-/* Label text for the Joined Waitlist state with notifications enabled */
-"windows-waitlist.joined.notifications-enabled" = "Vi skickar ett meddelande till dig när ditt exemplar av DuckDuckGo för Mac är klar att laddas ner.";
-
 /* Title for the settings subtitle */
 "windows-waitlist.settings.browse-privately" = "Surfa privat med vår app för Windows";
-
-/* Message used when sharing to iMessage. Parameter is an eight digit invite code. */
-"windows-waitlist.share-sheet.invite-code-message" = "Du har fått en inbjudan!\n\nÄr du redo att använda DuckDuckGo på Windows?\n\nSteg 1\nGå till den här webbadressen på din Windows-enhet för att ladda ner:\nhttps://duckduckgo.com/windows\n\nSteg 2\nÖppna installationsprogrammet för DuckDuckGo i Nerladdningar, välj Installera och ange din inbjudningskod.\n\nInbjudningskod: %@";
 
 /* Message used when sharing to iMessage */
 "windows-waitlist.share-sheet.message" = "Är du redo att börja surfa privat på Windows?\n\nLadda ner genom att gå till den här webbadressen på din dator:\nhttps://duckduckgo.com/windows";

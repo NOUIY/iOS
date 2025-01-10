@@ -17,8 +17,6 @@
 //  limitations under the License.
 //
 
-#if NETWORK_PROTECTION
-
 import Foundation
 import Combine
 import NetworkProtection
@@ -57,13 +55,13 @@ final class NetworkProtectionVPNLocationViewModel: ObservableObject {
     }
 
     func onNearestItemSelection() async {
-        DailyPixel.fireDailyAndCount(pixel: .networkProtectionGeoswitchingSetNearest)
+        DailyPixel.fireDailyAndCount(pixel: .networkProtectionGeoswitchingSetNearest, pixelNameSuffixes: DailyPixel.Constant.legacyDailyPixelSuffixes)
         settings.selectedLocation = .nearest
         await reloadList()
     }
 
     func onCountryItemSelection(id: String, cityId: String? = nil) async {
-        DailyPixel.fireDailyAndCount(pixel: .networkProtectionGeoswitchingSetCustom)
+        DailyPixel.fireDailyAndCount(pixel: .networkProtectionGeoswitchingSetCustom, pixelNameSuffixes: DailyPixel.Constant.legacyDailyPixelSuffixes)
         let location = NetworkProtectionSelectedLocation(country: id, city: cityId)
         settings.selectedLocation = .location(location)
         await reloadList()
@@ -73,7 +71,8 @@ final class NetworkProtectionVPNLocationViewModel: ObservableObject {
     private func reloadList() async {
         guard let list = try? await locationListRepository.fetchLocationList() else { return }
         if list.isEmpty {
-            DailyPixel.fireDailyAndCount(pixel: .networkProtectionGeoswitchingNoLocations)
+            DailyPixel.fireDailyAndCount(pixel: .networkProtectionGeoswitchingNoLocations,
+                                         pixelNameSuffixes: DailyPixel.Constant.legacyDailyPixelSuffixes)
         }
         let selectedLocation = self.settings.selectedLocation
         let isNearestSelected = selectedLocation == .nearest
@@ -164,5 +163,3 @@ struct NetworkProtectionVPNCityItemModel: Identifiable {
         self.isSelected = isSelected
     }
 }
-
-#endif

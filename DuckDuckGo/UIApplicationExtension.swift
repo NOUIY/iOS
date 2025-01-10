@@ -39,3 +39,19 @@ extension UIApplication {
         return await self.open(url)
     }
 }
+
+extension UIApplication {
+    var foregroundSceneWindows: [UIWindow] {
+        guard let scene = UIApplication.shared.connectedScenes.first(where: {
+            $0.activationState == .foregroundActive
+        }) as? UIWindowScene else {
+            return []
+        }
+
+        return scene.windows
+    }
+
+    var firstKeyWindow: UIWindow? {
+        return foregroundSceneWindows.first(where: \.isKeyWindow)
+    }
+}

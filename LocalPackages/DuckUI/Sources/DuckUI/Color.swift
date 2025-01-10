@@ -44,8 +44,8 @@ public extension Color {
     static let blue30 = Color.init(0x7295F6)
     static let blue20 = Color.init(0x8FABF9)
     static let blue10 = Color.init(0xADC2FC)
-    static let blue0 = Color.init(0xADC2FC)
-    
+    static let blue0 = Color.init(0xCCDAFF)
+
     static let gray95 = Color.init(0x111111)
     static let gray90 = Color.init(0x222222)
     static let gray85 = Color.init(0x333333)
@@ -117,6 +117,26 @@ public extension Color {
             blue: Double(hex & 0xFF) / 255,
             opacity: alpha
         )
+    }
+}
+
+public extension Color {
+    static func shade(_ percent: Double) -> Color {
+        Self.black.opacity(percent)
+    }
+
+    static func tint(_ percent: Double) -> Color {
+        Self.white.opacity(percent)
+    }
+}
+
+public extension UIColor {
+    static func shade(_ percent: Double) -> UIColor {
+        UIColor(.shade(percent))
+    }
+
+    static func tint(_ percent: Double) -> UIColor {
+        UIColor(.tint(percent))
     }
 }
 

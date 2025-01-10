@@ -24,9 +24,8 @@ struct DownloadsList: View {
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject var viewModel: DownloadsListViewModel
     @State var editMode: EditMode = .inactive
-    
-    @State private var isCancelDownloadAlertPresented: Bool = false
-    
+    @State private var selectedRowModelToCancel: OngoingDownloadRowViewModel?
+
     var body: some View {
         NavigationView {
             listOrEmptyState
@@ -34,21 +33,14 @@ struct DownloadsList: View {
                 .navigationBarItems(trailing: doneButton)
         }
         .navigationViewStyle(.stack)
+        .alert(item: $selectedRowModelToCancel) { rowModel in
+            makeCancelDownloadAlert(for: rowModel)
+        }
     }
     
     private var doneButton: some View {
         Button(action: {
-            if #available(iOS 15.0, *) {
-                presentationMode.wrappedValue.dismiss()
-            } else {
-                // Because: presentationMode.wrappedValue.dismiss() for view wrapped in NavigationView() does not work in iOS 14 and lower
-                if var topController = UIApplication.shared.windows.first!.rootViewController {
-                    while let presentedViewController = topController.presentedViewController {
-                        topController = presentedViewController
-                    }
-                    topController.dismiss(animated: true)
-                }
-            }
+            presentationMode.wrappedValue.dismiss()
         },
                label: { Text(UserText.navigationTitleDone).foregroundColor(.barButton).bold() })
             .opacity(editMode == .inactive ? 1.0 : 0.0)
@@ -79,15 +71,9 @@ struct DownloadsList: View {
     
     @ViewBuilder
     private var listWithBottomToolbar: some View {
-        if #available(iOS 15.0, *) {
-            listWithBackground.toolbar {
-                ToolbarItemGroup(placement: .bottomBar) {
-                    toolbarButtons
-                }
-            }
-        } else {
-            listWithBackground.toolbar {
-                toolbarContent
+        listWithBackground.toolbar {
+            ToolbarItemGroup(placement: .bottomBar) {
+                toolbarButtons
             }
         }
     }
@@ -171,8 +157,7 @@ struct DownloadsList: View {
     private func row(for rowModel: DownloadsListRowViewModel) -> some View {
         if let rowModel = rowModel as? OngoingDownloadRowViewModel {
             OngoingDownloadRow(rowModel: rowModel,
-                               cancelButtonAction: { self.isCancelDownloadAlertPresented = true })
-                .alert(isPresented: $isCancelDownloadAlertPresented) { makeCancelDownloadAlert(for: rowModel) }
+                               cancelButtonAction: { self.selectedRowModelToCancel = rowModel })
                 .deleteDisabled(true)
         } else if let rowModel = rowModel as? CompleteDownloadRowViewModel {
             CompleteDownloadRow(rowModel: rowModel,
@@ -204,8 +189,8 @@ extension DownloadsList {
         Alert(
             title: Text(UserText.cancelDownloadAlertTitle),
             message: Text(UserText.cancelDownloadAlertDescription),
-            primaryButton: .cancel(Text(UserText.cancelDownloadAlertResumeAction)),
-            secondaryButton: .destructive(Text(UserText.cancelDownloadAlertCancelAction), action: {
+            primaryButton: .cancel(Text(UserText.cancelDownloadAlertNoAction)),
+            secondaryButton: .destructive(Text(UserText.cancelDownloadAlertYesAction), action: {
                 cancelDownload(for: row)
             })
         )

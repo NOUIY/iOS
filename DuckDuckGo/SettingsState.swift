@@ -18,6 +18,7 @@
 //
 
 import BrowserServicesKit
+import Subscription
 
 struct SettingsState {
     
@@ -30,23 +31,29 @@ struct SettingsState {
         var position: AddressBarPosition
     }
     
-    struct TextSize {
+    struct TextZoom {
         var enabled: Bool
-        var size: Int
+        var level: TextZoomLevel
     }
-    
-    struct NetworkProtection {
-        var enabled: Bool
-        var status: String
-    }
-    
-    struct Subscription {
-        var enabled: Bool
+
+    struct Subscription: Codable {
         var canPurchase: Bool
+        var isSignedIn: Bool
         var hasActiveSubscription: Bool
-        var isSubscriptionPendingActivation: Bool
+        var isRestoring: Bool
+        var shouldDisplayRestoreSubscriptionError: Bool
+        var subscriptionFeatures: [Entitlement.ProductName]
+        var entitlements: [Entitlement.ProductName]
+        var platform: DDGSubscription.Platform
+        var isShowingStripeView: Bool
     }
-    
+
+    struct AIChat: Codable {
+        var enabled: Bool
+        var isAIChatBrowsingMenuFeatureFlagEnabled: Bool
+        var isAIChatAddressBarFeatureFlagEnabled: Bool
+    }
+
     struct SyncSettings {
         var enabled: Bool
         var title: String
@@ -56,8 +63,8 @@ struct SettingsState {
     var appTheme: ThemeName
     var appIcon: AppIcon
     var fireButtonAnimation: FireButtonAnimationType
-    var textSize: TextSize
-    var addressbar: AddressBar
+    var textZoom: TextZoom
+    var addressBar: AddressBar
     var showsFullURL: Bool
 
     // Privacy properties
@@ -68,6 +75,7 @@ struct SettingsState {
 
     // Customization properties
     var autocomplete: Bool
+    var recentlyVisitedSites: Bool
     var longPressPreviews: Bool
     var allowUniversalLinks: Bool
 
@@ -76,7 +84,8 @@ struct SettingsState {
 
     // About properties
     var version: String
-        
+    var crashCollectionOptInStatus: CrashCollectionOptInStatus
+
     // Features
     var debugModeEnabled: Bool
     var voiceSearchEnabled: Bool
@@ -84,41 +93,66 @@ struct SettingsState {
     var loginsEnabled: Bool
     
     // Network Protection properties
-    var networkProtection: NetworkProtection
-    
+    var networkProtectionConnected: Bool
+
     // Subscriptions Properties
     var subscription: Subscription
     
     // Sync Properties
     var sync: SyncSettings
+    var syncSource: String?
+
+    // Duck Player Mode
+    var duckPlayerEnabled: Bool
+    var duckPlayerMode: DuckPlayerMode?
+    var duckPlayerOpenInNewTab: Bool
+    var duckPlayerOpenInNewTabEnabled: Bool
+
+    // AI Chat
+    var aiChat: AIChat
 
     static var defaults: SettingsState {
         return SettingsState(
             appTheme: .systemDefault,
             appIcon: AppIconManager.shared.appIcon,
             fireButtonAnimation: .fireRising,
-            textSize: TextSize(enabled: false, size: 100),
-            addressbar: AddressBar(enabled: false, position: .top),
+            textZoom: TextZoom(enabled: false, level: .percent100),
+            addressBar: AddressBar(enabled: false, position: .top),
             showsFullURL: false,
             sendDoNotSell: true,
             autoconsentEnabled: false,
             autoclearDataEnabled: false,
             applicationLock: false,
             autocomplete: true,
+            recentlyVisitedSites: true,
             longPressPreviews: true,
             allowUniversalLinks: true,
             activeWebsiteAccount: nil,
             version: "0.0.0.0",
+            crashCollectionOptInStatus: .undetermined,
             debugModeEnabled: false,
             voiceSearchEnabled: false,
             speechRecognitionAvailable: false,
             loginsEnabled: false,
-            networkProtection: NetworkProtection(enabled: false, status: ""),
-            subscription: Subscription(enabled: false,
-                                       canPurchase: false,
+            networkProtectionConnected: false,
+            subscription: Subscription(canPurchase: false,
+                                       isSignedIn: false,
                                        hasActiveSubscription: false,
-                                       isSubscriptionPendingActivation: false),
-            sync: SyncSettings(enabled: false, title: "")
+                                       isRestoring: false,
+                                       shouldDisplayRestoreSubscriptionError: false,
+                                       subscriptionFeatures: [],
+                                       entitlements: [],
+                                       platform: .unknown,
+                                       isShowingStripeView: false),
+            sync: SyncSettings(enabled: false, title: ""),
+            syncSource: nil,
+            duckPlayerEnabled: false,
+            duckPlayerMode: .alwaysAsk,
+            duckPlayerOpenInNewTab: true,
+            duckPlayerOpenInNewTabEnabled: false,
+            aiChat: AIChat(enabled: false,
+                                  isAIChatBrowsingMenuFeatureFlagEnabled: false,
+                                  isAIChatAddressBarFeatureFlagEnabled: false)
         )
     }
 }

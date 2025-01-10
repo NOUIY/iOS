@@ -17,12 +17,10 @@
 //  limitations under the License.
 //
 
-#if SUBSCRIPTION
 import SwiftUI
 import Foundation
 import DesignResourcesKit
 
-@available(iOS 15.0, *)
 struct SubscriptionExternalLinkView: View {
         
     @Environment(\.dismiss) var dismiss
@@ -95,4 +93,3 @@ struct SubscriptionExternalLinkView: View {
         navAppearance.tintColor = UIColor(designSystemColor: .textPrimary)
     }
 }
-#endif

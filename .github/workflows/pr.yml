@@ -39,8 +39,8 @@ jobs:
 
     name: Unit Tests
 
-    runs-on: macos-13-xlarge
-    timeout-minutes: 30
+    runs-on: macos-15
+    timeout-minutes: 20
 
     outputs:
       commit_author: ${{ steps.fetch_commit_author.outputs.commit_author }}
@@ -79,7 +79,7 @@ jobs:
       run: |
         set -o pipefail && xcodebuild test \
           -scheme "DuckDuckGo" \
-          -destination "platform=iOS Simulator,name=iPhone 15,OS=17.2" \
+          -destination "platform=iOS Simulator,name=iPhone 16,OS=18.1" \
           -derivedDataPath "DerivedData" \
           -skipPackagePluginValidation \
           -skipMacroValidation \
@@ -89,7 +89,7 @@ jobs:
 
     - name: Upload logs if workflow failed
       uses: actions/upload-artifact@v4
-      if: failure()
+      if: failure() || cancelled()
       with:
         name: BuildLogs
         path: |
@@ -132,7 +132,7 @@ jobs:
     # Dependabot doesn't have access to all secrets, so we skip this job
     if: github.actor != 'dependabot[bot]'
 
-    runs-on: macos-13-xlarge
+    runs-on: macos-15
     timeout-minutes: 30
 
     steps:
@@ -185,7 +185,7 @@ jobs:
 
         set -o pipefail && xcodebuild \
         -scheme "DuckDuckGo" \
-        -destination "platform=iOS Simulator,name=iPhone 14" \
+        -destination "platform=iOS Simulator,name=iPhone 16" \
         -derivedDataPath "DerivedData" \
         -configuration "Release" \
         -skipPackagePluginValidation \

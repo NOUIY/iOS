@@ -23,34 +23,15 @@ import Common
 import UIKit
 import Combine
 import Core
-
-internal enum AutofillLoginListSectionType: Comparable {
-    case enableAutofill
-    case credentials(title: String, items: [AutofillLoginListItemViewModel])
-    
-    static func < (lhs: AutofillLoginListSectionType, rhs: AutofillLoginListSectionType) -> Bool {
-        if case .credentials(let leftTitle, _) = lhs,
-           case .credentials(let rightTitle, _) = rhs {
-            if leftTitle == miscSectionHeading {
-                return false
-            } else if rightTitle == miscSectionHeading {
-                return true
-            }
-            
-            return leftTitle.localizedCaseInsensitiveCompare(rightTitle) == .orderedAscending
-        }
-        return true
-    }
-    
-    static let miscSectionHeading = "#"
-}
+import DDGSync
+import PrivacyDashboard
+import os.log
 
 internal enum EnableAutofillRows: Int, CaseIterable {
     case toggleAutofill
     case resetNeverPromptWebsites
 }
 
-// swiftlint:disable file_length type_body_length
 final class AutofillLoginListViewModel: ObservableObject {
     
     enum ViewState {
@@ -61,8 +42,13 @@ final class AutofillLoginListViewModel: ObservableObject {
         case searching
         case searchingNoResults
     }
-    
-    let authenticator = AutofillLoginListAuthenticator(reason: UserText.autofillLoginListAuthenticationReason)
+
+    struct UserInfoKeys {
+        static let tabUid = "com.duckduckgo.autofill.tab-uid"
+    }
+
+    let authenticator = AutofillLoginListAuthenticator(reason: UserText.autofillLoginListAuthenticationReason,
+                                                       cancelTitle: UserText.autofillLoginListAuthenticationCancelButton)
     var isSearching: Bool = false
     var isEditing: Bool = false {
         didSet {
@@ -70,20 +56,55 @@ final class AutofillLoginListViewModel: ObservableObject {
         }
     }
     var authenticationNotRequired = false
+    var isCancelingSearch = false
+    var isAuthenticating = false
+
     @Published private var accounts = [SecureVaultModels.WebsiteAccount]()
     private var accountsToSuggest = [SecureVaultModels.WebsiteAccount]()
     private var cancellables: Set<AnyCancellable> = []
     private var appSettings: AppSettings
     private let tld: TLD
     private var currentTabUrl: URL?
+    private var currentTabUid: String?
     private let secureVault: (any AutofillSecureVault)?
     private let autofillNeverPromptWebsitesManager: AutofillNeverPromptWebsitesManager
+    private let privacyConfig: PrivacyConfiguration
+    private let keyValueStore: KeyValueStoringDictionaryRepresentable
     private var cachedDeletedCredentials: SecureVaultModels.WebsiteCredentials?
     private let autofillDomainNameUrlMatcher = AutofillDomainNameUrlMatcher()
     private let autofillDomainNameUrlSort = AutofillDomainNameUrlSort()
+    private let syncService: DDGSyncing
+    private let locale: Locale
+    private var showBreakageReporter: Bool = false
 
+    private lazy var reporterDateFormatter = {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        return dateFormatter
+    }()
 
-    @Published private (set) var viewState: AutofillLoginListViewModel.ViewState = .authLocked
+    private lazy var breakageReportIntervalDays = {
+        let settings = privacyConfig.settings(for: .autofillBreakageReporter)
+        return settings["monitorIntervalDays"] as? Int ?? 42
+    }()
+
+    private lazy var credentialIdentityStoreManager: AutofillCredentialIdentityStoreManaging = AutofillCredentialIdentityStoreManager(vault: secureVault,
+                                                                                                                                      reporter: SecureVaultReporter(),
+                                                                                                                                      tld: tld)
+
+    private lazy var syncPromoManager: SyncPromoManaging = SyncPromoManager(syncService: syncService)
+
+    private lazy var autofillSurveyManager: AutofillSurveyManaging = AutofillSurveyManager()
+
+    internal lazy var breakageReporter = BrokenSiteReporter(pixelHandler: { [weak self] _ in
+        if let currentTabUid = self?.currentTabUid {
+            NotificationCenter.default.post(name: .autofillFailureReport, object: self, userInfo: [UserInfoKeys.tabUid: currentTabUid])
+        }
+        self?.updateData()
+        self?.showBreakageReporter = false
+    }, keyValueStoring: keyValueStore, storageConfiguration: .autofillConfig)
+
+    @Published private(set) var viewState: AutofillLoginListViewModel.ViewState = .authLocked
     @Published private(set) var sections = [AutofillLoginListSectionType]() {
         didSet {
             updateViewState()
@@ -108,20 +129,41 @@ final class AutofillLoginListViewModel: ObservableObject {
         get { appSettings.autofillCredentialsEnabled }
         set {
             appSettings.autofillCredentialsEnabled = newValue
+            keyValueStore.set(false, forKey: UserDefaultsWrapper<Bool>.Key.autofillFirstTimeUser.rawValue)
             NotificationCenter.default.post(name: AppUserDefaults.Notifications.autofillEnabledChange, object: self)
         }
     }
-    
-    init(appSettings: AppSettings, tld: TLD, secureVault: (any AutofillSecureVault)?, currentTabUrl: URL? = nil, autofillNeverPromptWebsitesManager: AutofillNeverPromptWebsitesManager = AppDependencyProvider.shared.autofillNeverPromptWebsitesManager) {
+
+    init(appSettings: AppSettings,
+         tld: TLD,
+         secureVault: (any AutofillSecureVault)?,
+         currentTabUrl: URL? = nil,
+         currentTabUid: String? = nil,
+         autofillNeverPromptWebsitesManager: AutofillNeverPromptWebsitesManager = AppDependencyProvider.shared.autofillNeverPromptWebsitesManager,
+         privacyConfig: PrivacyConfiguration = ContentBlocking.shared.privacyConfigurationManager.privacyConfig,
+         keyValueStore: KeyValueStoringDictionaryRepresentable = UserDefaults.standard,
+         syncService: DDGSyncing,
+         locale: Locale = Locale.current) {
         self.appSettings = appSettings
         self.tld = tld
         self.secureVault = secureVault
         self.currentTabUrl = currentTabUrl
+        self.currentTabUid = currentTabUid
         self.autofillNeverPromptWebsitesManager = autofillNeverPromptWebsitesManager
+        self.privacyConfig = privacyConfig
+        self.keyValueStore = keyValueStore
+        self.syncService = syncService
+        self.locale = locale
 
+        if let count = getAccountsCount() {
+            authenticationNotRequired = count == 0 || AppDependencyProvider.shared.autofillLoginSession.isSessionValid
+        }
         updateData()
-        authenticationNotRequired = !hasAccountsSaved || AppDependencyProvider.shared.autofillLoginSession.isSessionValid
         setupCancellables()
+
+        if showBreakageReporter {
+            Pixel.fire(pixel: .autofillLoginsReportAvailable)
+        }
     }
     
  // MARK: Public Methods
@@ -129,7 +171,7 @@ final class AutofillLoginListViewModel: ObservableObject {
     func delete(at indexPath: IndexPath) -> Bool {
         let section = sections[indexPath.section]
         switch section {
-        case .credentials(_, let items):
+        case .credentials(_, let items), .suggestions(_, let items):
             let item = items[indexPath.row]
             let success = delete(item.account)
             updateData()
@@ -170,7 +212,13 @@ final class AutofillLoginListViewModel: ObservableObject {
         authenticator.logOut()
     }
     
-    func authenticate(completion: @escaping(AutofillLoginListAuthenticator.AuthError?) -> Void) {
+    func authenticate(completion: @escaping (AutofillLoginListAuthenticator.AuthError?) -> Void) {
+        guard !isAuthenticating else {
+            return
+        }
+
+        isAuthenticating = true
+
         if !authenticator.canAuthenticate() {
             viewState = .noAuthAvailable
             completion(nil)
@@ -186,6 +234,7 @@ final class AutofillLoginListViewModel: ObservableObject {
     }
 
     func authenticateInvalidateContext() {
+        isAuthenticating = false
         authenticator.invalidateContext()
     }
 
@@ -193,6 +242,12 @@ final class AutofillLoginListViewModel: ObservableObject {
         switch self.sections[section] {
         case .enableAutofill:
             return autofillNeverPromptWebsitesManager.neverPromptWebsites.isEmpty ? 1 : 2
+        case .suggestions(_, let items):
+            if isEditing || !showBreakageReporter {
+                return items.count
+            } else {
+                return items.count + 1
+            }
         case .credentials(_, let items):
             return items.count
         }
@@ -202,6 +257,7 @@ final class AutofillLoginListViewModel: ObservableObject {
         self.accounts = fetchAccounts()
         self.accountsToSuggest = fetchSuggestedAccounts()
         self.sections = makeSections(with: accounts)
+        self.showBreakageReporter = shouldShowBreakageReporter()
     }
     
     func filterData(with query: String? = nil) {
@@ -224,17 +280,119 @@ final class AutofillLoginListViewModel: ObservableObject {
         _ = autofillNeverPromptWebsitesManager.deleteAllNeverPromptWebsites()
     }
 
+    func createBreakageReporterAlert() -> UIAlertController? {
+        guard let currentTabUrl = currentTabUrl else {
+            return nil
+        }
+
+        let urlName = tld.eTLDplus1(forStringURL: currentTabUrl.absoluteString) ??
+        autofillDomainNameUrlMatcher.normalizeUrlForWeb(currentTabUrl.absoluteString)
+
+        let alert = UIAlertController(title: UserText.autofillSettingsReportNotWorkingConfirmationPromptTitle(for: urlName),
+                                      message: UserText.autofillSettingsReportNotWorkingConfirmationPromptMessage,
+                                      preferredStyle: .alert)
+
+        let sendReportAction = UIAlertAction(title: UserText.autofillSettingsReportNotWorkingConfirmationPromptButton,
+                                             style: .default) {[weak self] _ in
+            self?.saveReport(for: currentTabUrl)
+            Pixel.fire(pixel: .autofillLoginsReportConfirmationPromptConfirmed)
+        }
+
+        alert.addAction(sendReportAction)
+        alert.addAction(UIAlertAction(title: UserText.actionCancel, style: .cancel, handler: { _ in
+            Pixel.fire(pixel: .autofillLoginsReportConfirmationPromptDismissed)
+        }))
+        alert.preferredAction = sendReportAction
+
+        return alert
+    }
+
+    func shouldShowSyncPromo() -> Bool {
+        return viewState == .showItems
+               && !isEditing
+               && syncPromoManager.shouldPresentPromoFor(.passwords, count: accountsCount)
+    }
+
+    func dismissSyncPromo() {
+        syncPromoManager.dismissPromoFor(.passwords)
+    }
+
+    func getSurveyToPresent() -> AutofillSurveyManager.AutofillSurvey? {
+        guard locale.isEnglishLanguage,
+              viewState == .showItems || viewState == .empty,
+              !isEditing,
+              privacyConfig.isEnabled(featureKey: .autofillSurveys) else {
+            return nil
+        }
+        return autofillSurveyManager.surveyToPresent(settings: privacyConfig.settings(for: .autofillSurveys))
+    }
+
+    func surveyUrl(survey: String) -> URL? {
+        return autofillSurveyManager.buildSurveyUrl(survey, accountsCount: accountsCount)
+    }
+
+    func dismissSurvey(id: String) {
+        autofillSurveyManager.markSurveyAsCompleted(id: id)
+    }
+
     // MARK: Private Methods
-    
+
+    private func saveReport(for currentTabUrl: URL) {
+        let report = BrokenSiteReport(siteUrl: currentTabUrl,
+                                      category: "",
+                                      description: "",
+                                      osVersion: "",
+                                      manufacturer: "",
+                                      upgradedHttps: false,
+                                      tdsETag: nil,
+                                      configVersion: nil,
+                                      blockedTrackerDomains: nil,
+                                      installedSurrogates: nil,
+                                      isGPCEnabled: true,
+                                      ampURL: "",
+                                      urlParametersRemoved: true,
+                                      protectionsState: true,
+                                      reportFlow: .appMenu,
+                                      siteType: .mobile,
+                                      atb: "",
+                                      model: "",
+                                      errors: nil,
+                                      httpStatusCodes: nil,
+                                      openerContext: nil,
+                                      vpnOn: false,
+                                      jsPerformance: nil,
+                                      userRefreshCount: 0,
+                                      variant: "")
+
+        try? breakageReporter.report(report, reportMode: .regular, daysToExpiry: breakageReportIntervalDays)
+    }
+
+    private func getAccountsCount() -> Int? {
+        guard let secureVault = secureVault else {
+            return nil
+        }
+        do {
+            return try secureVault.accountsCount()
+        } catch {
+            return nil
+        }
+    }
+
     private func fetchAccounts() -> [SecureVaultModels.WebsiteAccount] {
         guard let secureVault = secureVault else {
             return []
         }
 
         do {
-            return try secureVault.accounts()
+            let accounts = try secureVault.accounts()
+
+            Task {
+                await credentialIdentityStoreManager.replaceCredentialStore(with: accounts)
+            }
+
+            return accounts
         } catch {
-            os_log("Failed to fetch accounts")
+            Logger.autofill.error("Failed to fetch accounts \(error.localizedDescription, privacy: .public)")
             return []
         }
     }
@@ -268,22 +426,22 @@ final class AutofillLoginListViewModel: ObservableObject {
             }
 
             if !accountsToSuggest.isEmpty {
-                let accountItems = accountsToSuggest.map { AutofillLoginListItemViewModel(account: $0,
-                                                                                          tld: tld,
-                                                                                          autofillDomainNameUrlMatcher: autofillDomainNameUrlMatcher,
-                                                                                          autofillDomainNameUrlSort: autofillDomainNameUrlSort)
+                let accountItems = accountsToSuggest.map { AutofillLoginItem(account: $0,
+                                                                             tld: tld,
+                                                                             autofillDomainNameUrlMatcher: autofillDomainNameUrlMatcher,
+                                                                             autofillDomainNameUrlSort: autofillDomainNameUrlSort)
                 }
-                newSections.append(.credentials(title: UserText.autofillLoginListSuggested, items: accountItems))
+                newSections.append(.suggestions(title: UserText.autofillLoginListSuggested, items: accountItems))
             }
         }
 
-        let viewModelsGroupedByFirstLetter = accounts.autofillLoginListItemViewModelsForAccountsGroupedByFirstLetter(
+        let viewModelsGroupedByFirstLetter = accounts.groupedByFirstLetter(
                 tld: tld,
                 autofillDomainNameUrlMatcher: autofillDomainNameUrlMatcher,
                 autofillDomainNameUrlSort: autofillDomainNameUrlSort)
-        let accountSections = viewModelsGroupedByFirstLetter.autofillLoginListSectionsForViewModelsSortedByTitle(autofillDomainNameUrlSort,
-                                                                                                                 tld: tld)
-        
+        let accountSections = viewModelsGroupedByFirstLetter.sortedIntoSections(autofillDomainNameUrlSort,
+                                                                                tld: tld)
+
         newSections.append(contentsOf: accountSections)
         return newSections
     }
@@ -327,12 +485,17 @@ final class AutofillLoginListViewModel: ObservableObject {
         var rowsToDelete: [IndexPath] = []
 
         for (index, section) in sections.enumerated() {
-            if case .credentials(_, let items) = section, items.contains(where: { $0.account.id == accountId }) {
-                if items.count == 1 {
-                    sectionsToDelete.append(index)
-                } else if let rowIndex = items.firstIndex(where: { $0.account.id == accountId }) {
-                    rowsToDelete.append(IndexPath(row: rowIndex, section: index))
-                }
+            switch section {
+            case .credentials(_, let items), .suggestions(_, let items):
+                if let itemIndex = items.firstIndex(where: { $0.account.id == accountId }) {
+                        if items.count == 1 {
+                            sectionsToDelete.append(index)
+                        } else {
+                            rowsToDelete.append(IndexPath(row: itemIndex, section: index))
+                        }
+                    }
+            default:
+                break
             }
         }
 
@@ -385,53 +548,28 @@ final class AutofillLoginListViewModel: ObservableObject {
             return false
         }
     }
-}
-// swiftlint:enable type_body_length
 
-extension AutofillLoginListItemViewModel: Comparable {
-    static func < (lhs: AutofillLoginListItemViewModel, rhs: AutofillLoginListItemViewModel) -> Bool {
-        lhs.title < rhs.title
-    }
-}
-
-internal extension Array where Element == SecureVaultModels.WebsiteAccount {
-    
-    func autofillLoginListItemViewModelsForAccountsGroupedByFirstLetter(tld: TLD,
-                                                                        autofillDomainNameUrlMatcher: AutofillDomainNameUrlMatcher,
-                                                                        autofillDomainNameUrlSort: AutofillDomainNameUrlSort)
-            -> [String: [AutofillLoginListItemViewModel]] {
-        reduce(into: [String: [AutofillLoginListItemViewModel]]()) { result, account in
-            
-            // Unfortunetly, folding doesn't produce perfect results despite respecting the system locale
-            // E.g. Romainian should treat letters with diacritics as seperate letters, but folding doesn't
-            // Apple's own apps (e.g. contacts) seem to suffer from the same problem
-            let key: String
-            if let firstChar = autofillDomainNameUrlSort.firstCharacterForGrouping(account, tld: tld),
-               let deDistinctionedChar = String(firstChar).folding(options: [.diacriticInsensitive, .caseInsensitive], locale: nil).first,
-               deDistinctionedChar.isLetter {
-                
-                key = String(deDistinctionedChar)
-            } else {
-                key = AutofillLoginListSectionType.miscSectionHeading
-            }
-            
-            return result[key, default: []].append(AutofillLoginListItemViewModel(account: account,
-                                                                                  tld: tld,
-                                                                                  autofillDomainNameUrlMatcher: autofillDomainNameUrlMatcher,
-                                                                                  autofillDomainNameUrlSort: autofillDomainNameUrlSort))
+    func shouldShowBreakageReporter() -> Bool {
+        guard let currentTabUrl = currentTabUrl,
+              !accountsToSuggest.isEmpty,
+              privacyConfig.isEnabled(featureKey: .autofillBreakageReporter),
+              let identifier = currentTabUrl.privacySafeDomainIdentifier,
+              !privacyConfig.isInExceptionList(domain: currentTabUrl.host, forFeature: .autofillBreakageReporter) else {
+            return false
         }
-    }
-}
 
-internal extension Dictionary where Key == String, Value == [AutofillLoginListItemViewModel] {
-    
-    func autofillLoginListSectionsForViewModelsSortedByTitle(_ autofillDomainNameUrlSort: AutofillDomainNameUrlSort, tld: TLD) -> [AutofillLoginListSectionType] {
-        map { dictionaryItem -> AutofillLoginListSectionType in
-            let sortedGroup = dictionaryItem.value.sorted(by: {
-                autofillDomainNameUrlSort.compareAccountsForSortingAutofill(lhs: $0.account, rhs: $1.account, tld: tld) == .orderedAscending
-            })
-            return AutofillLoginListSectionType.credentials(title: dictionaryItem.key,
-                                                            items: sortedGroup)
-        }.sorted()
+        if let entry = breakageReporter.persistencyManager.entry(forKey: identifier),
+           let lastReportedDateStr = entry.value as? String,
+           let lastReportedDate = reporterDateFormatter.date(from: lastReportedDateStr) {
+
+            if Date.daysAgo(breakageReportIntervalDays) > lastReportedDate {
+                _ = breakageReporter.persistencyManager.removeExpiredItems(currentDate: Date())
+                return true
+            } else {
+                return false
+            }
+        }
+
+        return true
     }
 }

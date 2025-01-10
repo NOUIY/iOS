@@ -1,11 +1,14 @@
+/* No comment provided by engineer. */
+"A device password is required to use Sync & Backup." = "Απαιτείται κωδικός πρόσβασης συσκευής για χρήση του Sync & Backup.";
+
 /* Standard Buttons - Back Button */
 "back.button" = "Πίσω";
 
-/* Sync Paused Errors - Bookmarks Limit Exceeded Action */
-"bookmarks.limit.exceeded.action" = "Διαχείριση σελιδοδεικτών";
+/* Do not translate - stringsdict entry */
+"bookmarks.invalid.objects.present.description" = "bookmarks.invalid.objects.present.description";
 
-/* Sync Paused Errors - Bookmarks Limit Exceeded Description */
-"bookmarks.limit.exceeded.description" = "Υπέρβαση του ορίου σελιδοδεικτών. Διαγράψτε ορισμένες για να συνεχίσετε τον συγχρονισμό.";
+/* Alert title for invalid bookmarks being filtered out of synced data */
+"bookmarks.invalid.objects.present.title" = "Ορισμένοι σελιδοδείκτες δεν συγχρονίζονται λόγω υπερβολικά μεγάλου περιεχομένου σε ορισμένα πεδία.";
 
 /* Camera View - Go to Settings Button */
 "camera.go.to.settings.button" = "Μεταβείτε στις Ρυθμίσεις";
@@ -43,17 +46,23 @@
 /* Connect With Server Sheet - Title */
 "connect.with.server.sheet.title" = "Συγχρονισμός και δημιουργία αντιγράφων ασφάλειας αυτής της συσκευής";
 
-/* Sync Paused Errors - Credentials Limit Exceeded Action */
-"credentials.limit.exceeded.action" = "Διαχείριση συνδέσεων";
+/* Standard Buttons - Copy Button */
+"copy.button" = "Αντιγραφή";
 
-/* Sync Paused Errors - Credentials Limit Exceeded Description */
-"credentials.limit.exceeded.description" = "Υπέρβαση του ορίου συνδέσεων. Διαγράψτε ορισμένες για να συνεχίσετε τον συγχρονισμό.";
+/* Do not translate - stringsdict entry */
+"credentials.invalid.objects.present.description" = "credentials.invalid.objects.present.description";
+
+/* Alert title for invalid logins being filtered out of synced data */
+"credentials.invalid.objects.present.title" = "Ορισμένες συνδέσεις δεν συγχρονίζονται λόγω υπερβολικά μεγάλου περιεχομένου σε ορισμένα πεδία.";
 
 /* Delete Server Data - Button */
 "delete.server.data" = "Απενεργοποίηση και διαγραφή δεδομένων διακομιστή...";
 
 /* No comment provided by engineer. */
 "Dev environment" = "Περιβάλλον ανάπτυξης";
+
+/* Device SyncedSheet Button to go get DuckDuckGo on other devices */
+"device.synced.sheet.button.get.other.devices" = "Αποκτήστε το DuckDuckGo σε άλλες συσκευές";
 
 /* Device SyncedSheet - Title */
 "device.synced.sheet.title" = "Τα δεδομένα σας είναι συγχρονισμένα!";
@@ -81,6 +90,9 @@
 
 /* Options - Fetch Favicons Title */
 "fetch.favicons.option.title" = "Αυτόματη λήψη εικονιδίων";
+
+/* No comment provided by engineer. */
+"Go to Settings" = "Μεταβείτε στις Ρυθμίσεις";
 
 /* No comment provided by engineer. */
 "Keep Development" = "Συνεχίστε την ανάπτυξη";
@@ -112,8 +124,11 @@
 /* Standard Buttons - Paste Button */
 "paste.button" = "Επικόλληση";
 
-/* Description of rollout banner */
-"preferences.sync.rollout-banner.description" = "Η λειτουργία Συγχρονισμός και δημιουργία αντιγράφων ασφάλειας κυκλοφορεί σταδιακά και ενδέχεται να μην είναι ακόμα διαθέσιμη στο DuckDuckGo στις άλλες συσκευές σας.";
+/* Button title for sync bookmarks limits exceeded warning to go to manage bookmarks */
+"prefrences.sync.bookmarks-limit-exceeded-action" = "Διαχείριση σελιδοδεικτών";
+
+/* Button title for sync credentials limits exceeded warning to go to manage passwords */
+"prefrences.sync.credentials-limit-exceeded-action" = "Διαχείριση κωδικών πρόσβασης…";
 
 /* Preparing To Sync Sheet - Description */
 "preparing.to.sync.sheet.description" = "Οι σελιδοδείκτες και οι κωδικοί πρόσβασής σας προετοιμάζονται για συγχρονισμό. Αυτό θα πρέπει να διαρκέσει ελάχιστο χρόνο.";
@@ -200,10 +215,13 @@
 "scan.or.see.code.scan.code.instructions.title" = "Από κινητό σε κινητό;";
 
 /* Scan or See Code View - Share Code Link */
-"scan.or.see.code.share.code.link" = "Κοινοποίηση κωδικού κειμένου;";
+"scan.or.see.code.share.code.link" = "Κοινοποίηση κωδικού κειμένου";
 
 /* Scan or See Code View - Title */
 "scan.or.see.code.title" = "Σάρωση κώδικα QR";
+
+/* No comment provided by engineer. */
+"Secure Your Device to Use Sync & Backup" = "Ασφαλίστε τη συσκευή σας για να χρησιμοποιείτε τη λειτουργία Sync & Backup";
 
 /* No comment provided by engineer. */
 "Switch to Production" = "Μετάβαση στην παραγωγή";
@@ -211,8 +229,23 @@
 /* Link label for syncing and backing up the device */
 "sync.and.backup.this.device.link" = "Συγχρονισμός και δημιουργία αντιγράφων ασφάλειας αυτής της συσκευής";
 
-/* Sync Paused Errors - Title */
-"sync.limit.exceeded.title" = "Παύση συγχρονισμού";
+/* Button to get DuckDuckGo on other devices */
+"sync.get.other.devices" = "Αποκτήστε το DuckDuckGo σε άλλες συσκευές";
+
+/* Button title to share link for downloading DuckDuckGo on other devices */
+"sync.get.other.devices.card.button.title" = "Κοινή χρήση συνδέσμου λήψης";
+
+/* Message before share link for downloading DuckDuckGo on other devices */
+"sync.get.other.devices.card.message" = "Για λήψη του DuckDuckGo σε υπολογιστή ή άλλη φορητή συσκευή, επισκεφθείτε τη διεύθυνση:";
+
+/* Title of card with share links for users to download DuckDuckGo on other devices */
+"sync.get.other.devices.card.title" = "Αποκτήστε το DuckDuckGo σε άλλες συσκευές για συγχρονισμό μεταξύ τους";
+
+/* Title of screen with share links for users to download DuckDuckGo on other devices */
+"sync.get.other.devices.screen.title" = "Αποκτήστε το DuckDuckGo";
+
+/* Message included when sharing a url via the system share sheet */
+"sync.get.other.devices.share.link.message" = "Εγκαταστήστε το πρόγραμμα περιήγησης DuckDuckGo στις συσκευές σας για να αρχίσετε να συγχρονίζετε με ασφάλεια τους σελιδοδείκτες και τους κωδικούς πρόσβασής σας:";
 
 /* Sync Menu Path */
 "sync.menu.path" = "Ρυθμίσεις > Συγχρονισμός και δημιουργία αντιγράφων ασφάλειας > Συγχρονισμός με άλλη συσκευή";
@@ -225,9 +258,6 @@
 
 /* Data syncing unavailable warning message */
 "sync.warning.data.syncing.disabled.upgrade.required" = "Δυστυχώς, η λειτουργία Συγχρονισμός και δημιουργία αντιγράφων ασφαλείας δεν είναι διαθέσιμη πλέον σε αυτήν την έκδοση της εφαρμογής. Ενημερώστε το DuckDuckGo στην πιο πρόσφατη έκδοση για να συνεχίσετε.";
-
-/* Title of the warning message */
-"sync.warning.sync.paused" = "Η λειτουργία Συγχρονισμός και δημιουργία αντιγράφων ασφαλείας είναι σε παύση";
 
 /* Title of the warning message */
 "sync.warning.sync.unavailable" = "Ο συγχρονισμός και η δημιουργία αντιγράφων ασφάλειας δεν είναι διαθέσιμος";

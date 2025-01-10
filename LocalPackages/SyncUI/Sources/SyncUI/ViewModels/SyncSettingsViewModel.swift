@@ -19,10 +19,11 @@
 
 import Foundation
 import UIKit
+import Combine
 
 public protocol SyncManagementViewModelDelegate: AnyObject {
 
-    func authenticateUser() async -> Bool
+    func authenticateUser() async throws
     func showRecoverData()
     func showSyncWithAnotherDevice()
     func showRecoveryPDF()
@@ -38,9 +39,26 @@ public protocol SyncManagementViewModelDelegate: AnyObject {
     func updateOptions()
     func launchBookmarksViewController()
     func launchAutofillViewController()
+    func showOtherPlatformLinks()
+    func fireOtherPlatformLinksPixel(event: SyncSettingsViewModel.PlatformLinksPixelEvent, with source: SyncSettingsViewModel.PlatformLinksPixelSource)
+    func shareLink(for url: URL, with message: String, from rect: CGRect)
+
+    var syncBookmarksPausedTitle: String? { get }
+    var syncCredentialsPausedTitle: String? { get }
+    var syncPausedTitle: String? { get }
+    var syncBookmarksPausedDescription: String? { get }
+    var syncCredentialsPausedDescription: String? { get }
+    var syncPausedDescription: String? { get }
+    var syncBookmarksPausedButtonTitle: String? { get }
+    var syncCredentialsPausedButtonTitle: String? { get }
 }
 
 public class SyncSettingsViewModel: ObservableObject {
+
+    public enum UserAuthenticationError: Error {
+        case authFailed
+        case authUnavailable
+    }
 
     public struct Device: Identifiable, Hashable {
 
@@ -67,6 +85,18 @@ public class SyncSettingsViewModel: ObservableObject {
         case valid
     }
 
+    public enum PlatformLinksPixelEvent {
+        case appear
+        case copy
+        case share
+    }
+
+    public enum PlatformLinksPixelSource: String {
+        case notActivated = "not_activated"
+        case activating
+        case activated
+    }
+
     @Published public var isSyncEnabled = false {
         didSet {
             if !isSyncEnabled {
@@ -79,6 +109,7 @@ public class SyncSettingsViewModel: ObservableObject {
     @Published public var isFaviconsFetchingEnabled = false
     @Published public var isUnifiedFavoritesEnabled = true
     @Published public var isSyncingDevices = false
+    @Published public var isSyncPaused = false
     @Published public var isSyncBookmarksPaused = false
     @Published public var isSyncCredentialsPaused = false
     @Published public var invalidBookmarksTitles: [String] = []
@@ -93,20 +124,39 @@ public class SyncSettingsViewModel: ObservableObject {
     @Published public var isAccountRecoveryAvailable: Bool = true
     @Published public var isAppVersionNotSupported: Bool = false
 
+    @Published var shouldShowPasscodeRequiredAlert: Bool = false
+
     public weak var delegate: SyncManagementViewModelDelegate?
     private(set) var isOnDevEnvironment: Bool
     private(set) var switchToProdEnvironment: () -> Void = {}
+    private var cancellables = Set<AnyCancellable>()
 
-    public init(isOnDevEnvironment: @escaping () -> Bool, switchToProdEnvironment: @escaping () -> Void) {
-        self.isOnDevEnvironment = isOnDevEnvironment()
-        self.switchToProdEnvironment = { [weak self] in
-            switchToProdEnvironment()
-            self?.isOnDevEnvironment = isOnDevEnvironment()
+    public init(
+        isOnDevEnvironment: @escaping () -> Bool,
+        switchToProdEnvironment: @escaping () -> Void) {
+            self.isOnDevEnvironment = isOnDevEnvironment()
+            self.switchToProdEnvironment = { [weak self] in
+                switchToProdEnvironment()
+                self?.isOnDevEnvironment = isOnDevEnvironment()
+            }
         }
-    }
 
-    func authenticateUser() async -> Bool {
-        await delegate?.authenticateUser() ?? false
+    @MainActor
+    func commonAuthenticate() async -> Bool {
+        do {
+            try await delegate?.authenticateUser()
+            return true
+        } catch {
+            if let error = error as? SyncSettingsViewModel.UserAuthenticationError {
+                switch error {
+                case .authFailed:
+                    break
+                case .authUnavailable:
+                    shouldShowPasscodeRequiredAlert = true
+                }
+            }
+            return false
+        }
     }
 
     func disableSync() {
@@ -134,11 +184,35 @@ public class SyncSettingsViewModel: ObservableObject {
     }
 
     func saveRecoveryPDF() {
-        delegate?.shareRecoveryPDF()
+        Task { @MainActor in
+            if await commonAuthenticate() {
+                delegate?.shareRecoveryPDF()
+            }
+        }
     }
 
     func scanQRCode() {
-        delegate?.showSyncWithAnotherDevice()
+        Task { @MainActor in
+            if await commonAuthenticate() {
+                delegate?.showSyncWithAnotherDevice()
+            }
+        }
+    }
+
+    func syncAndBackupThisDevice() {
+        Task { @MainActor in
+            if await commonAuthenticate() {
+                delegate?.showSyncWithAnotherDevice()
+            }
+        }
+    }
+
+    func recoverSyncedData() {
+        Task { @MainActor in
+            if await commonAuthenticate() {
+                delegate?.showSyncWithAnotherDevice()
+            }
+        }
     }
 
     func createEditDeviceModel(_ device: Device) -> EditDeviceViewModel {
@@ -172,7 +246,49 @@ public class SyncSettingsViewModel: ObservableObject {
         delegate?.launchAutofillViewController()
     }
 
-    public func recoverSyncDataPressed() {
-        delegate?.showRecoverData()
+    public func shareLinkPressed(for url: URL, with message: String, from rect: CGRect) {
+        delegate?.shareLink(for: url, with: message, from: rect)
     }
+
+    public func showOtherPlatformsPressed() {
+        delegate?.showOtherPlatformLinks()
+    }
+
+    public func fireOtherPlatformLinksPixel(for event: PlatformLinksPixelEvent, source: PlatformLinksPixelSource) {
+        delegate?.fireOtherPlatformLinksPixel(event: event, with: source)
+    }
+
+    public func recoverSyncDataPressed() {
+        Task { @MainActor in
+            if await commonAuthenticate() {
+                delegate?.showRecoverData()
+            }
+        }
+    }
+
+    public var syncBookmarksPausedTitle: String? {
+        return delegate?.syncBookmarksPausedTitle
+    }
+    public var syncCredentialsPausedTitle: String? {
+        delegate?.syncCredentialsPausedTitle
+    }
+    public var syncPausedTitle: String? {
+        delegate?.syncPausedTitle
+    }
+    public var syncBookmarksPausedDescription: String? {
+        delegate?.syncBookmarksPausedDescription
+    }
+    public var syncCredentialsPausedDescription: String? {
+        delegate?.syncCredentialsPausedDescription
+    }
+    public var syncPausedDescription: String? {
+        delegate?.syncPausedDescription
+    }
+    public var syncBookmarksPausedButtonTitle: String? {
+        delegate?.syncBookmarksPausedButtonTitle
+    }
+    public var syncCredentialsPausedButtonTitle: String? {
+        delegate?.syncCredentialsPausedButtonTitle
+    }
+
 }

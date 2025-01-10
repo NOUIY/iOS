@@ -97,16 +97,26 @@ public class SyncDataProviders: DataProvidersSource {
     public init(
         bookmarksDatabase: CoreDataDatabase,
         secureVaultFactory: AutofillVaultFactory = AutofillSecureVaultFactory,
-        secureVaultErrorReporter: SecureVaultErrorReporting,
+        secureVaultErrorReporter: SecureVaultReporting,
         settingHandlers: [SettingSyncHandler],
-        favoritesDisplayModeStorage: FavoritesDisplayModeStoring
+        favoritesDisplayModeStorage: FavoritesDisplayModeStoring,
+        syncErrorHandler: SyncErrorHandling,
+        faviconStoring: FaviconStoring,
+        tld: TLD
     ) {
         self.bookmarksDatabase = bookmarksDatabase
         self.secureVaultFactory = secureVaultFactory
         self.secureVaultErrorReporter = secureVaultErrorReporter
-        bookmarksAdapter = SyncBookmarksAdapter(database: bookmarksDatabase, favoritesDisplayModeStorage: favoritesDisplayModeStorage)
-        credentialsAdapter = SyncCredentialsAdapter(secureVaultFactory: secureVaultFactory, secureVaultErrorReporter: secureVaultErrorReporter)
-        settingsAdapter = SyncSettingsAdapter(settingHandlers: settingHandlers)
+        bookmarksAdapter = SyncBookmarksAdapter(database: bookmarksDatabase,
+                                                favoritesDisplayModeStorage: favoritesDisplayModeStorage,
+                                                syncErrorHandler: syncErrorHandler,
+                                                faviconStoring: faviconStoring)
+        credentialsAdapter = SyncCredentialsAdapter(secureVaultFactory: secureVaultFactory,
+                                                    secureVaultErrorReporter: secureVaultErrorReporter,
+                                                    syncErrorHandler: syncErrorHandler,
+                                                    tld: tld)
+        settingsAdapter = SyncSettingsAdapter(settingHandlers: settingHandlers,
+                                              syncErrorHandler: syncErrorHandler)
     }
 
     private func initializeMetadataDatabaseIfNeeded() {
@@ -139,5 +149,5 @@ public class SyncDataProviders: DataProvidersSource {
     private let syncMetadataDatabase: CoreDataDatabase = SyncMetadataDatabase.make()
     private let bookmarksDatabase: CoreDataDatabase
     private let secureVaultFactory: AutofillVaultFactory
-    private let secureVaultErrorReporter: SecureVaultErrorReporting
+    private let secureVaultErrorReporter: SecureVaultReporting
 }

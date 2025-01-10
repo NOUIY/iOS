@@ -1,11 +1,14 @@
+/* No comment provided by engineer. */
+"A device password is required to use Sync & Backup." = "Na používanie služby Sync & Backup je potrebné heslo zariadenia.";
+
 /* Standard Buttons - Back Button */
 "back.button" = "Späť";
 
-/* Sync Paused Errors - Bookmarks Limit Exceeded Action */
-"bookmarks.limit.exceeded.action" = "Správa záložiek";
+/* Do not translate - stringsdict entry */
+"bookmarks.invalid.objects.present.description" = "bookmarks.invalid.objects.present.description";
 
-/* Sync Paused Errors - Bookmarks Limit Exceeded Description */
-"bookmarks.limit.exceeded.description" = "Limit záložiek bol prekročený. Ak chcete obnoviť synchronizáciu, odstráňte niektoré záložky.";
+/* Alert title for invalid bookmarks being filtered out of synced data */
+"bookmarks.invalid.objects.present.title" = "Niektoré záložky sa nesynchronizujú kvôli príliš dlhému obsahu v určitých poliach.";
 
 /* Camera View - Go to Settings Button */
 "camera.go.to.settings.button" = "Prejdite do Nastavení";
@@ -43,17 +46,23 @@
 /* Connect With Server Sheet - Title */
 "connect.with.server.sheet.title" = "Synchronizujte a zálohujte toto zariadenie";
 
-/* Sync Paused Errors - Credentials Limit Exceeded Action */
-"credentials.limit.exceeded.action" = "Správa prihlásení";
+/* Standard Buttons - Copy Button */
+"copy.button" = "Kopírovať";
 
-/* Sync Paused Errors - Credentials Limit Exceeded Description */
-"credentials.limit.exceeded.description" = "Limit prihlásení bol prekročený. Ak chcete obnoviť synchronizáciu, odstráňte niektoré prihlásenia.";
+/* Do not translate - stringsdict entry */
+"credentials.invalid.objects.present.description" = "credentials.invalid.objects.present.description";
+
+/* Alert title for invalid logins being filtered out of synced data */
+"credentials.invalid.objects.present.title" = "Niektoré prihlásenia sa nesynchronizujú kvôli príliš dlhému obsahu v určitých poliach.";
 
 /* Delete Server Data - Button */
 "delete.server.data" = "Vypnúť a zmazať údaje servera...";
 
 /* No comment provided by engineer. */
 "Dev environment" = "Vývojárske prostredie";
+
+/* Device SyncedSheet Button to go get DuckDuckGo on other devices */
+"device.synced.sheet.button.get.other.devices" = "Získajte DuckDuckGo na iných zariadeniach";
 
 /* Device SyncedSheet - Title */
 "device.synced.sheet.title" = "Vaše údaje sú synchronizované!";
@@ -81,6 +90,9 @@
 
 /* Options - Fetch Favicons Title */
 "fetch.favicons.option.title" = "Ikony automatického sťahovania";
+
+/* No comment provided by engineer. */
+"Go to Settings" = "Prejdite do Nastavení";
 
 /* No comment provided by engineer. */
 "Keep Development" = "Udržiavanie vývoja";
@@ -112,8 +124,11 @@
 /* Standard Buttons - Paste Button */
 "paste.button" = "Vložiť";
 
-/* Description of rollout banner */
-"preferences.sync.rollout-banner.description" = "Synchronizácia a zálohovanie sa zavádza postupne a nemusí byť ešte k dispozícii v rámci DuckDuckGo vo vašich ostatných zariadeniach.";
+/* Button title for sync bookmarks limits exceeded warning to go to manage bookmarks */
+"prefrences.sync.bookmarks-limit-exceeded-action" = "Správa záložiek";
+
+/* Button title for sync credentials limits exceeded warning to go to manage passwords */
+"prefrences.sync.credentials-limit-exceeded-action" = "Spravovať heslá…";
 
 /* Preparing To Sync Sheet - Description */
 "preparing.to.sync.sheet.description" = "Vaše záložky a heslá sa pripravujú na synchronizáciu. Malo by to trvať len chvíľu.";
@@ -200,10 +215,13 @@
 "scan.or.see.code.scan.code.instructions.title" = "Z mobilného telefónu na mobilný telefón?";
 
 /* Scan or See Code View - Share Code Link */
-"scan.or.see.code.share.code.link" = "Zdieľať textový kód?";
+"scan.or.see.code.share.code.link" = "Zdieľať textový kód";
 
 /* Scan or See Code View - Title */
 "scan.or.see.code.title" = "Skenovanie kódu QR";
+
+/* No comment provided by engineer. */
+"Secure Your Device to Use Sync & Backup" = "Aby ste mohli používať službu Sync & Backup, zabezpečte svoje zariadenie.";
 
 /* No comment provided by engineer. */
 "Switch to Production" = "Prepnutie na výrobu";
@@ -211,8 +229,23 @@
 /* Link label for syncing and backing up the device */
 "sync.and.backup.this.device.link" = "Synchronizujte a zálohujte toto zariadenie";
 
-/* Sync Paused Errors - Title */
-"sync.limit.exceeded.title" = "Synchronizácia bola pozastavená";
+/* Button to get DuckDuckGo on other devices */
+"sync.get.other.devices" = "Získajte DuckDuckGo v iných zariadeniach";
+
+/* Button title to share link for downloading DuckDuckGo on other devices */
+"sync.get.other.devices.card.button.title" = "Zdieľať odkaz na stiahnutie";
+
+/* Message before share link for downloading DuckDuckGo on other devices */
+"sync.get.other.devices.card.message" = "Ak si chcete stiahnuť DuckDuckGo do počítača alebo iného mobilného zariadenia, navštívte:";
+
+/* Title of card with share links for users to download DuckDuckGo on other devices */
+"sync.get.other.devices.card.title" = "Získajte DuckDuckGo na iných zariadeniach na synchronizáciu s týmto";
+
+/* Title of screen with share links for users to download DuckDuckGo on other devices */
+"sync.get.other.devices.screen.title" = "Získajte DuckDuckGo";
+
+/* Message included when sharing a url via the system share sheet */
+"sync.get.other.devices.share.link.message" = "Nainštalujte si do svojich zariadení prehliadač DuckDuckGo a začnite bezpečne synchronizovať svoje záložky a heslá:";
 
 /* Sync Menu Path */
 "sync.menu.path" = "Nastavenia > Synchronizácia a zálohovanie > Synchronizácia s iným zariadením";
@@ -225,9 +258,6 @@
 
 /* Data syncing unavailable warning message */
 "sync.warning.data.syncing.disabled.upgrade.required" = "Je nám ľúto, ale služba Synchronizácia a zálohovanie už nie je v tejto verzii aplikácie k dispozícii. Ak chcete pokračovať, aktualizujte DuckDuckGo na najnovšiu verziu.";
-
-/* Title of the warning message */
-"sync.warning.sync.paused" = "Synchronizácia a zálohovanie sú pozastavené";
 
 /* Title of the warning message */
 "sync.warning.sync.unavailable" = "Synchronizácia a zálohovanie nie je k dispozícii";

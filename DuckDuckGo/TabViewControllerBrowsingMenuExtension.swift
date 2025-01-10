@@ -26,68 +26,127 @@ import WidgetKit
 import Common
 import PrivacyDashboard
 
-// swiftlint:disable file_length
 extension TabViewController {
-    
+
+    private var shouldShowAIChatInMenuHeader: Bool {
+        let settings = AIChatSettings(privacyConfigurationManager: ContentBlocking.shared.privacyConfigurationManager,
+                                      internalUserDecider: AppDependencyProvider.shared.internalUserDecider)
+        return settings.isAIChatBrowsingMenuUserSettingsEnabled
+    }
+
+    private var shouldShowPrintButtonInBrowsingMenuList: Bool { shouldShowAIChatInMenuHeader }
+
     func buildBrowsingMenuHeaderContent() -> [BrowsingMenuEntry] {
-        
         var entries = [BrowsingMenuEntry]()
-        
-        entries.append(BrowsingMenuEntry.regular(name: UserText.actionNewTab,
-                                                 accessibilityLabel: UserText.keyCommandNewTab,
-                                                 image: UIImage(named: "Add-24")!,
-                                                 action: { [weak self] in
+
+        let newTabEntry = BrowsingMenuEntry.regular(name: UserText.actionNewTab,
+                                                    accessibilityLabel: UserText.keyCommandNewTab,
+                                                    image: UIImage(named: "Add-24")!,
+                                                    action: { [weak self] in
             self?.onNewTabAction()
-        }))
-        
-        entries.append(BrowsingMenuEntry.regular(name: UserText.actionShare, image: UIImage(named: "Share-24")!, action: { [weak self] in
+        })
+
+        let shareEntry = BrowsingMenuEntry.regular(name: UserText.actionShare, image: UIImage(named: "Share-24")!, action: { [weak self] in
             guard let self = self else { return }
             guard let menu = self.chromeDelegate?.omniBar.menuButton else { return }
             Pixel.fire(pixel: .browsingMenuShare)
             self.onShareAction(forLink: self.link!, fromView: menu)
-        }))
-        
-        entries.append(BrowsingMenuEntry.regular(name: UserText.actionCopy, image: UIImage(named: "Copy-24")!, action: { [weak self] in
+        })
+
+        let copyEntry = BrowsingMenuEntry.regular(name: UserText.actionCopy, image: UIImage(named: "Copy-24")!, action: { [weak self] in
             guard let strongSelf = self else { return }
             if !strongSelf.isError, let url = strongSelf.webView.url {
                 strongSelf.onCopyAction(forUrl: url)
             } else if let text = self?.chromeDelegate?.omniBar.textField.text {
                 strongSelf.onCopyAction(for: text)
             }
-            
+
             Pixel.fire(pixel: .browsingMenuCopy)
             let addressBarBottom = strongSelf.appSettings.currentAddressBarPosition.isBottom
             ActionMessageView.present(message: UserText.actionCopyMessage,
                                       presentationLocation: .withBottomBar(andAddressBarBottom: addressBarBottom))
-        }))
-        
-        entries.append(BrowsingMenuEntry.regular(name: UserText.actionPrint, image: UIImage(named: "Print-24")!, action: { [weak self] in
+        })
+
+        let printEntry = BrowsingMenuEntry.regular(name: UserText.actionPrint, image: UIImage(named: "Print-24")!, action: { [weak self] in
             Pixel.fire(pixel: .browsingMenuPrint)
             self?.print()
-        }))
+        })
+
+        let chatEntry = BrowsingMenuEntry.regular(name: UserText.actionOpenAIChat, image: UIImage(named: "AIChat-24")!, action: { [weak self] in
+            Pixel.fire(pixel: .browsingMenuAIChat)
+            self?.openAIChat()
+        })
+
+        if shouldShowAIChatInMenuHeader {
+            entries.append(newTabEntry)
+            entries.append(chatEntry)
+            entries.append(shareEntry)
+            entries.append(copyEntry)
+        } else {
+            entries.append(newTabEntry)
+            entries.append(shareEntry)
+            entries.append(copyEntry)
+            entries.append(printEntry)
+        }
 
         return entries
     }
-    
+
+
     var favoriteEntryIndex: Int { 1 }
+
+    func buildShortcutsMenu() -> [BrowsingMenuEntry] {
+        buildShortcutsEntries(includeBookmarks: true)
+    }
 
     func buildBrowsingMenu(with bookmarksInterface: MenuBookmarksInteracting) -> [BrowsingMenuEntry] {
         var entries = [BrowsingMenuEntry]()
-        
+
         let linkEntries = buildLinkEntries(with: bookmarksInterface)
         entries.append(contentsOf: linkEntries)
-            
+
+        if shouldShowPrintButtonInBrowsingMenuList {
+            entries.append(.regular(name: UserText.actionPrintSite,
+                                    accessibilityLabel: UserText.actionPrintSite,
+                                    image: UIImage(named: "Print-16")!,
+                                    action: { [weak self] in
+                Pixel.fire(pixel: .browsingMenuListPrint)
+                self?.print()
+            }))
+        }
+
         if let domain = self.privacyInfo?.domain {
             entries.append(self.buildToggleProtectionEntry(forDomain: domain))
         }
 
-        entries.append(BrowsingMenuEntry.regular(name: UserText.actionReportBrokenSite,
-                                                 image: UIImage(named: "Feedback-16")!,
-                                                 action: { [weak self] in
-            self?.onReportBrokenSiteAction()
-        }))
+        if link != nil {
+            let name = UserText.actionReportBrokenSite
+            entries.append(BrowsingMenuEntry.regular(name: name,
+                                                     image: UIImage(named: "Feedback-16")!,
+                                                     action: { [weak self] in
+                self?.onReportBrokenSiteAction()
+            }))
+        }
 
-        entries.append(.separator)
+        // Do not add separator if there are no entries so far
+        if entries.count > 0 {
+            entries.append(.separator)
+        }
+
+        let shortcutsEntries = buildShortcutsEntries(includeBookmarks: false)
+        entries.append(contentsOf: shortcutsEntries)
+
+        return entries
+    }
+
+    private func buildShortcutsEntries(includeBookmarks: Bool) -> [BrowsingMenuEntry] {
+        var entries = [BrowsingMenuEntry]()
+
+        if includeBookmarks {
+            entries.append(buildOpenBookmarksEntry())
+
+            entries.append(.separator)
+        }
 
         if featureFlagger.isFeatureOn(.autofillAccessCredentialManagement) {
             entries.append(BrowsingMenuEntry.regular(name: UserText.actionAutofillLogins,
@@ -123,12 +182,7 @@ extension TabViewController {
         assert(self.favoriteEntryIndex == entries.count, "Entry index should be in sync with entry placement")
         entries.append(bookmarkEntries.favorite)
                 
-        entries.append(BrowsingMenuEntry.regular(name: UserText.actionOpenBookmarks,
-                                                 image: UIImage(named: "Library-16")!,
-                                                 action: { [weak self] in
-            guard let strongSelf = self else { return }
-            strongSelf.delegate?.tabDidRequestBookmarks(tab: strongSelf)
-        }))
+        entries.append(buildOpenBookmarksEntry())
 
         entries.append(.separator)
 
@@ -137,6 +191,10 @@ extension TabViewController {
         }
 
         if let entry = self.buildUseNewDuckAddressEntry(forLink: link) {
+            entries.append(entry)
+        }
+
+        if let entry = textZoomCoordinator.makeBrowsingMenuEntry(forLink: link, inController: self, forWebView: self.webView) {
             entries.append(entry)
         }
 
@@ -150,10 +208,10 @@ extension TabViewController {
                 
         return entries
     }
-    
+
     private func buildKeepSignInEntry(forLink link: Link) -> BrowsingMenuEntry? {
         guard let domain = link.url.host, !link.url.isDuckDuckGo else { return nil }
-        let isFireproofed = PreserveLogins.shared.isAllowed(cookieDomain: domain)
+        let isFireproofed = fireproofing.isAllowed(cookieDomain: domain)
         
         if isFireproofed {
             return BrowsingMenuEntry.regular(name: UserText.disablePreservingLogins,
@@ -216,9 +274,18 @@ extension TabViewController {
                                          })
     }
 
+    private func buildOpenBookmarksEntry() -> BrowsingMenuEntry {
+        BrowsingMenuEntry.regular(name: UserText.actionOpenBookmarks,
+                                                 image: UIImage(named: "Library-16")!,
+                                                 action: { [weak self] in
+            self?.onOpenBookmarksAction()
+        })
+    }
+
     private func performSaveBookmarkAction(for link: Link,
                                            with bookmarksInterface: MenuBookmarksInteracting) {
         Pixel.fire(pixel: .browsingMenuAddToBookmarks)
+        DailyPixel.fire(pixel: .addBookmarkDaily)
         bookmarksInterface.createBookmark(title: link.title ?? "", url: link.url)
         favicons.loadFavicon(forDomain: link.url.host, intoCache: .fireproof, fromCache: .tabs)
         syncService.scheduler.notifyDataChanged()
@@ -260,6 +327,7 @@ extension TabViewController {
                                               image: UIImage(named: "Favorite-16")!,
                                               action: { [weak self] in
             Pixel.fire(pixel: addToFavoriteFlow ? .browsingMenuAddToFavoritesAddFavoriteFlow : .browsingMenuAddToFavorites)
+            DailyPixel.fire(pixel: .addFavoriteDaily)
             self?.performAddFavoriteAction(for: link, with: bookmarksInterface)
         })
         return entry
@@ -348,7 +416,7 @@ extension TabViewController {
 
     private func shareLinkWithTemporaryDownload(_ temporaryDownload: Download?,
                                                 originalLink: Link,
-                                                completion: @escaping(Link) -> Void) {
+                                                completion: @escaping (Link) -> Void) {
         guard let download = temporaryDownload else {
             completion(originalLink)
             return
@@ -403,9 +471,15 @@ extension TabViewController {
     }
     
     private func onBrowsingSettingsAction() {
-        Pixel.fire(pixel: .browsingMenuSettings)
-        AppDependencyProvider.shared.userBehaviorMonitor.handleAction(.openSettings)
         delegate?.tabDidRequestSettings(tab: self)
+    }
+
+    private func onOpenBookmarksAction() {
+        delegate?.tabDidRequestBookmarks(tab: self)
+    }
+
+    private func openAIChat() {
+        delegate?.tabDidRequestAIChat(tab: self)
     }
 
     private func buildToggleProtectionEntry(forDomain domain: String) -> BrowsingMenuEntry {
@@ -420,8 +494,10 @@ extension TabViewController {
     }
 
     private func onToggleProtectionAction(forDomain domain: String, isProtected: Bool) {
-        let config = ContentBlocking.shared.privacyConfigurationManager.privacyConfig
-        if isProtected && ToggleReportsFeature(privacyConfiguration: config).isEnabled {
+        let toggleReportingConfig = ToggleReportingConfiguration(privacyConfigurationManager: ContentBlocking.shared.privacyConfigurationManager)
+        let toggleReportingFeature = ToggleReportingFeature(toggleReportingConfiguration: toggleReportingConfig)
+        let toggleReportingManager = ToggleReportingManager(feature: toggleReportingFeature)
+        if isProtected && toggleReportingManager.shouldShowToggleReport {
             delegate?.tab(self, didRequestToggleReportWithCompletionHandler: { [weak self] didSendReport in
                 self?.togglePrivacyProtection(domain: domain, didSendReport: didSendReport)
             })
@@ -458,7 +534,6 @@ extension TabViewController {
                                   onAction: { [weak self] in
             self?.togglePrivacyProtection(domain: domain)
         })
-        AppDependencyProvider.shared.userBehaviorMonitor.handleAction(.toggleProtections)
     }
 
 }

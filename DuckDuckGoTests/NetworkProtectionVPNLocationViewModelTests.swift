@@ -23,9 +23,6 @@ import NetworkExtension
 import NetworkProtectionTestUtils
 @testable import DuckDuckGo
 
-// swiftlint:disable type_body_length
-// swiftlint:disable file_length
-
 final class NetworkProtectionVPNLocationViewModelTests: XCTestCase {
     private var listRepository: MockNetworkProtectionLocationListRepository!
     private var settings: VPNSettings!
@@ -657,15 +654,32 @@ final class NetworkProtectionVPNLocationViewModelTests: XCTestCase {
     }
 }
 
-// swiftlint:enable type_body_length
-
 final class MockNetworkProtectionLocationListRepository: NetworkProtectionLocationListRepository {
+
     var stubLocationList: [NetworkProtectionLocation] = []
     var stubError: Error?
     var didCallFetchLocationList: Bool = false
+    var didCallFetchLocationListIgnoringCache: Bool = false
 
     func fetchLocationList() async throws -> [NetworkProtectionLocation] {
         didCallFetchLocationList = true
+        if let stubError {
+            throw stubError
+        }
+        return stubLocationList
+    }
+
+    func fetchLocationList(cachePolicy: NetworkProtectionLocationListCachePolicy) async throws -> [NetworkProtectionLocation] {
+        switch cachePolicy {
+        case .returnCacheElseLoad:
+            return try await fetchLocationList()
+        case .ignoreCache:
+            return try await fetchLocationListIgnoringCache()
+        }
+    }
+
+    func fetchLocationListIgnoringCache() async throws -> [NetworkProtection.NetworkProtectionLocation] {
+        didCallFetchLocationListIgnoringCache = true
         if let stubError {
             throw stubError
         }
@@ -690,5 +704,3 @@ struct EncodableWrapper: Encodable {
         try self.wrapped.encode(to: encoder)
     }
 }
-
-// swiftlint:enable file_length

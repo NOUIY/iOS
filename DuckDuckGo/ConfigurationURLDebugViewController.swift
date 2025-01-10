@@ -125,7 +125,7 @@ final class ConfigurationURLDebugViewController: UITableViewController {
         }
         cell.title.text = row.title
         cell.subtitle.text = url(for: row)
-        cell.subtitle.textColor = customURL(for: row) != nil ? UIColor(designSystemColor: .accent) : .black
+        cell.subtitle.textColor = customURL(for: row) != nil ? UIColor(designSystemColor: .accent) : .label
         cell.ternary.text = lastConfigurationUpdateDate != nil ? dateFormatter.string(from: lastConfigurationUpdateDate!) : "-"
         cell.refresh.addAction(refreshAction, for: .primaryActionTriggered)
         return cell
@@ -179,7 +179,7 @@ struct CustomConfigurationURLProvider: ConfigurationURLProviding {
     var customPrivacyConfigurationURL: URL?
     var customTrackerDataSetURL: URL?
     var customSurrogatesURL: URL?
-    var customFBConfigURL: URL?
+    var customRemoteMessagingConfigURL: URL?
 
     let defaultProvider = AppConfigurationURLProvider()
 
@@ -193,7 +193,7 @@ struct CustomConfigurationURLProvider: ConfigurationURLProviding {
         case .privacyConfiguration: customURL = customPrivacyConfigurationURL
         case .trackerDataSet: customURL = customTrackerDataSetURL
         case .surrogates: customURL = customSurrogatesURL
-        case .FBConfig: customURL = nil
+        case .remoteMessagingConfig: customURL = customRemoteMessagingConfigURL
         }
         return customURL ?? defaultURL
     }

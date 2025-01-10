@@ -19,6 +19,7 @@
 
 import UIKit
 import Core
+import DuckPlayer
 
 class TabViewListCell: TabViewCell {
 
@@ -53,7 +54,7 @@ class TabViewListCell: TabViewCell {
             isHidden = false
         }
         isCurrent = delegate?.isCurrent(tab: tab) ?? false
-        decorate(with: ThemeManager.shared.currentTheme)
+        decorate()
 
         if let link = tab.link {
             removeButton.accessibilityLabel = UserText.closeTab(withTitle: link.displayTitle, atAddress: link.url.host ?? "")
@@ -75,13 +76,33 @@ class TabViewListCell: TabViewCell {
             link.isHidden = !tab.viewed
         } else {
             removeButton.isHidden = false
+            
+            // Duck Player videos
+            if let url = tab.link?.url,
+                url.isDuckPlayer,
+                let (videoID, _) = url.youtubeVideoParams {
+                    link.text = URL.duckPlayer(videoID).absoluteString
+                    favicon.image = UIImage(named: "DuckPlayerURLIcon")
+                    return
+            }
+            
+            // Other URLs
             link.text = tab.link?.url.absoluteString ?? ""
             favicon.loadFavicon(forDomain: tab.link?.url.host, usingCache: .tabs)
+            
         }
     }
-    
-    override func decorate(with theme: Theme) {
-        super.decorate(with: theme)
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            decorate()
+        }
+    }
+
+    private func decorate() {
+        let theme = ThemeManager.shared.currentTheme
         
         background.layer.borderWidth = isCurrent ? Constants.selectedBorderWidth : Constants.unselectedBorderWidth
         background.layer.borderColor = theme.tabSwitcherCellBorderColor.cgColor

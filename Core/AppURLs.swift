@@ -31,7 +31,13 @@ public extension URL {
     static let emailProtection = URL(string: "\(base)/email")!
     static let emailProtectionSignUp = URL(string: "\(base)/email/start-incontext")!
     static let emailProtectionQuickLink = URL(string: AppDeepLinkSchemes.quickLink.appending("\(ddg.host!)/email"))!
+    static let emailProtectionAccountLink = URL(string: AppDeepLinkSchemes.quickLink.appending("\(ddg.host!)/email/settings/account"))!
+    static let emailProtectionSupportLink = URL(string: AppDeepLinkSchemes.quickLink.appending("\(ddg.host!)/email/settings/support"))!
+    static let emailProtectionHelpPageLink = URL(string: AppDeepLinkSchemes.quickLink.appending("\(ddg.host!)/duckduckgo-help-pages/email-protection/what-is-duckduckgo-email-protection/"))!
     static let aboutLink = URL(string: AppDeepLinkSchemes.quickLink.appending("\(ddg.host!)/about"))!
+    static let apps = URL(string: AppDeepLinkSchemes.quickLink.appending("\(ddg.host!)/apps?origin=funnel_app_ios"))!
+    static let searchSettings = URL(string: AppDeepLinkSchemes.quickLink.appending("\(ddg.host!)/settings"))!
+    static let autofillHelpPageLink = URL(string: AppDeepLinkSchemes.quickLink.appending("\(ddg.host!)/duckduckgo-help-pages/sync-and-backup/password-manager-security/"))!
 
     static let surrogates = URL(string: "\(staticBase)/surrogates.txt")!
 
@@ -54,13 +60,6 @@ public extension URL {
     static let windows = URL(string: "\(base)/windows")!
 
     static func makeExtiURL(atb: String) -> URL { URL.exti.appendingParameter(name: Param.atb, value: atb) }
-
-    static func makeAutocompleteURL(for text: String) throws -> URL {
-        URL.autocomplete.appendingParameters([
-            Param.search: text,
-            Param.enableNavSuggestions: ParamValue.enableNavSuggestions
-        ])
-    }
 
     static func isDuckDuckGo(domain: String?) -> Bool {
         guard let domain = domain, let url = URL(string: "https://\(domain)") else { return false }
@@ -113,7 +112,6 @@ public extension URL {
         static let vertical = "ia"
         static let verticalRewrite = "iar"
         static let verticalMaps = "iaxm"
-        static let enableNavSuggestions = "is_nav"
         static let email = "email"
 
     }
@@ -123,7 +121,6 @@ public extension URL {
         static let source = "ddg_ios"
         static let appUsage = "app_use"
         static let searchHeader = "-1"
-        static let enableNavSuggestions = "1"
         static let emailEnabled = "1"
         static let emailDisabled = "0"
         static let majorVerticals: Set<String> = ["images", "videos", "news"]

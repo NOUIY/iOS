@@ -52,7 +52,7 @@ class TabsBarViewController: UIViewController {
     weak var delegate: TabsBarDelegate?
     private weak var tabsModel: TabsModel?
 
-    let tabSwitcherButton = TabSwitcherButton()
+    var tabSwitcherButton: TabSwitcherButton!
     private let longPressTabGesture = UILongPressGestureRecognizer()
     
     private weak var pressedCell: TabsBarCell?
@@ -72,7 +72,9 @@ class TabsBarViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        applyTheme(ThemeManager.shared.currentTheme)
+        tabSwitcherButton = TabSwitcherButton()
+
+        decorate()
 
         tabSwitcherButton.delegate = self
         tabSwitcherContainer.addSubview(tabSwitcherButton)
@@ -94,9 +96,7 @@ class TabsBarViewController: UIViewController {
 
     @IBAction func onFireButtonPressed() {
         
-        if DaxDialogs.shared.shouldShowFireButtonPulse {
-            delegate?.tabsBarDidRequestFireEducationDialog(self)
-        } else {
+        func showClearDataAlert() {
             let alert = ForgetDataAlert.buildAlert(forgetTabsAndDataHandler: { [weak self] in
                 guard let self = self else { return }
                 self.delegate?.tabsBarDidRequestForgetAll(self)
@@ -104,6 +104,8 @@ class TabsBarViewController: UIViewController {
             self.present(controller: alert, fromView: fireButton)
         }
 
+        delegate?.tabsBarDidRequestFireEducationDialog(self)
+        showClearDataAlert()
     }
 
     @IBAction func onNewTabPressed() {
@@ -272,14 +274,14 @@ extension TabsBarViewController: UICollectionViewDataSource {
 
 }
 
-extension TabsBarViewController: Themable {
+extension TabsBarViewController {
 
-    func decorate(with theme: Theme) {
+    private func decorate() {
+        let theme = ThemeManager.shared.currentTheme
         view.backgroundColor = theme.tabsBarBackgroundColor
         view.tintColor = theme.barTintColor
         collectionView.backgroundColor = theme.tabsBarBackgroundColor
         buttonsBackground.backgroundColor = theme.tabsBarBackgroundColor
-        tabSwitcherButton.decorate(with: theme)
         
         collectionView.reloadData()
     }
@@ -312,9 +314,8 @@ extension MainViewController: TabsBarDelegate {
     }
     
     func tabsBarDidRequestFireEducationDialog(_ controller: TabsBarViewController) {
-        if let spec = DaxDialogs.shared.fireButtonEducationMessage() {
-            segueToActionSheetDaxDialogWithSpec(spec)
-        }
+        currentTab?.dismissContextualDaxFireDialog()
+        ViewHighlighter.hideAll()
     }
     
     func tabsBarDidRequestTabSwitcher(_ controller: TabsBarViewController) {

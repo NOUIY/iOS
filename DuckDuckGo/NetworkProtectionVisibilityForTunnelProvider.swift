@@ -17,34 +17,30 @@
 //  limitations under the License.
 //
 
-#if NETWORK_PROTECTION
-
 import Foundation
-
-#if SUBSCRIPTION
 import Subscription
-#endif
 
 struct NetworkProtectionVisibilityForTunnelProvider: NetworkProtectionFeatureVisibility {
-    func isWaitlistBetaActive() -> Bool {
-        preconditionFailure("Does not apply to Tunnel Provider")
+
+    private let accountManager: AccountManager
+
+    init(accountManager: AccountManager) {
+        self.accountManager = accountManager
     }
 
-    func isWaitlistUser() -> Bool {
-        preconditionFailure("Does not apply to Tunnel Provider")
-    }
-    
     func isPrivacyProLaunched() -> Bool {
-#if SUBSCRIPTION
-        AccountManager().isUserAuthenticated
-#else
-        false
-#endif
+        accountManager.isUserAuthenticated
     }
     
     func shouldMonitorEntitlement() -> Bool {
         isPrivacyProLaunched()
     }
-}
 
-#endif
+    func shouldShowVPNShortcut() -> Bool {
+        guard isPrivacyProLaunched() else {
+            return false
+        }
+
+        return accountManager.isUserAuthenticated
+    }
+}

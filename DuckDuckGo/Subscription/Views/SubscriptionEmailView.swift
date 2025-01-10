@@ -17,13 +17,11 @@
 //  limitations under the License.
 //
 
-#if SUBSCRIPTION
 import SwiftUI
 import Foundation
 import Core
 import Combine
 
-@available(iOS 15.0, *)
 struct SubscriptionEmailView: View {
         
     @StateObject var viewModel: SubscriptionEmailViewModel
@@ -44,13 +42,13 @@ struct SubscriptionEmailView: View {
         
     var body: some View {
         // Hidden Navigation Links for Onboarding sections
-        NavigationLink(destination: NetworkProtectionRootView(inviteCompletion: {}).navigationViewStyle(.stack),
+        NavigationLink(destination: LazyView(NetworkProtectionRootView().navigationViewStyle(.stack)),
                        isActive: $isShowingNetP,
                        label: { EmptyView() })
-        NavigationLink(destination: SubscriptionITPView().navigationViewStyle(.stack),
+        NavigationLink(destination: LazyView(SubscriptionITPView().navigationViewStyle(.stack)),
                        isActive: $isShowingITR,
                        label: { EmptyView() })
-        NavigationLink(destination: SubscriptionPIRView().navigationViewStyle(.stack),
+        NavigationLink(destination: LazyView(SubscriptionPIRView().navigationViewStyle(.stack)),
                        isActive: $isShowingDBP,
                        label: { EmptyView() })
                         
@@ -184,11 +182,8 @@ struct SubscriptionEmailView: View {
 }
 
 // Commented out because CI fails if a SwiftUI preview is enabled https://app.asana.com/0/414709148257752/1206774081310425/f
-// @available(iOS 15.0, *)
 // struct SubscriptionEmailView_Previews: PreviewProvider {
 //    static var previews: some View {
 //        SubscriptionEmailView()
 //    }
 // }
-
-#endif

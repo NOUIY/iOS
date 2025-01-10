@@ -50,7 +50,6 @@ public final class ContentBlocking {
                                            embeddedDataProvider: AppPrivacyConfigurationDataProvider(),
                                            localProtection: DomainsProtectionUserDefaultsStore(),
                                            errorReporting: Self.debugEvents,
-                                           toggleProtectionsCounterEventReporting: toggleProtectionsEvents,
                                            internalUserDecider: internalUserDecider,
                                            installDate: statisticsStore.installDate)
         self.privacyConfigurationManager = privacyConfigurationManager
@@ -70,8 +69,7 @@ public final class ContentBlocking {
         contentBlockingManager = ContentBlockerRulesManager(rulesSource: contentBlockerRulesSource,
                                                             exceptionsSource: exceptionsSource,
                                                             lastCompiledRulesStore: lastCompiledRulesStore,
-                                                            errorReporting: Self.debugEvents,
-                                                            log: .contentBlockingLog)
+                                                            errorReporting: Self.debugEvents)
 
         adClickAttributionRulesProvider = AdClickAttributionRulesProvider(config: adClickAttribution,
                                                                           compiledRulesSource: contentBlockingManager,
@@ -118,8 +116,21 @@ public final class ContentBlocking {
 
             domainEvent = .contentBlockingCompilationFailed(listType: listType, component: component)
 
-        case .contentBlockingCompilationTime:
-            domainEvent = .contentBlockingCompilationTime
+        case .contentBlockingLookupRulesSucceeded:
+            domainEvent = .contentBlockingLookupRulesSucceeded
+            
+        case .contentBlockingFetchLRCSucceeded:
+            domainEvent = .contentBlockingFetchLRCSucceeded
+            
+        case .contentBlockingNoMatchInLRC:
+            domainEvent = .contentBlockingNoMatchInLRC
+            
+        case .contentBlockingLRCMissing:
+            domainEvent = .contentBlockingLRCMissing
+
+        case .contentBlockingCompilationTaskPerformance(let retryCount, let timeBucketAggregation):
+            domainEvent = .contentBlockingCompilationTaskPerformance(iterationCount: retryCount,
+                                                                     timeBucketAggregation: Pixel.Event.CompileTimeBucketAggregation(number: timeBucketAggregation))
         }
 
         if let error = error {
@@ -140,8 +151,7 @@ public final class ContentBlocking {
         AdClickAttributionDetection(feature: adClickAttribution,
                                     tld: tld,
                                     eventReporting: attributionEvents,
-                                    errorReporting: attributionDebugEvents,
-                                    log: .adAttributionLog)
+                                    errorReporting: attributionDebugEvents)
     }
 
     public func makeAdClickAttributionLogic(tld: TLD) -> AdClickAttributionLogic {
@@ -149,8 +159,7 @@ public final class ContentBlocking {
                                 rulesProvider: adClickAttributionRulesProvider,
                                 tld: tld,
                                 eventReporting: attributionEvents,
-                                errorReporting: attributionDebugEvents,
-                                log: .adAttributionLog)
+                                errorReporting: attributionDebugEvents)
     }
 
     private let attributionEvents = EventMapping<AdClickAttributionEvents> { event, _, parameters, _ in
@@ -195,16 +204,6 @@ public final class ContentBlocking {
         }
 
         Pixel.fire(pixel: domainEvent, includedParameters: [])
-    }
-
-    private let toggleProtectionsEvents = EventMapping<ToggleProtectionsCounterEvent> { event, _, parameters, _ in
-        let domainEvent: Pixel.Event
-        switch event {
-        case .toggleProtectionsCounterDaily:
-            domainEvent = .toggleProtectionsDailyCount
-        }
-
-        Pixel.fire(pixel: domainEvent, withAdditionalParameters: parameters ?? [:])
     }
 
 }

@@ -22,12 +22,21 @@ import UIKit
 import Core
 import PrivacyDashboard
 import DesignResourcesKit
+import DuckPlayer
+import os.log
 
 extension OmniBar: NibLoading {}
 
-// swiftlint:disable file_length
-// swiftlint:disable type_body_length
+public enum OmniBarIcon: String {
+    case duckPlayer = "DuckPlayerURLIcon"
+}
+
 class OmniBar: UIView {
+
+    enum AccessoryType {
+         case share
+         case chat
+     }
 
     public static let didLayoutNotification = Notification.Name("com.duckduckgo.app.OmniBarDidLayout")
     
@@ -46,12 +55,13 @@ class OmniBar: UIView {
     @IBOutlet weak var cancelButton: UIButton!
     @IBOutlet weak var refreshButton: UIButton!
     @IBOutlet weak var voiceSearchButton: UIButton!
-    
+    @IBOutlet weak var abortButton: UIButton!
+
     @IBOutlet weak var bookmarksButton: UIButton!
     @IBOutlet weak var backButton: UIButton!
     @IBOutlet weak var forwardButton: UIButton!
-    @IBOutlet weak var shareButton: UIButton!
-    
+    @IBOutlet weak var accessoryButton: UIButton!
+
     private(set) var menuButtonContent = MenuButton()
 
     // Don't use weak because adding/removing them causes them to go away
@@ -65,25 +75,40 @@ class OmniBar: UIView {
     @IBOutlet var separatorToBottom: NSLayoutConstraint!
 
     weak var omniDelegate: OmniBarDelegate?
-    fileprivate var state: OmniBarState = SmallOmniBarState.HomeNonEditingState()
-    
-    private var privacyIconAndTrackersAnimator = PrivacyIconAndTrackersAnimator()
-    private var notificationAnimator = OmniBarNotificationAnimator()
-
-    static func loadFromXib() -> OmniBar {
-        return OmniBar.load(nibName: "OmniBar")
+    fileprivate var state: OmniBarState!
+    var accessoryType: AccessoryType = .share {
+        didSet {
+            switch accessoryType {
+            case .chat:
+                accessoryButton.setImage(UIImage(named: "AIChat-24"), for: .normal)
+            case .share:
+                accessoryButton.setImage(UIImage(named: "Share-24"), for: .normal)
+            }
+        }
     }
 
-    private let appSettings: AppSettings
+    private var privacyIconAndTrackersAnimator = PrivacyIconAndTrackersAnimator()
+    private var notificationAnimator = OmniBarNotificationAnimator()
+    private let privacyIconContextualOnboardingAnimator = PrivacyIconContextualOnboardingAnimator()
+
+    // Set up a view to add a custom icon to the Omnibar
+    private var customIconView: UIImageView = UIImageView(frame: CGRect(x: 4, y: 8, width: 26, height: 26))
+
+    static func loadFromXib(voiceSearchHelper: VoiceSearchHelperProtocol) -> OmniBar {
+        let omniBar = OmniBar.load(nibName: "OmniBar")
+        omniBar.state = SmallOmniBarState.HomeNonEditingState(voiceSearchHelper: voiceSearchHelper, isLoading: false)
+        omniBar.refreshState(omniBar.state)
+
+        return omniBar
+    }
 
     required init?(coder: NSCoder) {
-        appSettings = AppDependencyProvider.shared.appSettings
         super.init(coder: coder)
     }
 
     // Tests require this
-    override init(frame: CGRect) {
-        appSettings = AppDependencyProvider.shared.appSettings
+    init(voiceSearchHelper: VoiceSearchHelperProtocol, frame: CGRect) {
+        self.state = SmallOmniBarState.HomeNonEditingState(voiceSearchHelper: voiceSearchHelper, isLoading: false)
         super.init(frame: frame)
     }
 
@@ -94,13 +119,14 @@ class OmniBar: UIView {
         configureSettingsLongPressButton()
         configureShareLongPressButton()
         registerNotifications()
-        
+
         configureSeparator()
         configureEditingMenu()
-        refreshState(state)
         enableInteractionsWithPointer()
         
         privacyInfoContainer.isHidden = true
+
+        decorate()
     }
 
     private func configureSettingsLongPressButton() {
@@ -112,7 +138,7 @@ class OmniBar: UIView {
     private func configureShareLongPressButton() {
         let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleShareLongPress(_:)))
         longPressGesture.minimumPressDuration = 0.7
-        shareButton.addGestureRecognizer(longPressGesture)
+        accessoryButton.addGestureRecognizer(longPressGesture)
     }
 
     @objc private func handleSettingsLongPress(_ gesture: UILongPressGestureRecognizer) {
@@ -123,7 +149,7 @@ class OmniBar: UIView {
 
     @objc private func handleShareLongPress(_ gesture: UILongPressGestureRecognizer) {
         if gesture.state == .began {
-            omniDelegate?.onShareLongPressed()
+            omniDelegate?.onAccessoryLongPressed(accessoryType: accessoryType)
         }
     }
 
@@ -145,7 +171,7 @@ class OmniBar: UIView {
         settingsButton.isPointerInteractionEnabled = true
         cancelButton.isPointerInteractionEnabled = true
         bookmarksButton.isPointerInteractionEnabled = true
-        shareButton.isPointerInteractionEnabled = true
+        accessoryButton.isPointerInteractionEnabled = true
         menuButton.isPointerInteractionEnabled = true
 
         refreshButton.isPointerInteractionEnabled = true
@@ -174,6 +200,8 @@ class OmniBar: UIView {
         }
     }
     
+    var textFieldTapped = true
+
     private func configureSeparator() {
         separatorHeightConstraint.constant = 1.0 / UIScreen.main.scale
     }
@@ -225,12 +253,24 @@ class OmniBar: UIView {
         separatorToBottom.constant = 0
     }
 
+    func cancel() {
+        refreshState(state.onEditingStoppedState)
+    }
+
     func startBrowsing() {
         refreshState(state.onBrowsingStartedState)
     }
 
     func stopBrowsing() {
         refreshState(state.onBrowsingStoppedState)
+    }
+
+    func startLoading() {
+        refreshState(state.withLoading())
+    }
+
+    func stopLoading() {
+        refreshState(state.withoutLoading())
     }
 
     func removeTextSelection() {
@@ -240,13 +280,14 @@ class OmniBar: UIView {
     public func hidePrivacyIcon() {
         privacyInfoContainer.privacyIcon.isHidden = true
     }
-    
+
     public func resetPrivacyIcon(for url: URL?) {
         cancelAllAnimations()
         privacyInfoContainer.privacyIcon.isHidden = false
         
         let icon = PrivacyIconLogic.privacyIcon(for: url)
         privacyInfoContainer.privacyIcon.updateIcon(icon)
+        customIconView.isHidden = true
     }
     
     public func updatePrivacyIcon(for privacyInfo: PrivacyInfo?) {
@@ -255,10 +296,23 @@ class OmniBar: UIView {
               !privacyIconAndTrackersAnimator.isAnimatingForDaxDialog
         else { return }
         
-        privacyInfoContainer.privacyIcon.isHidden = false
+        if privacyInfo.url.isDuckPlayer {
+            showCustomIcon(icon: .duckPlayer)
+            return
+        }
         
+        privacyInfoContainer.privacyIcon.isHidden = privacyInfo.isSpecialErrorPageVisible
         let icon = PrivacyIconLogic.privacyIcon(for: privacyInfo)
         privacyInfoContainer.privacyIcon.updateIcon(icon)
+        customIconView.isHidden = true
+    }
+    
+    // Support static custom icons, for things like internal pages, for example
+    func showCustomIcon(icon: OmniBarIcon) {
+        privacyInfoContainer.privacyIcon.isHidden = true
+        customIconView.image = UIImage(named: icon.rawValue)
+        privacyInfoContainer.addSubview(customIconView)
+        customIconView.isHidden = false
     }
     
     public func startTrackersAnimation(_ privacyInfo: PrivacyInfo, forDaxDialog: Bool) {
@@ -280,6 +334,7 @@ class OmniBar: UIView {
     public func cancelAllAnimations() {
         privacyIconAndTrackersAnimator.cancelAnimations(in: self)
         notificationAnimator.cancelAnimations(in: self)
+        privacyIconContextualOnboardingAnimator.dismissPrivacyIconAnimation(privacyInfoContainer.privacyIcon)
     }
     
     public func completeAnimationForDaxDialog() {
@@ -289,13 +344,28 @@ class OmniBar: UIView {
     func showOrScheduleCookiesManagedNotification(isCosmetic: Bool) {
         let type: OmniBarNotificationType = isCosmetic ? .cookiePopupHidden : .cookiePopupManaged
         
+        enqueueAnimationIfNeeded { [weak self] in
+            guard let self else { return }
+            self.notificationAnimator.showNotification(type, in: self)
+        }
+    }
+
+    func showOrScheduleOnboardingPrivacyIconAnimation() {
+        enqueueAnimationIfNeeded { [weak self] in
+            guard let self else { return }
+            self.privacyIconContextualOnboardingAnimator.showPrivacyIconAnimation(in: self)
+        }
+    }
+
+    func dismissOnboardingPrivacyIconAnimation() {
+        privacyIconContextualOnboardingAnimator.dismissPrivacyIconAnimation(privacyInfoContainer.privacyIcon)
+    }
+
+    private func enqueueAnimationIfNeeded(_ block: @escaping () -> Void) {
         if privacyIconAndTrackersAnimator.state == .completed {
-            notificationAnimator.showNotification(type, in: self)
+            block()
         } else {
-            privacyIconAndTrackersAnimator.onAnimationCompletion = { [weak self] in
-                guard let self = self else { return }
-                self.notificationAnimator.showNotification(type, in: self)
-            }
+            privacyIconAndTrackersAnimator.onAnimationCompletion(block)
         }
     }
 
@@ -304,16 +374,20 @@ class OmniBar: UIView {
         textField.selectedTextRange = textField.textRange(from: fromPosition, to: textField.endOfDocument)
     }
 
-    fileprivate func refreshState(_ newState: OmniBarState) {
-        if state.name != newState.name {
-            os_log("OmniBar entering %s from %s", log: .generalLog, type: .debug, newState.name, state.name)
-            if newState.clearTextOnStart {
-                clear()
+    fileprivate func refreshState(_ newState: any OmniBarState) {
+        if state.requiresUpdate(transitioningInto: newState) {
+            Logger.general.debug("OmniBar entering \(newState.description) from \(self.state.description)")
+
+            if state.isDifferentState(than: newState) {
+                if newState.clearTextOnStart {
+                    clear()
+                }
+                cancelAllAnimations()
             }
+
             state = newState
-            cancelAllAnimations()
         }
-        
+
         searchFieldContainer.adjustTextFieldOffset(for: state)
         
         setVisibility(privacyInfoContainer, hidden: !state.showPrivacyIcon)
@@ -324,11 +398,12 @@ class OmniBar: UIView {
         setVisibility(cancelButton, hidden: !state.showCancel)
         setVisibility(refreshButton, hidden: !state.showRefresh)
         setVisibility(voiceSearchButton, hidden: !state.showVoiceSearch)
+        setVisibility(abortButton, hidden: !state.showAbort)
 
         setVisibility(backButton, hidden: !state.showBackButton)
         setVisibility(forwardButton, hidden: !state.showForwardButton)
         setVisibility(bookmarksButton, hidden: !state.showBookmarksButton)
-        setVisibility(shareButton, hidden: !state.showShareButton)
+        setVisibility(accessoryButton, hidden: !state.showAccessoryButton)
         
         searchContainerCenterConstraint.isActive = state.hasLargeWidth
         searchContainerMaxWidthConstraint.isActive = state.hasLargeWidth
@@ -339,8 +414,8 @@ class OmniBar: UIView {
             searchStackContainer.setCustomSpacing(13, after: voiceSearchButton)
         }
 
-        UIView.animate(withDuration: 0.0) {
-            self.layoutIfNeeded()
+        UIView.animate(withDuration: 0.0) { [weak self] in
+            self?.layoutIfNeeded()
         }
         
     }
@@ -362,6 +437,10 @@ class OmniBar: UIView {
     }
 
     @discardableResult override func becomeFirstResponder() -> Bool {
+        textFieldTapped = false
+        defer {
+            textFieldTapped = true
+        }
         return textField.becomeFirstResponder()
     }
 
@@ -412,13 +491,19 @@ class OmniBar: UIView {
     @IBAction func onVoiceSearchButtonPressed(_ sender: UIButton) {
         omniDelegate?.onVoiceSearchPressed()
     }
-    
+
+    @IBAction func onAbortButtonPressed(_ sender: Any) {
+        omniDelegate?.onAbortPressed()
+    }
+
     @IBAction func onClearButtonPressed(_ sender: Any) {
+        omniDelegate?.onClearPressed()
         refreshState(state.onTextClearedState)
     }
 
     @IBAction func onPrivacyIconPressed(_ sender: Any) {
-        omniDelegate?.onPrivacyIconPressed()
+        let isPrivacyIconHighlighted = privacyIconContextualOnboardingAnimator.isPrivacyIconHighlighted(privacyInfoContainer.privacyIcon)
+        omniDelegate?.onPrivacyIconPressed(isHighlighted: isPrivacyIconHighlighted)
     }
 
     @IBAction func onMenuButtonPressed(_ sender: UIButton) {
@@ -437,6 +522,7 @@ class OmniBar: UIView {
 
     @IBAction func onCancelPressed(_ sender: Any) {
         omniDelegate?.onCancelPressed()
+        refreshState(state.onEditingStoppedState)
     }
     
     @IBAction func onRefreshPressed(_ sender: Any) {
@@ -458,10 +544,9 @@ class OmniBar: UIView {
                    withAdditionalParameters: [PixelParameters.originatedFromMenu: "0"])
         omniDelegate?.onBookmarksPressed()
     }
-    
-    @IBAction func onSharePressed(_ sender: Any) {
-        Pixel.fire(pixel: .addressBarShare)
-        omniDelegate?.onSharePressed()
+
+    @IBAction func onAccessoryPressed(_ sender: Any) {
+        omniDelegate?.onAccessoryPressed(accessoryType: accessoryType)
     }
     
     func enterPhoneState() {
@@ -478,16 +563,15 @@ class OmniBar: UIView {
     }
 
 }
-// swiftlint:enable type_body_length
 
 extension OmniBar: UITextFieldDelegate {
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         self.refreshState(self.state.onEditingStartedState)
         return true
     }
-    
+
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
-        omniDelegate?.onTextFieldWillBeginEditing(self)
+        omniDelegate?.onTextFieldWillBeginEditing(self, tapped: textFieldTapped)
         return true
     }
 
@@ -508,14 +592,19 @@ extension OmniBar: UITextFieldDelegate {
     }
 
     func textFieldDidEndEditing(_ textField: UITextField) {
-        omniDelegate?.onDismissed()
-        refreshState(state.onEditingStoppedState)
+        switch omniDelegate?.onEditingEnd() {
+        case .dismissed, .none:
+            refreshState(state.onEditingStoppedState)
+        case .suspended:
+            refreshState(state.onEditingSuspendedState)
+        }
     }
 }
 
-extension OmniBar: Themable {
+extension OmniBar {
     
-    public func decorate(with theme: Theme) {
+    private func decorate() {
+        let theme = ThemeManager.shared.currentTheme
         backgroundColor = theme.omniBarBackgroundColor
         tintColor = theme.barTintColor
         
@@ -524,7 +613,6 @@ extension OmniBar: Themable {
         editingBackground?.backgroundColor = theme.searchBarBackgroundColor
         editingBackground?.borderColor = theme.searchBarBackgroundColor
         
-        privacyInfoContainer.decorate(with: theme)
         privacyIconAndTrackersAnimator.resetImageProvider()
         
         searchStackContainer?.tintColor = theme.barTintColor
@@ -542,5 +630,12 @@ extension OmniBar: Themable {
         searchLoupe.alpha = 0.5
         cancelButton.setTitleColor(theme.barTintColor, for: .normal)
     }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            privacyIconAndTrackersAnimator.resetImageProvider()
+        }
+    }
 }
-// swiftlint:enable file_length

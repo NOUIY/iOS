@@ -17,8 +17,6 @@
 //  limitations under the License.
 //
 
-#if NETWORK_PROTECTION
-
 import Foundation
 import NetworkProtection
 import Common
@@ -37,16 +35,6 @@ extension EventMapping where Event == NetworkProtectionError {
             pixelError = error
         case .failedToParseLocationListResponse(let error):
             pixelEvent = .networkProtectionClientFailedToParseLocationsResponse
-            pixelError = error
-        case .failedToEncodeRedeemRequest:
-            pixelEvent = .networkProtectionClientFailedToEncodeRedeemRequest
-        case .invalidInviteCode:
-            pixelEvent = .networkProtectionClientInvalidInviteCode
-        case .failedToRedeemInviteCode(let error):
-            pixelEvent = .networkProtectionClientFailedToRedeemInviteCode
-            pixelError = error
-        case .failedToParseRedeemResponse(let error):
-            pixelEvent = .networkProtectionClientFailedToParseRedeemResponse
             pixelError = error
         case .invalidAuthToken:
             pixelEvent = .networkProtectionClientInvalidAuthToken
@@ -69,7 +57,7 @@ extension EventMapping where Event == NetworkProtectionError {
             pixelEvent = .networkProtectionKeychainDeleteError
             params[PixelParameters.keychainErrorCode] = String(status)
         case .noAuthTokenFound:
-            pixelEvent = .networkProtectionNoAuthTokenFoundError
+            pixelEvent = .networkProtectionNoAccessTokenFoundError
         case .vpnAccessRevoked:
             return
         case .noServerRegistrationInfo,
@@ -87,18 +75,25 @@ extension EventMapping where Event == NetworkProtectionError {
                 .wireGuardInvalidState,
                 .wireGuardDnsResolution,
                 .wireGuardSetNetworkSettings,
-                .startWireGuardBackend,
-                .failedToRetrieveAuthToken:
+                .failedToFetchServerStatus,
+                .failedToParseServerStatusResponse:
             pixelEvent = .networkProtectionUnhandledError
             params[PixelParameters.function] = #function
             params[PixelParameters.line] = String(#line)
             // Should never be sent from from the app
         case .unhandledError(function: let function, line: let line, error: let error):
             pixelEvent = .networkProtectionUnhandledError
+        case .startWireGuardBackend(let error):
+            pixelEvent = .networkProtectionWireguardErrorCannotStartWireguardBackend
+            pixelError = error
+        case .setWireguardConfig(let error):
+            pixelEvent = .networkProtectionWireguardErrorCannotSetWireguardConfig
+            pixelError = error
         }
 
-        DailyPixel.fireDailyAndCount(pixel: pixelEvent, error: pixelError, withAdditionalParameters: params)
+        DailyPixel.fireDailyAndCount(pixel: pixelEvent,
+                                     pixelNameSuffixes: DailyPixel.Constant.legacyDailyPixelSuffixes,
+                                     error: pixelError,
+                                     withAdditionalParameters: params)
     }
 }
-
-#endif

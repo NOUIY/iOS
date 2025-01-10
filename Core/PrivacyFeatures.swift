@@ -19,6 +19,7 @@
 
 import BrowserServicesKit
 import Common
+import os.log
 
 public final class PrivacyFeatures {
 
@@ -45,7 +46,11 @@ public final class PrivacyFeatures {
         }
 
         if dailyAndCount {
-            DailyPixel.fireDailyAndCount(pixel: domainEvent, error: error, withAdditionalParameters: parameters ?? [:], onCountComplete: onComplete)
+            DailyPixel.fireDailyAndCount(pixel: domainEvent,
+                                         pixelNameSuffixes: DailyPixel.Constant.legacyDailyPixelSuffixes,
+                                         error: error,
+                                         withAdditionalParameters: parameters ?? [:],
+                                         onCountComplete: onComplete)
         } else {
             Pixel.fire(pixel: domainEvent, error: error, withAdditionalParameters: parameters ?? [:], onComplete: onComplete)
         }
@@ -54,9 +59,11 @@ public final class PrivacyFeatures {
         AppHTTPSUpgradeStore(database: Database.shared,
                              bloomFilterDataURL: bloomFilterDataURL,
                              embeddedResources: embeddedBloomFilterResources,
-                             errorEvents: httpsUpgradeDebugEvents)
+                             errorEvents: httpsUpgradeDebugEvents,
+                             logger: Logger.general)
     }
 
-    public static let httpsUpgrade = HTTPSUpgrade(store: httpsUpgradeStore, privacyManager: ContentBlocking.shared.privacyConfigurationManager)
+    public static let httpsUpgrade = HTTPSUpgrade(store: httpsUpgradeStore, privacyManager: ContentBlocking.shared.privacyConfigurationManager,
+                                                  logger: Logger.general)
 
 }

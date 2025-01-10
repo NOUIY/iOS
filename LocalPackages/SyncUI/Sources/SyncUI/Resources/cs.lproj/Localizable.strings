@@ -1,11 +1,14 @@
+/* No comment provided by engineer. */
+"A device password is required to use Sync & Backup." = "Pro použití funkce Sync & Backup se vyžaduje heslo k zařízení.";
+
 /* Standard Buttons - Back Button */
 "back.button" = "Zpět";
 
-/* Sync Paused Errors - Bookmarks Limit Exceeded Action */
-"bookmarks.limit.exceeded.action" = "Spravovat záložky";
+/* Do not translate - stringsdict entry */
+"bookmarks.invalid.objects.present.description" = "bookmarks.invalid.objects.present.description";
 
-/* Sync Paused Errors - Bookmarks Limit Exceeded Description */
-"bookmarks.limit.exceeded.description" = "Je překročený limit počtu záložek. Jestli chceš synchronizaci obnovit, některé odstraň.";
+/* Alert title for invalid bookmarks being filtered out of synced data */
+"bookmarks.invalid.objects.present.title" = "Některé záložky se nesynchronizují kvůli příliš dlouhému obsahu v určitých polích.";
 
 /* Camera View - Go to Settings Button */
 "camera.go.to.settings.button" = "Přejdi do Nastavení";
@@ -43,17 +46,23 @@
 /* Connect With Server Sheet - Title */
 "connect.with.server.sheet.title" = "Synchronizace a záloha tohoto zařízení";
 
-/* Sync Paused Errors - Credentials Limit Exceeded Action */
-"credentials.limit.exceeded.action" = "Spravovat přihlašovací údaje";
+/* Standard Buttons - Copy Button */
+"copy.button" = "Kopírovat";
 
-/* Sync Paused Errors - Credentials Limit Exceeded Description */
-"credentials.limit.exceeded.description" = "Je překročený limit počtu přihlášení. Jestli chceš synchronizaci obnovit, některá odstraň.";
+/* Do not translate - stringsdict entry */
+"credentials.invalid.objects.present.description" = "credentials.invalid.objects.present.description";
+
+/* Alert title for invalid logins being filtered out of synced data */
+"credentials.invalid.objects.present.title" = "Některá přihlášení se nesynchronizují kvůli příliš dlouhému obsahu v určitých polích.";
 
 /* Delete Server Data - Button */
 "delete.server.data" = "Vypnout a smazat data serveru...";
 
 /* No comment provided by engineer. */
 "Dev environment" = "Vývojářské prostředí";
+
+/* Device SyncedSheet Button to go get DuckDuckGo on other devices */
+"device.synced.sheet.button.get.other.devices" = "Získat DuckDuckGo na jiných zařízeních";
 
 /* Device SyncedSheet - Title */
 "device.synced.sheet.title" = "Tvoje data už se zase synchronizují!";
@@ -81,6 +90,9 @@
 
 /* Options - Fetch Favicons Title */
 "fetch.favicons.option.title" = "Automatické stahování ikon";
+
+/* No comment provided by engineer. */
+"Go to Settings" = "Přejdi do Nastavení";
 
 /* No comment provided by engineer. */
 "Keep Development" = "Nechat vývojovou verzi";
@@ -112,8 +124,11 @@
 /* Standard Buttons - Paste Button */
 "paste.button" = "Vložit";
 
-/* Description of rollout banner */
-"preferences.sync.rollout-banner.description" = "Synchronizaci a zálohování zpřístupňujeme postupně a na tvých dalších zařízeních nemusí být v aplikaci DuckDuckGo ještě k dispozici.";
+/* Button title for sync bookmarks limits exceeded warning to go to manage bookmarks */
+"prefrences.sync.bookmarks-limit-exceeded-action" = "Spravovat záložky";
+
+/* Button title for sync credentials limits exceeded warning to go to manage passwords */
+"prefrences.sync.credentials-limit-exceeded-action" = "Spravovat hesla…";
 
 /* Preparing To Sync Sheet - Description */
 "preparing.to.sync.sheet.description" = "Tvoje záložky a hesla připravujeme na synchronizaci. Nemělo by to trvat dlouho.";
@@ -206,13 +221,31 @@
 "scan.or.see.code.title" = "Skenování QR kódu";
 
 /* No comment provided by engineer. */
+"Secure Your Device to Use Sync & Backup" = "Zabezpeč své zařízení, ať můžeš používat funkci Sync & Backup";
+
+/* No comment provided by engineer. */
 "Switch to Production" = "Přepnout na produkční verzi";
 
 /* Link label for syncing and backing up the device */
 "sync.and.backup.this.device.link" = "Synchronizace a záloha tohoto zařízení";
 
-/* Sync Paused Errors - Title */
-"sync.limit.exceeded.title" = "Synchronizace je pozastavená";
+/* Button to get DuckDuckGo on other devices */
+"sync.get.other.devices" = "Získat DuckDuckGo na jiných zařízeních";
+
+/* Button title to share link for downloading DuckDuckGo on other devices */
+"sync.get.other.devices.card.button.title" = "Sdílet odkaz ke stažení";
+
+/* Message before share link for downloading DuckDuckGo on other devices */
+"sync.get.other.devices.card.message" = "Pokud si chceš stáhnout DuckDuckGo na počítač nebo jiné mobilní zařízení, přejdi sem:";
+
+/* Title of card with share links for users to download DuckDuckGo on other devices */
+"sync.get.other.devices.card.title" = "Získej DuckDuckGo na jiných zařízeních, aby se mohla synchronizovat s tímhle";
+
+/* Title of screen with share links for users to download DuckDuckGo on other devices */
+"sync.get.other.devices.screen.title" = "Pořiď si DuckDuckGo";
+
+/* Message included when sharing a url via the system share sheet */
+"sync.get.other.devices.share.link.message" = "Nainstaluj si do svých zařízení prohlížeč DuckDuckGo a začni bezpečně synchronizovat svoje záložky a hesla:";
 
 /* Sync Menu Path */
 "sync.menu.path" = "Nastavení > Synchronizace a zálohování > Synchronizace s jiným zařízením";
@@ -225,9 +258,6 @@
 
 /* Data syncing unavailable warning message */
 "sync.warning.data.syncing.disabled.upgrade.required" = "Omlouváme se, ale funkce synchronizace a zálohování není v téhle verzi aplikace dostupná. Pro pokračování aktualizuj DuckDuckGo na nejnovější verzi.";
-
-/* Title of the warning message */
-"sync.warning.sync.paused" = "Funkce synchronizace a zálohování je pozastavená";
 
 /* Title of the warning message */
 "sync.warning.sync.unavailable" = "Synchronizace a zálohování není k dispozici";
@@ -248,7 +278,7 @@
 "synced.devices.section.header" = "Synchronizovaná zařízení";
 
 /* Synced Devices - Sync with Another Device Label */
-"synced.devices.sync.with.another.device.label" = "Synchronizace s jiným zařízením";
+"synced.devices.sync.with.another.device.label" = "Synchronizovat s jiným zařízením";
 
 /* Synced Devices - This Device Label */
 "synced.devices.this.device.label" = "Tohle zařízení";

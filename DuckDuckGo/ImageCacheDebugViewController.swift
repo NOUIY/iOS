@@ -26,6 +26,7 @@ import Persistence
 import BrowserServicesKit
 import Common
 import Kingfisher
+import os.log
 
 class ImageCacheDebugViewController: UITableViewController {
 
@@ -48,6 +49,7 @@ class ImageCacheDebugViewController: UITableViewController {
     private let tabsModel = TabsModel.get() ?? TabsModel(desktop: false)
 
     private let bookmarksContext: NSManagedObjectContext
+    private let fireproofing: Fireproofing
 
     private var fireproofFavicons = [String: UIImage]()
     private var tabFavicons = [String: UIImage]()
@@ -58,9 +60,11 @@ class ImageCacheDebugViewController: UITableViewController {
     private var tabs = [String: String]()
 
     init?(coder: NSCoder,
-          bookmarksDatabase: CoreDataDatabase) {
+          bookmarksDatabase: CoreDataDatabase,
+          fireproofing: Fireproofing) {
 
         bookmarksContext = bookmarksDatabase.makeContext(concurrencyType: .mainQueueConcurrencyType)
+        self.fireproofing = fireproofing
         super.init(coder: coder)
     }
 
@@ -88,13 +92,13 @@ class ImageCacheDebugViewController: UITableViewController {
     }
 
     private func loadAllFireproofFavicons() {
-        guard let cacheUrl = Favicons.CacheType.fireproof.cacheLocation() else { return }
+        guard let cacheUrl = FaviconsCacheType.fireproof.cacheLocation() else { return }
         let fireproofCacheUrl = cacheUrl.appendingPathComponent(Constants.fireproofCachePath)
         fireproofFavicons = loadFaviconImages(from: fireproofCacheUrl)
     }
 
     private func loadAllTabFavicons() {
-        guard let cacheUrl = Favicons.CacheType.tabs.cacheLocation() else { return }
+        guard let cacheUrl = FaviconsCacheType.tabs.cacheLocation() else { return }
         let tabCacheUrl = cacheUrl.appendingPathComponent(Constants.tabsCachePath)
         tabFavicons = loadFaviconImages(from: tabCacheUrl)
     }
@@ -127,7 +131,7 @@ class ImageCacheDebugViewController: UITableViewController {
 
     private func loadAllLogins() {
         do {
-            let secureVault = try AutofillSecureVaultFactory.makeVault(errorReporter: SecureVaultErrorReporter.shared)
+            let secureVault = try AutofillSecureVaultFactory.makeVault(reporter: SecureVaultReporter())
             let accounts = try secureVault.accounts()
             for account in accounts {
                 if let imageResource = Favicons.shared.defaultResource(forDomain: account.domain) {
@@ -135,13 +139,13 @@ class ImageCacheDebugViewController: UITableViewController {
                 }
             }
         } catch {
-            os_log("Failed to fetch accounts")
+            Logger.general.error("Failed to fetch accounts: \(error.localizedDescription)")
         }
     }
 
     private func loadAllFireproofSites() {
-        let preservedLoginSites = PreserveLogins.shared.allowedDomains
-        for site in preservedLoginSites {
+        let allowedDomains = fireproofing.allowedDomains
+        for site in allowedDomains {
             if let imageResource = Favicons.shared.defaultResource(forDomain: site) {
                 fireproofSites[imageResource.cacheKey] = site
             }

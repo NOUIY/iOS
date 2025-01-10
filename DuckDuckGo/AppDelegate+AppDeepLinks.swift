@@ -20,9 +20,8 @@
 import UIKit
 import Core
 
-extension AppDelegate {
+extension OldAppDelegate {
 
-    // swiftlint:disable:next cyclomatic_complexity
     func handleAppDeepLink(_ app: UIApplication, _ mainViewController: MainViewController?, _ url: URL) -> Bool {
         guard let mainViewController else { return false }
 
@@ -52,9 +51,23 @@ extension AppDelegate {
             mainViewController.newEmailAddress()
 
         case .openVPN:
-#if NETWORK_PROTECTION
             presentNetworkProtectionStatusSettingsModal()
-#endif
+
+        case .openPasswords:
+            var source: AutofillSettingsSource = .homeScreenWidget
+
+            if let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+                let queryItems = components.queryItems,
+                queryItems.first(where: { $0.name == "ls" }) != nil {
+                Pixel.fire(pixel: .autofillLoginsLaunchWidgetLock)
+                source = .lockScreenWidget
+            } else {
+                Pixel.fire(pixel: .autofillLoginsLaunchWidgetHome)
+            }
+
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5) {
+                mainViewController.launchAutofillLogins(openSearch: true, source: source)
+            }
 
         default:
             guard app.applicationState == .active,

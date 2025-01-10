@@ -1,11 +1,14 @@
+/* No comment provided by engineer. */
+"A device password is required to use Sync & Backup." = "É necessária uma palavra-passe do dispositivo para usar o Sync & Backup.";
+
 /* Standard Buttons - Back Button */
 "back.button" = "Retroceder";
 
-/* Sync Paused Errors - Bookmarks Limit Exceeded Action */
-"bookmarks.limit.exceeded.action" = "Gerir marcadores";
+/* Do not translate - stringsdict entry */
+"bookmarks.invalid.objects.present.description" = "bookmarks.invalid.objects.present.description";
 
-/* Sync Paused Errors - Bookmarks Limit Exceeded Description */
-"bookmarks.limit.exceeded.description" = "Limite de marcadores excedido. Elimina alguns para retomar a sincronização.";
+/* Alert title for invalid bookmarks being filtered out of synced data */
+"bookmarks.invalid.objects.present.title" = "Alguns marcadores não estão a sincronizar devido ao conteúdo excessivamente longo em certos campos.";
 
 /* Camera View - Go to Settings Button */
 "camera.go.to.settings.button" = "Aceder às Definições";
@@ -43,17 +46,23 @@
 /* Connect With Server Sheet - Title */
 "connect.with.server.sheet.title" = "Sincronizar e fazer cópia de segurança deste dispositivo";
 
-/* Sync Paused Errors - Credentials Limit Exceeded Action */
-"credentials.limit.exceeded.action" = "Gerir inícios de sessão";
+/* Standard Buttons - Copy Button */
+"copy.button" = "Copiar";
 
-/* Sync Paused Errors - Credentials Limit Exceeded Description */
-"credentials.limit.exceeded.description" = "Limite de inícios de sessão excedido. Elimina alguns para retomar a sincronização.";
+/* Do not translate - stringsdict entry */
+"credentials.invalid.objects.present.description" = "credentials.invalid.objects.present.description";
+
+/* Alert title for invalid logins being filtered out of synced data */
+"credentials.invalid.objects.present.title" = "Alguns dados de início de sessão não estão a sincronizar devido ao conteúdo excessivamente longo em certos campos.";
 
 /* Delete Server Data - Button */
 "delete.server.data" = "Desativar e eliminar dados do servidor...";
 
 /* No comment provided by engineer. */
 "Dev environment" = "Ambiente de desenvolvimento";
+
+/* Device SyncedSheet Button to go get DuckDuckGo on other devices */
+"device.synced.sheet.button.get.other.devices" = "Instalar DuckDuckGo noutros dispositivos";
 
 /* Device SyncedSheet - Title */
 "device.synced.sheet.title" = "Os teus dados estão sincronizados!";
@@ -81,6 +90,9 @@
 
 /* Options - Fetch Favicons Title */
 "fetch.favicons.option.title" = "Transferir automaticamente os ícones";
+
+/* No comment provided by engineer. */
+"Go to Settings" = "Aceder às Definições";
 
 /* No comment provided by engineer. */
 "Keep Development" = "Manter desenvolvimento";
@@ -112,8 +124,11 @@
 /* Standard Buttons - Paste Button */
 "paste.button" = "Colar";
 
-/* Description of rollout banner */
-"preferences.sync.rollout-banner.description" = "A sincronização e cópia de segurança estão a ser disponibilizadas gradualmente e podem ainda não estar disponíveis no DuckDuckGo nos teus outros dispositivos.";
+/* Button title for sync bookmarks limits exceeded warning to go to manage bookmarks */
+"prefrences.sync.bookmarks-limit-exceeded-action" = "Gerir marcadores";
+
+/* Button title for sync credentials limits exceeded warning to go to manage passwords */
+"prefrences.sync.credentials-limit-exceeded-action" = "Gerir palavras-passe…";
 
 /* Preparing To Sync Sheet - Description */
 "preparing.to.sync.sheet.description" = "Os teus marcadores e palavras-passe estão a ser preparados para sincronização. Deve demorar apenas alguns segundos.";
@@ -200,10 +215,13 @@
 "scan.or.see.code.scan.code.instructions.title" = "Entre dispositivos móveis?";
 
 /* Scan or See Code View - Share Code Link */
-"scan.or.see.code.share.code.link" = "Partilhar código de texto?";
+"scan.or.see.code.share.code.link" = "Partilhar código de texto";
 
 /* Scan or See Code View - Title */
 "scan.or.see.code.title" = "Ler código QR";
+
+/* No comment provided by engineer. */
+"Secure Your Device to Use Sync & Backup" = "Protege o teu dispositivo para usares o Sync & Backup";
 
 /* No comment provided by engineer. */
 "Switch to Production" = "Mudar para produção";
@@ -211,8 +229,23 @@
 /* Link label for syncing and backing up the device */
 "sync.and.backup.this.device.link" = "Sincronizar e fazer cópia de segurança deste dispositivo";
 
-/* Sync Paused Errors - Title */
-"sync.limit.exceeded.title" = "Sincronização em pausa";
+/* Button to get DuckDuckGo on other devices */
+"sync.get.other.devices" = "Instalar DuckDuckGo noutros dispositivos";
+
+/* Button title to share link for downloading DuckDuckGo on other devices */
+"sync.get.other.devices.card.button.title" = "Partilhar link de transferência";
+
+/* Message before share link for downloading DuckDuckGo on other devices */
+"sync.get.other.devices.card.message" = "Para transferires o DuckDuckGo num computador ou noutro dispositivo móvel, visita:";
+
+/* Title of card with share links for users to download DuckDuckGo on other devices */
+"sync.get.other.devices.card.title" = "Instala o DuckDuckGo noutros dispositivos para sincronizar com este";
+
+/* Title of screen with share links for users to download DuckDuckGo on other devices */
+"sync.get.other.devices.screen.title" = "Instala o DuckDuckGo";
+
+/* Message included when sharing a url via the system share sheet */
+"sync.get.other.devices.share.link.message" = "Instala o navegador DuckDuckGo nos teus dispositivos para começares a sincronizar os teus marcadores e palavras-passe em segurança:";
 
 /* Sync Menu Path */
 "sync.menu.path" = "Definições > Sincronização e cópia de segurança > Sincronizar com outro dispositivo";
@@ -225,9 +258,6 @@
 
 /* Data syncing unavailable warning message */
 "sync.warning.data.syncing.disabled.upgrade.required" = "Lamentamos, mas a sincronização e cópia de segurança já não estão disponíveis nesta versão da aplicação. Atualiza o DuckDuckGo para a versão mais recente para continuar.";
-
-/* Title of the warning message */
-"sync.warning.sync.paused" = "A sincronização e a cópia de segurança estão em pausa";
 
 /* Title of the warning message */
 "sync.warning.sync.unavailable" = "A sincronização e a cópia de segurança não estão disponíveis";

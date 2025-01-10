@@ -21,6 +21,7 @@ import Foundation
 import BrowserServicesKit
 import Common
 import Networking
+import os.log
 
 public struct PixelParameters {
     public static let url = "url"
@@ -83,9 +84,11 @@ public struct PixelParameters {
     public static let tabControllerCacheCount = "tab_controller_cache_count"
 
     public static let count = "count"
+    public static let source = "source"
 
-    public static let textSizeInitial = "text_size_initial"
-    public static let textSizeUpdated = "text_size_updated"
+    // Text size is the legacy name
+    public static let textZoomInitial = "text_size_initial"
+    public static let textZoomUpdated = "text_size_updated"
 
     public static let canAutoPreviewMIMEType = "can_auto_preview_mime_type"
     public static let mimeType = "mime_type"
@@ -115,18 +118,56 @@ public struct PixelParameters {
     // Network Protection
     public static let keychainFieldName = "fieldName"
     public static let keychainErrorCode = errorCode
-    public static let wireguardErrorCode = errorCode
     public static let latency = "latency"
     public static let server = "server"
     public static let networkType = "network_type"
     public static let function = "function"
     public static let line = "line"
     public static let reason = "reason"
+    public static let vpnCohort = "cohort"
 
     // Return user
     public static let returnUserErrorCode = "error_code"
     public static let returnUserOldATB = "old_atb"
     public static let returnUserNewATB = "new_atb"
+
+    // Pixel Experiment
+    public static let cohort = "cohort"
+
+    // Ad Attribution
+    public static let adAttributionOrgID = "org_id"
+    public static let adAttributionCampaignID = "campaign_id"
+    public static let adAttributionConversionType = "conversion_type"
+    public static let adAttributionAdGroupID = "ad_group_id"
+    public static let adAttributionCountryOrRegion = "country_or_region"
+    public static let adAttributionKeywordID = "keyword_id"
+    public static let adAttributionAdID = "ad_id"
+    public static let adAttributionToken = "attribution_token"
+    public static let adAttributionIsReinstall = "is_reinstall"
+
+    // Autofill
+    public static let countBucket = "count_bucket"
+    public static let backfilled = "backfilled"
+    public static let isExtension = "is_extension"
+
+    // Privacy Dashboard
+    public static let daysSinceInstall = "daysSinceInstall"
+    public static let fromOnboarding = "from_onboarding"
+
+    // Subscription
+    public static let privacyProKeychainAccessType = "access_type"
+    public static let privacyProKeychainError = "error"
+
+    // Persistent pixel
+    public static let originalPixelTimestamp = "originalPixelTimestamp"
+    public static let retriedPixel = "retriedPixel"
+
+    public static let time = "time"
+
+    public static let appState = "state"
+    public static let appEvent = "event"
+
+    public static let didCallWillEnterForeground = "didCallWillEnterForeground"
 }
 
 public struct PixelValues {
@@ -146,7 +187,7 @@ public class Pixel {
         DefaultInternalUserDecider(store: InternalUserStore()).isInternalUser
     }
 
-    public enum QueryParameters {
+    public enum QueryParameters: Codable {
         case atb
         case appVersion
     }
@@ -166,7 +207,7 @@ public class Pixel {
                             withAdditionalParameters params: [String: String] = [:],
                             allowedQueryReservedCharacters: CharacterSet? = nil,
                             withHeaders headers: APIRequest.Headers = APIRequest.Headers(),
-                            includedParameters: [QueryParameters] = [.atb, .appVersion],
+                            includedParameters: [QueryParameters] = [.appVersion],
                             onComplete: @escaping (Error?) -> Void = { _ in },
                             debounce: Int = 0) {
         
@@ -196,7 +237,7 @@ public class Pixel {
                             withAdditionalParameters params: [String: String] = [:],
                             allowedQueryReservedCharacters: CharacterSet? = nil,
                             withHeaders headers: APIRequest.Headers = APIRequest.Headers(),
-                            includedParameters: [QueryParameters] = [.atb, .appVersion],
+                            includedParameters: [QueryParameters] = [.appVersion],
                             onComplete: @escaping (Error?) -> Void = { _ in }) {
         var newParams = params
         if includedParameters.contains(.appVersion) {
@@ -204,9 +245,7 @@ public class Pixel {
         }
 
         guard !isDryRun else {
-            os_log(.debug, log: .generalLog, "Pixel fired %{public}@ %{public}@",
-                   pixelName.replacingOccurrences(of: "_", with: "."),
-                   params.count > 0 ? "\(params)" : "")
+            Logger.general.debug("Pixel fired \(pixelName.replacingOccurrences(of: "_", with: "."), privacy: .public) \(params.count > 0 ? "\(params)" : "", privacy: .public)")
             // simulate server response time for Dry Run mode
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 onComplete(nil)
@@ -237,7 +276,7 @@ public class Pixel {
                                                      headers: headers)
         let request = APIRequest(configuration: configuration, urlSession: .session(useMainThreadCallbackQueue: true))
         request.fetch { _, error in
-            os_log("Pixel fired %{public}s %{public}s", log: .generalLog, type: .debug, pixelName, "\(params)")
+            Logger.general.debug("Pixel fired \(pixelName, privacy: .public) \(params, privacy: .public)")
             onComplete(error)
         }
     }
@@ -272,18 +311,37 @@ private extension Pixel.Event {
 }
 
 extension Dictionary where Key == String, Value == String {
+
     mutating func appendErrorPixelParams(error: Error) {
         let nsError = error as NSError
 
         self[PixelParameters.errorCode] = "\(nsError.code)"
         self[PixelParameters.errorDomain] = nsError.domain
 
-        if let underlyingError = nsError.userInfo["NSUnderlyingError"] as? NSError {
-            self[PixelParameters.underlyingErrorCode] = "\(underlyingError.code)"
-            self[PixelParameters.underlyingErrorDomain] = underlyingError.domain
-        } else if let sqlErrorCode = nsError.userInfo["NSSQLiteErrorDomain"] as? NSNumber {
-            self[PixelParameters.underlyingErrorCode] = "\(sqlErrorCode.intValue)"
-            self[PixelParameters.underlyingErrorDomain] = "NSSQLiteErrorDomain"
-        }
+        let underlyingErrorParameters = underlyingErrorParameters(for: error as NSError)
+        self.merge(underlyingErrorParameters) { first, _ in first }
     }
+
+    private func underlyingErrorParameters(for nsError: NSError, level: Int = 0) -> [String: String] {
+        if let underlyingError = nsError.userInfo[NSUnderlyingErrorKey] as? NSError {
+            let errorCodeParameterName = PixelParameters.underlyingErrorCode + (level == 0 ? "" : String(level + 1))
+            let errorDomainParameterName = PixelParameters.underlyingErrorDomain + (level == 0 ? "" : String(level + 1))
+
+            let currentUnderlyingErrorParameters = [
+                errorCodeParameterName: "\(underlyingError.code)",
+                errorDomainParameterName: underlyingError.domain
+            ]
+
+            let additionalParameters = underlyingErrorParameters(for: underlyingError, level: level + 1)
+            return currentUnderlyingErrorParameters.merging(additionalParameters) { first, _ in first }
+        } else if let sqlErrorCode = nsError.userInfo["NSSQLiteErrorDomain"] as? NSNumber {
+            return [
+                PixelParameters.underlyingErrorCode: "\(sqlErrorCode.intValue)",
+                PixelParameters.underlyingErrorDomain: "NSSQLiteErrorDomain"
+            ]
+        }
+
+        return [:]
+    }
+
 }

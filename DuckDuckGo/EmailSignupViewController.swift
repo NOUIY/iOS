@@ -27,7 +27,6 @@ import WebKit
 import DesignResourcesKit
 import SecureStorage
 
-// swiftlint:disable file_length
 class EmailSignupViewController: UIViewController {
 
     private enum Constants {
@@ -65,6 +64,7 @@ class EmailSignupViewController: UIViewController {
 
     lazy private var vaultManager: SecureVaultManager = {
         let manager = SecureVaultManager(includePartialAccountMatches: true,
+                                         shouldAllowPartialFormSaves: featureFlagger.isFeatureOn(.autofillPartialFormSaves),
                                          tld: AppDependencyProvider.shared.storageCache.tld)
         manager.delegate = self
         return manager
@@ -137,7 +137,7 @@ class EmailSignupViewController: UIViewController {
         setupWebView()
         setupNavigationBarTitle()
         addDuckDuckGoEmailObserver()
-        applyTheme(ThemeManager.shared.currentTheme)
+        decorate()
 
         isModalInPresentation = true
         navigationController?.presentationController?.delegate = self
@@ -341,7 +341,6 @@ extension EmailSignupViewController: UserContentControllerDelegate {
 
 extension EmailSignupViewController: EmailManagerRequestDelegate {
 
-    // swiftlint:disable function_parameter_count
     func emailManager(_ emailManager: EmailManager, requested url: URL, method: String, headers: [String: String], parameters: [String: String]?, httpBody: Data?, timeoutInterval: TimeInterval) async throws -> Data {
         let method = APIRequest.HTTPMethod(rawValue: method) ?? .post
         let configuration = APIRequest.Configuration(url: url,
@@ -353,16 +352,18 @@ extension EmailSignupViewController: EmailManagerRequestDelegate {
         let request = APIRequest(configuration: configuration, urlSession: .session())
         return try await request.fetch().data ?? { throw AliasRequestError.noDataError }()
     }
-    // swiftlint:enable function_parameter_count
-
 }
 
 // MARK: - SecureVaultManagerDelegate
 
 extension EmailSignupViewController: SecureVaultManagerDelegate {
 
-    func secureVaultInitFailed(_ error: SecureStorageError) {
-        SecureVaultErrorReporter.shared.secureVaultInitFailed(error)
+    func secureVaultError(_ error: SecureStorageError) {
+        SecureVaultReporter().secureVaultError(error)
+    }
+
+    func secureVaultKeyStoreEvent(_ event: SecureStorageKeyStoreEvent) {
+        SecureVaultReporter().secureVaultKeyStoreEvent(event)
     }
 
     func secureVaultManagerIsEnabledStatus(_ manager: SecureVaultManager, forType type: AutofillType?) -> Bool {
@@ -380,7 +381,6 @@ extension EmailSignupViewController: SecureVaultManagerDelegate {
         // no-op
     }
 
-    // swiftlint:disable function_parameter_count
     func secureVaultManager(_: SecureVaultManager,
                             promptUserToAutofillCredentialsForDomain domain: String,
                             withAccounts accounts: [SecureVaultModels.WebsiteAccount],
@@ -389,7 +389,6 @@ extension EmailSignupViewController: SecureVaultManagerDelegate {
                             completionHandler: @escaping (SecureVaultModels.WebsiteAccount?) -> Void) {
         // no-op
     }
-    // swiftlint:enable function_parameter_count
 
     func secureVaultManager(_: SecureVaultManager,
                             promptUserWithGeneratedPassword password: String,
@@ -427,6 +426,7 @@ extension EmailSignupViewController: SecureVaultManagerDelegate {
     func secureVaultManager(_: SecureVaultManager, didRequestRuntimeConfigurationForDomain domain: String, completionHandler: @escaping (String?) -> Void) {
         let contentScopeProperties = ContentScopeProperties(gpcEnabled: AppDependencyProvider.shared.appSettings.sendDoNotSell,
                                                             sessionKey: "",
+                                                            messageSecret: "",
                                                             featureToggles: ContentScopeFeatureToggles.supportedFeaturesOniOS)
 
         let runtimeConfig = DefaultAutofillSourceProvider.Builder(privacyConfigurationManager: ContentBlocking.shared.privacyConfigurationManager,
@@ -450,9 +450,10 @@ extension EmailSignupViewController: SecureVaultManagerDelegate {
 
 // MARK: Themable
 
-extension EmailSignupViewController: Themable {
+extension EmailSignupViewController {
 
-    func decorate(with theme: Theme) {
+    private func decorate() {
+        let theme = ThemeManager.shared.currentTheme
         view.backgroundColor = theme.backgroundColor
 
         navigationController?.navigationBar.barTintColor = theme.barBackgroundColor
@@ -460,5 +461,3 @@ extension EmailSignupViewController: Themable {
     }
 
 }
-
-// swiftlint:enable file_length

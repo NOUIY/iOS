@@ -1,11 +1,14 @@
+/* No comment provided by engineer. */
+"A device password is required to use Sync & Backup." = "Il faut le mot de passe d'un appareil pour pouvoir utiliser Sync & Backup.";
+
 /* Standard Buttons - Back Button */
 "back.button" = "Retour";
 
-/* Sync Paused Errors - Bookmarks Limit Exceeded Action */
-"bookmarks.limit.exceeded.action" = "Gérer les signets";
+/* Do not translate - stringsdict entry */
+"bookmarks.invalid.objects.present.description" = "bookmarks.invalid.objects.present.description";
 
-/* Sync Paused Errors - Bookmarks Limit Exceeded Description */
-"bookmarks.limit.exceeded.description" = "La limite de signets est dépassée. Supprimez-en quelques-uns pour reprendre la synchronisation.";
+/* Alert title for invalid bookmarks being filtered out of synced data */
+"bookmarks.invalid.objects.present.title" = "Certains favoris ne sont pas synchronisés à cause de la longueur excessive du contenu de certains champs.";
 
 /* Camera View - Go to Settings Button */
 "camera.go.to.settings.button" = "Accéder à Paramètres";
@@ -43,17 +46,23 @@
 /* Connect With Server Sheet - Title */
 "connect.with.server.sheet.title" = "Synchroniser et sauvegarder cet appareil";
 
-/* Sync Paused Errors - Credentials Limit Exceeded Action */
-"credentials.limit.exceeded.action" = "Gérer les identifiants";
+/* Standard Buttons - Copy Button */
+"copy.button" = "Copier";
 
-/* Sync Paused Errors - Credentials Limit Exceeded Description */
-"credentials.limit.exceeded.description" = "Limite d'identifiants dépassée. Supprimez-en quelques-uns pour reprendre la synchronisation.";
+/* Do not translate - stringsdict entry */
+"credentials.invalid.objects.present.description" = "credentials.invalid.objects.present.description";
+
+/* Alert title for invalid logins being filtered out of synced data */
+"credentials.invalid.objects.present.title" = "Certaines connexions ne sont pas synchronisées à cause de la longueur excessive du contenu de certains champs.";
 
 /* Delete Server Data - Button */
 "delete.server.data" = "Désactiver et supprimer les données du serveur…";
 
 /* No comment provided by engineer. */
 "Dev environment" = "Environnement de développement";
+
+/* Device SyncedSheet Button to go get DuckDuckGo on other devices */
+"device.synced.sheet.button.get.other.devices" = "Installer DuckDuckGo sur d'autres appareils";
 
 /* Device SyncedSheet - Title */
 "device.synced.sheet.title" = "Vos données sont synchronisées !";
@@ -81,6 +90,9 @@
 
 /* Options - Fetch Favicons Title */
 "fetch.favicons.option.title" = "Icônes de téléchargement automatique";
+
+/* No comment provided by engineer. */
+"Go to Settings" = "Accéder à Paramètres";
 
 /* No comment provided by engineer. */
 "Keep Development" = "Rester sur le développement";
@@ -112,8 +124,11 @@
 /* Standard Buttons - Paste Button */
 "paste.button" = "Coller";
 
-/* Description of rollout banner */
-"preferences.sync.rollout-banner.description" = "Le déploiement de Synchronisation et sauvegarde se fait progressivement et peut ne pas être encore disponible dans DuckDuckGo sur vos autres appareils.";
+/* Button title for sync bookmarks limits exceeded warning to go to manage bookmarks */
+"prefrences.sync.bookmarks-limit-exceeded-action" = "Gérer les signets";
+
+/* Button title for sync credentials limits exceeded warning to go to manage passwords */
+"prefrences.sync.credentials-limit-exceeded-action" = "Gérer les mots de passe…";
 
 /* Preparing To Sync Sheet - Description */
 "preparing.to.sync.sheet.description" = "Vos signets et mots de passe sont en cours de préparation pour la synchronisation. Cela ne devrait prendre qu'un instant.";
@@ -200,10 +215,13 @@
 "scan.or.see.code.scan.code.instructions.title" = "De mobile à mobile ?";
 
 /* Scan or See Code View - Share Code Link */
-"scan.or.see.code.share.code.link" = "Partager le code texte ?";
+"scan.or.see.code.share.code.link" = "Partager le code texte";
 
 /* Scan or See Code View - Title */
 "scan.or.see.code.title" = "Scanner le code QR";
+
+/* No comment provided by engineer. */
+"Secure Your Device to Use Sync & Backup" = "Sécurisez votre appareil pour pouvoir utiliser Sync & Backup";
 
 /* No comment provided by engineer. */
 "Switch to Production" = "Passer à la production";
@@ -211,8 +229,23 @@
 /* Link label for syncing and backing up the device */
 "sync.and.backup.this.device.link" = "Synchroniser et sauvegarder cet appareil";
 
-/* Sync Paused Errors - Title */
-"sync.limit.exceeded.title" = "Synchronisation suspendue";
+/* Button to get DuckDuckGo on other devices */
+"sync.get.other.devices" = "Installer DuckDuckGo sur d'autres appareils";
+
+/* Button title to share link for downloading DuckDuckGo on other devices */
+"sync.get.other.devices.card.button.title" = "Partager le lien de téléchargement";
+
+/* Message before share link for downloading DuckDuckGo on other devices */
+"sync.get.other.devices.card.message" = "Pour télécharger DuckDuckGo sur un ordinateur de bureau ou sur un autre appareil mobile, visitez :";
+
+/* Title of card with share links for users to download DuckDuckGo on other devices */
+"sync.get.other.devices.card.title" = "Installer DuckDuckGo sur d'autres appareils pour une synchronisation avec celui-ci";
+
+/* Title of screen with share links for users to download DuckDuckGo on other devices */
+"sync.get.other.devices.screen.title" = "Installer DuckDuckGo";
+
+/* Message included when sharing a url via the system share sheet */
+"sync.get.other.devices.share.link.message" = "Installez le navigateur DuckDuckGo sur vos appareils pour commencer à synchroniser en toute sécurité vos signets et vos mots de passe :";
 
 /* Sync Menu Path */
 "sync.menu.path" = "Réglages > Synchronisation et sauvegarde > Synchroniser avec un autre appareil";
@@ -225,9 +258,6 @@
 
 /* Data syncing unavailable warning message */
 "sync.warning.data.syncing.disabled.upgrade.required" = "Désolés, mais la synchronisation et la sauvegarde ne sont plus disponibles dans cette version de l'application. Veuillez mettre à jour DuckDuckGo avec la dernière version pour continuer.";
-
-/* Title of the warning message */
-"sync.warning.sync.paused" = "La synchronisation et la sauvegarde sont suspendues";
 
 /* Title of the warning message */
 "sync.warning.sync.unavailable" = "Synchronisation et sauvegarde n'est pas disponible";

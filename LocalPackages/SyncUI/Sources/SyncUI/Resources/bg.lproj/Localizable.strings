@@ -1,11 +1,14 @@
+/* No comment provided by engineer. */
+"A device password is required to use Sync & Backup." = "За да използвате Sync & Backup, е необходима парола на устройството.";
+
 /* Standard Buttons - Back Button */
 "back.button" = "Обратно";
 
-/* Sync Paused Errors - Bookmarks Limit Exceeded Action */
-"bookmarks.limit.exceeded.action" = "Управление на отметки";
+/* Do not translate - stringsdict entry */
+"bookmarks.invalid.objects.present.description" = "bookmarks.invalid.objects.present.description";
 
-/* Sync Paused Errors - Bookmarks Limit Exceeded Description */
-"bookmarks.limit.exceeded.description" = "Превишихте лимита за отметки. Изтрийте някои от тях, за да възобновите синхронизирането.";
+/* Alert title for invalid bookmarks being filtered out of synced data */
+"bookmarks.invalid.objects.present.title" = "Някои отметки не се синхронизират поради прекалено дълго съдържание в определени полета.";
 
 /* Camera View - Go to Settings Button */
 "camera.go.to.settings.button" = "Влезте в Настройки";
@@ -43,17 +46,23 @@
 /* Connect With Server Sheet - Title */
 "connect.with.server.sheet.title" = "Синхронизиране и архивиране на това устройство";
 
-/* Sync Paused Errors - Credentials Limit Exceeded Action */
-"credentials.limit.exceeded.action" = "Управление на данните за вход";
+/* Standard Buttons - Copy Button */
+"copy.button" = "Копиране";
 
-/* Sync Paused Errors - Credentials Limit Exceeded Description */
-"credentials.limit.exceeded.description" = "Превишихте лимита за данни за вход. Изтрийте някои от тях, за да възобновите синхронизирането.";
+/* Do not translate - stringsdict entry */
+"credentials.invalid.objects.present.description" = "credentials.invalid.objects.present.description";
+
+/* Alert title for invalid logins being filtered out of synced data */
+"credentials.invalid.objects.present.title" = "Някои данни за вход не се синхронизират поради прекалено дълго съдържание в определени полета.";
 
 /* Delete Server Data - Button */
 "delete.server.data" = "Изключване и изтриване на данните от сървъра...";
 
 /* No comment provided by engineer. */
 "Dev environment" = "Среда за разработване";
+
+/* Device SyncedSheet Button to go get DuckDuckGo on other devices */
+"device.synced.sheet.button.get.other.devices" = "Вземете DuckDuckGo на други устройства";
 
 /* Device SyncedSheet - Title */
 "device.synced.sheet.title" = "Данните Ви са синхронизирани!";
@@ -81,6 +90,9 @@
 
 /* Options - Fetch Favicons Title */
 "fetch.favicons.option.title" = "Автоматично изтегляне на икони";
+
+/* No comment provided by engineer. */
+"Go to Settings" = "Влезте в Настройки";
 
 /* No comment provided by engineer. */
 "Keep Development" = "Продължаване на разработката";
@@ -112,8 +124,11 @@
 /* Standard Buttons - Paste Button */
 "paste.button" = "Поставяне";
 
-/* Description of rollout banner */
-"preferences.sync.rollout-banner.description" = "Функцията Синхронизиране и архивиране се въвежда постепенно и може все още да не е достъпна в DuckDuckGo на останалите Ви устройства.";
+/* Button title for sync bookmarks limits exceeded warning to go to manage bookmarks */
+"prefrences.sync.bookmarks-limit-exceeded-action" = "Управление на отметки";
+
+/* Button title for sync credentials limits exceeded warning to go to manage passwords */
+"prefrences.sync.credentials-limit-exceeded-action" = "Управление на пароли…";
 
 /* Preparing To Sync Sheet - Description */
 "preparing.to.sync.sheet.description" = "Вашите отметки и пароли се подготвят за синхронизиране. Това ще отнеме само няколко секунди.";
@@ -200,10 +215,13 @@
 "scan.or.see.code.scan.code.instructions.title" = "От мобилно към мобилно устройство?";
 
 /* Scan or See Code View - Share Code Link */
-"scan.or.see.code.share.code.link" = "Споделяне на текстов код?";
+"scan.or.see.code.share.code.link" = "Споделяне на текстов код";
 
 /* Scan or See Code View - Title */
 "scan.or.see.code.title" = "Сканиране на QR код";
+
+/* No comment provided by engineer. */
+"Secure Your Device to Use Sync & Backup" = "Защитете устройството си, за да използвате Sync & Backup";
 
 /* No comment provided by engineer. */
 "Switch to Production" = "Превключване към производство";
@@ -211,8 +229,23 @@
 /* Link label for syncing and backing up the device */
 "sync.and.backup.this.device.link" = "Синхронизиране и архивиране на това устройство";
 
-/* Sync Paused Errors - Title */
-"sync.limit.exceeded.title" = "Синхронизирането е на пауза";
+/* Button to get DuckDuckGo on other devices */
+"sync.get.other.devices" = "Вземете DuckDuckGo на други устройства";
+
+/* Button title to share link for downloading DuckDuckGo on other devices */
+"sync.get.other.devices.card.button.title" = "Споделяне на връзка за изтегляне";
+
+/* Message before share link for downloading DuckDuckGo on other devices */
+"sync.get.other.devices.card.message" = "За да изтеглите DuckDuckGo на настолен компютър или друго мобилно устройство, посетете:";
+
+/* Title of card with share links for users to download DuckDuckGo on other devices */
+"sync.get.other.devices.card.title" = "Вземете DuckDuckGo на други устройства, които да синхронизирате с това";
+
+/* Title of screen with share links for users to download DuckDuckGo on other devices */
+"sync.get.other.devices.screen.title" = "Вземете DuckDuckGo";
+
+/* Message included when sharing a url via the system share sheet */
+"sync.get.other.devices.share.link.message" = "Инсталирайте браузъра DuckDuckGo на устройствата си, за да започнете сигурно синхронизиране на отметките и паролите си:";
 
 /* Sync Menu Path */
 "sync.menu.path" = "Настройки > Синхронизиране и архивиране > Синхронизиране с друго устройство";
@@ -225,9 +258,6 @@
 
 /* Data syncing unavailable warning message */
 "sync.warning.data.syncing.disabled.upgrade.required" = "Съжаляваме, но функцията за синхронизиране и архивиране вече не се предлага в тази версия на приложението. Моля, актуализирайте DuckDuckGo до най-новата версия, за да продължите.";
-
-/* Title of the warning message */
-"sync.warning.sync.paused" = "Функцията за синхронизиране и архивиране е на пауза";
 
 /* Title of the warning message */
 "sync.warning.sync.unavailable" = "Функцията за синхронизиране и архивиране не е достъпна";

@@ -21,9 +21,11 @@ import Foundation
 import BrowserServicesKit
 import Common
 import Subscription
+import AIChat
 
 enum InterceptedURL: String {
     case privacyPro
+    case aiChat
 }
 
 struct InterceptedURLInfo {
@@ -37,28 +39,33 @@ protocol TabURLInterceptor {
 
 final class TabURLInterceptorDefault: TabURLInterceptor {
     
+    typealias CanPurchaseUpdater = () -> Bool
+    private let canPurchase: CanPurchaseUpdater
+    private let featureFlagger: FeatureFlagger
+
+    init(featureFlagger: FeatureFlagger, canPurchase: @escaping CanPurchaseUpdater) {
+        self.canPurchase = canPurchase
+        self.featureFlagger = featureFlagger
+    }
 
     static let interceptedURLs: [InterceptedURLInfo] = [
         InterceptedURLInfo(id: .privacyPro, path: "/pro")
     ]
     
     func allowsNavigatingTo(url: URL) -> Bool {
-        
-        if !url.isPart(ofDomain: "duckduckgo.com") {
+        if featureFlagger.isFeatureOn(.aiChatDeepLink), url.isDuckAIURL {
+            return handleURLInterception(interceptedURL: .aiChat, queryItems: nil)
+        }
+
+        guard url.isPart(ofDomain: "duckduckgo.com"),
+              let components = normalizeScheme(url.absoluteString),
+              let matchingURL = urlToIntercept(path: components.path) else {
             return true
         }
-        
-        guard let components = normalizeScheme(url.absoluteString) else {
-            return true
-        }
-        
-        guard let matchingURL = urlToIntercept(path: components.path) else {
-            return true
-        }
-        
-        return Self.handleURLInterception(url: matchingURL.id)
-        
+
+        return handleURLInterception(interceptedURL: matchingURL.id, queryItems: components.percentEncodedQueryItems)
     }
+
 }
 
 extension TabURLInterceptorDefault {
@@ -79,21 +86,36 @@ extension TabURLInterceptorDefault {
         return URLComponents(string: "\(URL.URLProtocol.https.scheme)\(noScheme)")
     }
 
-    private static func handleURLInterception(url: InterceptedURL) -> Bool {
-        switch url {
-            
+    private func handleURLInterception(interceptedURL: InterceptedURL, queryItems: [URLQueryItem]?) -> Bool {
+        switch interceptedURL {
             // Opens the Privacy Pro Subscription Purchase page (if user can purchase)
-            case .privacyPro:
-                if SubscriptionPurchaseEnvironment.canPurchase {
-                    NotificationCenter.default.post(name: .urlInterceptPrivacyPro, object: nil)
-                    return false
-                }
+        case .privacyPro:
+            if canPurchase() {
+                // If URL has an `origin` query parameter, append it to the `subscriptionPurchase` URL.
+                // Also forward the origin as it will need to be sent as parameter to the Pixel to track subcription attributions.
+                let originQueryItem = queryItems?.first(where: { $0.name == AttributionParameter.origin })
+                NotificationCenter.default.post(
+                    name: .urlInterceptPrivacyPro,
+                    object: nil,
+                    userInfo: [AttributionParameter.origin: originQueryItem?.value as Any]
+                )
+                return false
             }
+        case .aiChat:
+            if featureFlagger.isFeatureOn(.aiChatDeepLink) {
+                NotificationCenter.default.post(
+                    name: .urlInterceptAIChat,
+                    object: nil,
+                    userInfo: nil
+                )
+                return false
+            }
+        }
         return true
-        
     }
 }
 
 extension NSNotification.Name {
     static let urlInterceptPrivacyPro: NSNotification.Name = Notification.Name(rawValue: "com.duckduckgo.notification.urlInterceptPrivacyPro")
+    static let urlInterceptAIChat: NSNotification.Name = Notification.Name(rawValue: "com.duckduckgo.notification.urlInterceptAIChat")
 }

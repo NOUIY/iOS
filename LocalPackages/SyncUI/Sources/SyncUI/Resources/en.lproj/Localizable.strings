@@ -7,12 +7,6 @@
 /* Alert title for invalid bookmarks being filtered out of synced data */
 "bookmarks.invalid.objects.present.title" = "Some bookmarks are not syncing due to excessively long content in certain fields.";
 
-/* Sync Paused Errors - Bookmarks Limit Exceeded Action */
-"bookmarks.limit.exceeded.action" = "Manage Bookmarks";
-
-/* Sync Paused Errors - Bookmarks Limit Exceeded Description */
-"bookmarks.limit.exceeded.description" = "Bookmark limit exceeded. Delete some to resume syncing.";
-
 /* Camera View - Go to Settings Button */
 "camera.go.to.settings.button" = "Go to Settings";
 
@@ -46,20 +40,20 @@
 /* Connect With Server Sheet - Title */
 "connect.with.server.sheet.title" = "Sync and Back Up This Device";
 
+/* Standard Buttons - Copy Button */
+"copy.button" = "Copy";
+
 /* Do not translate - stringsdict entry */
 "credentials.invalid.objects.present.description" = "credentials.invalid.objects.present.description";
 
 /* Alert title for invalid logins being filtered out of synced data */
 "credentials.invalid.objects.present.title" = "Some logins are not syncing due to excessively long content in certain fields.";
 
-/* Sync Paused Errors - Credentials Limit Exceeded Action */
-"credentials.limit.exceeded.action" = "Manage Logins";
-
-/* Sync Paused Errors - Credentials Limit Exceeded Description */
-"credentials.limit.exceeded.description" = "Logins limit exceeded. Delete some to resume syncing.";
-
 /* Delete Server Data - Button */
 "delete.server.data" = "Turn Off and Delete Server Data...";
+
+/* Device SyncedSheet Button to go get DuckDuckGo on other devices */
+"device.synced.sheet.button.get.other.devices" = "Get DuckDuckGo on Other Devices";
 
 /* Device SyncedSheet - Title */
 "device.synced.sheet.title" = "Your data is synced!";
@@ -115,8 +109,11 @@
 /* Standard Buttons - Paste Button */
 "paste.button" = "Paste";
 
-/* Description of rollout banner */
-"preferences.sync.rollout-banner.description" = "Sync & Backup is rolling out gradually and may not be available yet within DuckDuckGo on your other devices.";
+/* Button title for sync bookmarks limits exceeded warning to go to manage bookmarks */
+"prefrences.sync.bookmarks-limit-exceeded-action" = "Manage Bookmarks";
+
+/* Button title for sync credentials limits exceeded warning to go to manage passwords */
+"prefrences.sync.credentials-limit-exceeded-action" = "Manage passwords…";
 
 /* Preparing To Sync Sheet - Description */
 "preparing.to.sync.sheet.description" = "Your bookmarks and passwords are being prepared to sync. This should only take a moment.";
@@ -211,8 +208,23 @@
 /* Link label for syncing and backing up the device */
 "sync.and.backup.this.device.link" = "Sync and Back Up This Device";
 
-/* Sync Paused Errors - Title */
-"sync.limit.exceeded.title" = "Sync Paused";
+/* Button to get DuckDuckGo on other devices */
+"sync.get.other.devices" = "Get DuckDuckGo on Other Devices";
+
+/* Button title to share link for downloading DuckDuckGo on other devices */
+"sync.get.other.devices.card.button.title" = "Share Download Link";
+
+/* Message before share link for downloading DuckDuckGo on other devices */
+"sync.get.other.devices.card.message" = "To download DuckDuckGo on desktop or another mobile device, visit:";
+
+/* Title of card with share links for users to download DuckDuckGo on other devices */
+"sync.get.other.devices.card.title" = "Get DuckDuckGo on other devices to sync with this one";
+
+/* Title of screen with share links for users to download DuckDuckGo on other devices */
+"sync.get.other.devices.screen.title" = "Get DuckDuckGo";
+
+/* Message included when sharing a url via the system share sheet */
+"sync.get.other.devices.share.link.message" = "Install the DuckDuckGo browser on your devices to start securely syncing your bookmarks and passwords:";
 
 /* Sync Menu Path */
 "sync.menu.path" = "Settings > Sync & Backup > Sync With Another Device";
@@ -225,9 +237,6 @@
 
 /* Data syncing unavailable warning message */
 "sync.warning.data.syncing.disabled.upgrade.required" = "Sorry, but Sync & Backup is no longer available in this app version. Please update DuckDuckGo to the latest version to continue.";
-
-/* Title of the warning message */
-"sync.warning.sync.paused" = "Sync & Backup is Paused";
 
 /* Title of the warning message */
 "sync.warning.sync.unavailable" = "Sync & Backup is Unavailable";

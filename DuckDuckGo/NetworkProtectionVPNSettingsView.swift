@@ -17,12 +17,9 @@
 //  limitations under the License.
 //
 
-#if NETWORK_PROTECTION
-
 import SwiftUI
 import DesignResourcesKit
 
-@available(iOS 15, *)
 struct NetworkProtectionVPNSettingsView: View {
     @StateObject var viewModel = NetworkProtectionVPNSettingsViewModel()
 
@@ -35,26 +32,17 @@ struct NetworkProtectionVPNSettingsView: View {
                 case .authorized: notificationAuthorizedView
                 }
 
+                shortcutsView
+
                 toggleSection(
                     text: UserText.netPExcludeLocalNetworksSettingTitle,
+                    headerText: UserText.netPExcludeLocalNetworksSettingHeader,
                     footerText: UserText.netPExcludeLocalNetworksSettingFooter
                 ) {
                     Toggle("", isOn: $viewModel.excludeLocalNetworks)
-                        .onTapGesture {
-                            viewModel.toggleExcludeLocalNetworks()
-                        }
                 }
 
-                Section {
-                    HStack(spacing: 16) {
-                        Image("Info-Solid-24")
-                            .foregroundColor(.init(designSystemColor: .icons).opacity(0.3))
-                        Text(UserText.netPSecureDNSSettingFooter)
-                            .daxFootnoteRegular()
-                            .foregroundColor(.init(designSystemColor: .textSecondary))
-                    }
-                }
-                .listRowBackground(Color(designSystemColor: .surface))
+                dnsSection()
             }
         }
         .applyInsetGroupedListStyle()
@@ -65,8 +53,37 @@ struct NetworkProtectionVPNSettingsView: View {
         }
     }
 
+    func dnsSection() -> some View {
+        Section {
+            NavigationLink {
+                NetworkProtectionDNSSettingsView()
+            } label: {
+                HStack {
+                    Text(UserText.vpnSettingDNSServerTitle)
+                        .daxBodyRegular()
+                        .foregroundColor(.init(designSystemColor: .textPrimary))
+                    Spacer()
+                    Text(viewModel.dnsServers)
+                        .daxBodyRegular()
+                        .foregroundColor(.init(designSystemColor: .textSecondary))
+                }
+            }
+        } header: {
+            Text(UserText.vpnSettingDNSSectionHeader)
+        } footer: {
+            if viewModel.usesCustomDNS {
+                Text(UserText.vpnSettingDNSSectionDisclaimer)
+                    .foregroundColor(.init(designSystemColor: .textSecondary))
+            } else {
+                Text(UserText.netPSecureDNSSettingFooter)
+                    .foregroundColor(.init(designSystemColor: .textSecondary))
+            }
+        }
+        .listRowBackground(Color(designSystemColor: .surface))
+    }
+
     @ViewBuilder
-    func toggleSection(text: String, footerText: String, @ViewBuilder toggle: () -> some View) -> some View {
+    func toggleSection(text: String, headerText: String, footerText: String, @ViewBuilder toggle: () -> some View) -> some View {
         Section {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
@@ -79,6 +96,8 @@ struct NetworkProtectionVPNSettingsView: View {
                 toggle()
                     .toggleStyle(SwitchToggleStyle(tint: .init(designSystemColor: .accent)))
             }
+        } header: {
+            Text(headerText)
         } footer: {
             Text(footerText)
                 .foregroundColor(.init(designSystemColor: .textSecondary))
@@ -116,6 +135,8 @@ struct NetworkProtectionVPNSettingsView: View {
                 )
             )
             .toggleStyle(SwitchToggleStyle(tint: .init(designSystemColor: .accent)))
+        } header: {
+            Text(UserText.netPVPNAlertsSectionHeader)
         } footer: {
             Text(UserText.netPVPNAlertsToggleSectionFooter)
                 .foregroundColor(.init(designSystemColor: .textSecondary))
@@ -125,6 +146,67 @@ struct NetworkProtectionVPNSettingsView: View {
         .listRowBackground(Color(designSystemColor: .surface))
     }
 
+    @ViewBuilder
+    private var shortcutsView: some View {
+        // Widget only available for iOS 17 and up
+        if #available(iOS 17.0, *) {
+            Section {
+                NavigationLink {
+                    WidgetEducationView.vpn
+                } label: {
+                    Label {
+                        Text(UserText.vpnSettingsAddWidget)
+                    } icon: {
+                        Image(.addWidgetColor24)
+                            .frame(width: 24, height: 24)
+                    }.daxBodyRegular()
+                }
+
+                if #available(iOS 18.0, *) {
+                    NavigationLink {
+                        ControlCenterWidgetEducationView(navBarTitle: "Add DuckDuckGo VPN Shortcut to Your Control Center",
+                                                         widget: .vpnToggle)
+                    } label: {
+                        Label {
+                            Text(UserText.vpnSettingsAddControlCenterWidget)
+                        } icon: {
+                            Image(.settingsColor24)
+                                .frame(width: 24, height: 24)
+                        }.daxBodyRegular()
+                    }
+                }
+
+                NavigationLink {
+                    SiriEducationView()
+                } label: {
+                    Label {
+                        Text(UserText.vpnSettingsControlWithSiri)
+                    } icon: {
+                        Image(.askSiriColor24)
+                            .frame(width: 24, height: 24)
+                    }.daxBodyRegular()
+                }
+            } header: {
+                Text(UserText.netPVPNShortcutsSectionHeader)
+            }
+            .listRowBackground(Color(designSystemColor: .surface))
+        }
+    }
 }
 
-#endif
+@available(iOS 17.0, *)
+private extension WidgetEducationView {
+
+    static var vpn: Self {
+        WidgetEducationView(
+            navBarTitle: UserText.settingsAddVPNWidget,
+            thirdParagraphText: UserText.addVPNWidgetSettingsThirdParagraph,
+            thirdParagraphDetail: .image(
+                Image("WidgetEducationVPNWidgetExample"),
+                maxWidth: 164,
+                horizontalOffset: -7,
+                dropsShadow: true
+            )
+        )
+    }
+}

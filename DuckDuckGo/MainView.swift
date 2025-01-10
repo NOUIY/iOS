@@ -22,17 +22,19 @@ import UIKit
 class MainViewFactory {
 
     private let coordinator: MainViewCoordinator
+    private let voiceSearchHelper: VoiceSearchHelperProtocol
 
     var superview: UIView {
         coordinator.superview
     }
 
-    private init(_ superview: UIView) {
+    private init(superview: UIView, voiceSearchHelper: VoiceSearchHelperProtocol) {
         coordinator = MainViewCoordinator(superview: superview)
+        self.voiceSearchHelper = voiceSearchHelper
     }
 
-    static func createViewHierarchy(_ superview: UIView) -> MainViewCoordinator {
-        let factory = MainViewFactory(superview)
+    static func createViewHierarchy(_ superview: UIView, voiceSearchHelper: VoiceSearchHelperProtocol) -> MainViewCoordinator {
+        let factory = MainViewFactory(superview: superview, voiceSearchHelper: voiceSearchHelper)
         factory.createViews()
         factory.disableAutoresizingOnImmediateSubviews(superview)
         factory.constrainViews()
@@ -54,7 +56,7 @@ extension MainViewFactory {
         createLogoBackground()
         createContentContainer()
         createSuggestionTrayContainer()
-        createNotificationBarContainer()
+        createTopSlideContainer()
         createStatusBackground()
         createTabBarContainer()
         createOmniBar()
@@ -70,7 +72,7 @@ extension MainViewFactory {
     }
 
     private func createOmniBar() {
-        coordinator.omniBar = OmniBar.loadFromXib()
+        coordinator.omniBar = OmniBar.loadFromXib(voiceSearchHelper: voiceSearchHelper)
         coordinator.omniBar.translatesAutoresizingMaskIntoConstraints = false
     }
     
@@ -107,12 +109,6 @@ extension MainViewFactory {
     private func createNavigationBarContainer() {
         coordinator.navigationBarContainer = NavigationBarContainer()
         superview.addSubview(coordinator.navigationBarContainer)
-    }
-
-    final class NotificationBarContainer: UIView { }
-    private func createNotificationBarContainer() {
-        coordinator.notificationBarContainer = NotificationBarContainer()
-        superview.addSubview(coordinator.notificationBarContainer)
     }
 
     final class ContentContainer: UIView { }
@@ -180,6 +176,13 @@ extension MainViewFactory {
         disableAutoresizingOnImmediateSubviews(coordinator.logoContainer)
     }
 
+    final class TopSlideContainer: UIView { }
+    private func createTopSlideContainer() {
+        coordinator.topSlideContainer = TopSlideContainer()
+        coordinator.topSlideContainer.translatesAutoresizingMaskIntoConstraints = false
+        superview.addSubview(coordinator.topSlideContainer)
+    }
+
 }
 
 /// Add constraint functions
@@ -187,9 +190,9 @@ extension MainViewFactory {
 
     private func constrainViews() {
         constrainLogoBackground()
+        constrainTopSlideContainer()
         constrainContentContainer()
         constrainSuggestionTrayContainer()
-        constrainNotificationBarContainer()
         constrainStatusBackground()
         constrainTabBarContainer()
         constrainNavigationBarContainer()
@@ -213,25 +216,23 @@ extension MainViewFactory {
     }
     
     private func constrainNavigationBarContainer() {
-        let navigationBarContainer = coordinator.navigationBarContainer!
+        let container = coordinator.navigationBarContainer!
         let toolbar = coordinator.toolbar!
         let navigationBarCollectionView = coordinator.navigationBarCollectionView!
 
-        coordinator.constraints.navigationBarContainerTop = navigationBarContainer.constrainView(superview.safeAreaLayoutGuide, by: .top)
-        coordinator.constraints.navigationBarContainerBottom = navigationBarContainer.constrainView(toolbar, by: .bottom, to: .top)
-        coordinator.constraints.navigationBarCollectionViewBottom
-            = navigationBarCollectionView.constrainView(navigationBarContainer, by: .bottom, relatedBy: .greaterThanOrEqual)
-        
+        coordinator.constraints.navigationBarContainerTop = container.constrainView(superview.safeAreaLayoutGuide, by: .top)
+        coordinator.constraints.navigationBarContainerBottom = container.constrainView(toolbar, by: .bottom, to: .top)
+        coordinator.constraints.navigationBarContainerHeight = container.constrainAttribute(.height, to: 52, relatedBy: .equal)
+
         NSLayoutConstraint.activate([
             coordinator.constraints.navigationBarContainerTop,
-            navigationBarContainer.constrainView(superview, by: .leading),
-            navigationBarContainer.constrainView(superview, by: .trailing),
-            navigationBarContainer.constrainAttribute(.height, to: 52, relatedBy: .greaterThanOrEqual),
+            container.constrainView(superview, by: .leading),
+            container.constrainView(superview, by: .trailing),
+            coordinator.constraints.navigationBarContainerHeight,
             navigationBarCollectionView.constrainAttribute(.height, to: 52),
-            navigationBarCollectionView.constrainView(navigationBarContainer, by: .top),
-            navigationBarCollectionView.constrainView(navigationBarContainer, by: .leading),
-            navigationBarCollectionView.constrainView(navigationBarContainer, by: .trailing),
-            coordinator.constraints.navigationBarCollectionViewBottom
+            navigationBarCollectionView.constrainView(container, by: .top),
+            navigationBarCollectionView.constrainView(container, by: .leading),
+            navigationBarCollectionView.constrainView(container, by: .trailing),
         ])
     }
 
@@ -266,34 +267,12 @@ extension MainViewFactory {
         ])
     }
 
-    private func constrainNotificationBarContainer() {
-        let notificationBarContainer = coordinator.notificationBarContainer!
-        let contentContainer = coordinator.contentContainer!
-        let navigationBarContainer = coordinator.navigationBarContainer!
-        let statusBackground = coordinator.statusBackground!
-
-        coordinator.constraints.notificationContainerTopToNavigationBar
-            = notificationBarContainer.constrainView(navigationBarContainer, by: .top, to: .bottom)
-        coordinator.constraints.notificationContainerTopToStatusBackground
-            = notificationBarContainer.constrainView(statusBackground, by: .top, to: .bottom)
-        coordinator.constraints.notificationContainerHeight = notificationBarContainer.constrainAttribute(.height, to: 0)
-
-        NSLayoutConstraint.activate([
-            notificationBarContainer.constrainView(superview, by: .width),
-            notificationBarContainer.constrainView(superview, by: .centerX),
-            coordinator.constraints.notificationContainerHeight,
-            notificationBarContainer.constrainView(contentContainer, by: .bottom, to: .top),
-            coordinator.constraints.notificationContainerTopToNavigationBar,
-        ])
-    }
-
     private func constrainContentContainer() {
         let contentContainer = coordinator.contentContainer!
         let toolbar = coordinator.toolbar!
-        let notificationBarContainer = coordinator.notificationBarContainer!
         let navigationBarContainer = coordinator.navigationBarContainer!
 
-        coordinator.constraints.contentContainerTop = contentContainer.constrainView(notificationBarContainer, by: .top, to: .bottom)
+        coordinator.constraints.contentContainerTop = contentContainer.constrainView(coordinator.topSlideContainer!, by: .top, to: .bottom)
         coordinator.constraints.contentContainerBottomToToolbarTop = contentContainer.constrainView(toolbar, by: .bottom, to: .top)
         coordinator.constraints.contentContainerBottomToNavigationBarContainerTop
             = contentContainer.constrainView(navigationBarContainer, by: .bottom, to: .top)
@@ -343,6 +322,27 @@ extension MainViewFactory {
             logo.constrainAttribute(.height, to: 96),
             text.constrainView(logo, by: .top, to: .bottom, constant: 12),
             text.constrainView(logo, by: .centerX),
+        ])
+    }
+
+    private func constrainTopSlideContainer() {
+        let topSlideContainer = coordinator.topSlideContainer!
+        let navigationBarContainer = coordinator.navigationBarContainer!
+        let statusBackground = coordinator.statusBackground!
+
+        coordinator.constraints.topSlideContainerTopToNavigationBar = topSlideContainer.constrainView(navigationBarContainer, by: .top, to: .bottom)
+        coordinator.constraints.topSlideContainerTopToStatusBackground = topSlideContainer.constrainView(statusBackground, by: .top, to: .bottom)
+
+        coordinator.constraints.topSlideContainerBottomToNavigationBarBottom = topSlideContainer.constrainView(navigationBarContainer, by: .bottom)
+        coordinator.constraints.topSlideContainerBottomToStatusBackgroundBottom = topSlideContainer.constrainView(statusBackground, by: .bottom)
+
+        coordinator.constraints.topSlideContainerHeight = topSlideContainer.constrainAttribute(.height, to: 0, relatedBy: .greaterThanOrEqual)
+
+        NSLayoutConstraint.activate([
+            topSlideContainer.constrainView(superview, by: .width),
+            topSlideContainer.constrainView(superview, by: .centerX),
+            coordinator.constraints.topSlideContainerHeight,
+            coordinator.constraints.topSlideContainerBottomToNavigationBarBottom,
         ])
     }
 

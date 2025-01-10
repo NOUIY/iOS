@@ -73,10 +73,11 @@ extension SyncSettingsView {
     @ViewBuilder
     func otherOptions() -> some View {
         Section {
-
             Button(UserText.syncAndBackUpThisDeviceLink) {
                 Task { @MainActor in
-                    isSyncWithSetUpSheetVisible = await model.authenticateUser()
+                    if await model.commonAuthenticate() {
+                        isSyncWithSetUpSheetVisible = true
+                    }
                 }
             }
             .sheet(isPresented: $isSyncWithSetUpSheetVisible, content: {
@@ -88,7 +89,9 @@ extension SyncSettingsView {
 
             Button(UserText.recoverSyncedDataLink) {
                 Task { @MainActor in
-                    isRecoverSyncedDataSheetVisible = await model.authenticateUser()
+                    if await model.commonAuthenticate() {
+                        isRecoverSyncedDataSheetVisible = true
+                    }
                 }
             }
             .sheet(isPresented: $isRecoverSyncedDataSheetVisible, content: {
@@ -100,6 +103,21 @@ extension SyncSettingsView {
 
         } header: {
             Text(UserText.otherOptionsSectionHeader)
+        }
+    }
+
+    @ViewBuilder
+    func otherPlatformsLinks(source: SyncSettingsViewModel.PlatformLinksPixelSource) -> some View {
+        Section {
+            NavigationLink(destination: PlatformLinksView(model: model, source: source)) {
+                HStack(spacing: 6) {
+                    Image("Sync-Downloads-24")
+                    Text(UserText.syncGetOnOtherDevices)
+                        .daxBodyRegular()
+                }
+                .foregroundColor(Color(designSystemColor: .textPrimary))
+            }
+            .buttonStyle(.plain)
         }
     }
 }
@@ -177,22 +195,6 @@ extension SyncSettingsView {
         } header: {
             Text(UserText.syncedDevicesSectionHeader)
         }
-        .sheet(item: $selectedDevice) { device in
-            Group {
-                if device.isThisDevice {
-                    EditDeviceView(model: model.createEditDeviceModel(device))
-                } else {
-                    RemoveDeviceView(model: model.createRemoveDeviceModel(device))
-                }
-            }
-            .modifier {
-                if #available(iOS 16.0, *) {
-                    $0.presentationDetents([.medium])
-                } else {
-                    $0
-                }
-            }
-        }
         .onReceive(timer) { _ in
             if selectedDevice == nil {
                 model.delegate?.refreshDevices(clearDevices: false)
@@ -259,30 +261,46 @@ extension SyncSettingsView {
 
     @ViewBuilder
     func syncPaused(for itemType: LimitedItemType) -> some View {
-        var explanation: String {
+        var title: String? {
             switch itemType {
             case .bookmarks:
-                return UserText.bookmarksLimitExceededDescription
+                return model.syncBookmarksPausedTitle
             case .credentials:
-                return UserText.credentialsLimitExceededDescription
+                return model.syncCredentialsPausedTitle
             }
         }
-        var buttonTitle: String {
+        var explanation: String? {
             switch itemType {
             case .bookmarks:
-                return UserText.bookmarksLimitExceededAction
+                return model.syncBookmarksPausedDescription
             case .credentials:
-                return UserText.credentialsLimitExceededAction
+                return model.syncCredentialsPausedDescription
             }
         }
+        var buttonTitle: String? {
+            switch itemType {
+            case .bookmarks:
+                return model.syncBookmarksPausedButtonTitle
+            case .credentials:
+                return model.syncCredentialsPausedButtonTitle
+            }
+        }
+        if let title, let explanation, let buttonTitle {
+            SyncWarningMessageView(title: title, message: explanation, buttonTitle: buttonTitle) {
+                switch itemType {
+                case .bookmarks:
+                    model.manageBookmarks()
+                case .credentials:
+                    model.manageLogins()
+                }
+            }
+        }
+    }
 
-        SyncWarningMessageView(title: UserText.syncLimitExceededTitle, message: explanation, buttonTitle: buttonTitle) {
-            switch itemType {
-            case .bookmarks:
-                model.manageBookmarks()
-            case .credentials:
-                model.manageLogins()
-            }
+    @ViewBuilder
+    func syncPaused() -> some View {
+        if let title = model.syncPausedTitle, let message = model.syncPausedDescription {
+            SyncWarningMessageView(title: title, message: message)
         }
     }
 
@@ -339,17 +357,13 @@ extension SyncSettingsView {
             Button(action: {
                 isEnvironmentSwitcherInstructionsVisible.toggle()
             }, label: {
-                if #available(iOS 15.0, *) {
-                    Text("Dev environment")
-                        .daxFootnoteRegular()
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 2)
-                        .foregroundColor(.white)
-                        .background(Color.red40)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                } else {
-                    Text("Dev environment")
-                }
+                Text("Dev environment")
+                    .daxFootnoteRegular()
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 2)
+                    .foregroundColor(.white)
+                    .background(Color.red40)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
             })
             .alert(isPresented: $isEnvironmentSwitcherInstructionsVisible) {
                 Alert(
@@ -361,24 +375,6 @@ extension SyncSettingsView {
         } else {
             EmptyView()
         }
-    }
-
-    @ViewBuilder
-    func rolloutBanner() -> some View {
-        Section {
-            HStack(alignment: .top, spacing: 16) {
-                Image("Info-Color-16")
-                Text(UserText.syncRollOutBannerDescription)
-                    .font(.system(size: 12))
-                    .foregroundColor(.primary)
-                    .multilineTextAlignment(.leading)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-        .padding()
-        .background(RoundedRectangle(cornerRadius: 8).foregroundColor(Color("RolloutBannerBackground")))
-        .padding(.bottom, 10)
-        .padding(.horizontal, 14)
     }
 
     enum LimitedItemType {

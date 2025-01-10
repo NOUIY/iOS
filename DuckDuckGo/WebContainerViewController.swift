@@ -22,6 +22,7 @@ import Core
 import UIKit
 import WebKit
 import Networking
+import os.log
 
 /// Use title property to set the displayed title
 class WebContainerViewController: UIViewController {
@@ -46,8 +47,6 @@ class WebContainerViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        applyTheme(ThemeManager.shared.currentTheme)
 
         let webView = WKWebView(frame: view.frame)
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -87,7 +86,7 @@ class WebContainerViewController: UIViewController {
             progress = Float(webView?.estimatedProgress ?? 0.0)
 
         default:
-            os_log("Unhandled keyPath %s", log: .generalLog, type: .debug, keyPath)
+            Logger.general.debug("Unhandled keyPath \(keyPath)")
         }
     }
 
@@ -101,5 +100,3 @@ class WebContainerViewController: UIViewController {
     }
 
 }
-
-extension WebContainerViewController: Themable { }

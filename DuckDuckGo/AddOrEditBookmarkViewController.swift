@@ -92,7 +92,8 @@ class AddOrEditBookmarkViewController: UIViewController {
         updateTitle()
         updateSaveButton()
 
-        applyTheme(ThemeManager.shared.currentTheme)
+        decorateNavigationBar()
+        decorateToolbar()
 
         viewModelCancellable = viewModel.externalUpdates.sink { [weak self] _ in
             self?.foldersViewController?.refresh()
@@ -133,6 +134,15 @@ class AddOrEditBookmarkViewController: UIViewController {
     }
 
     func saveAndDismiss() {
+        let changes = viewModel.bookmark.changedValues()
+        if changes.contains(where: { $0.key == #keyPath(BookmarkEntity.favoriteFolders) }) {
+            if viewModel.bookmark.isFavorite(on: viewModel.favoritesDisplayMode.displayedFolder) {
+                Pixel.fire(pixel: .bookmarkAddFavoriteFromBookmark)
+            } else {
+                Pixel.fire(pixel: .bookmarkRemoveFavoriteFromBookmark)
+            }
+        }
+
         viewModel.save()
         WidgetCenter.shared.reloadAllTimelines()
         self.delegate?.finishedEditing(self, entityID: viewModel.bookmark.objectID)
@@ -189,14 +199,4 @@ extension AddOrEditBookmarkViewController: AddOrEditBookmarkViewControllerDelega
         self.delegate?.deleteBookmark(self, entityID: entityID)
     }
 
-}
-
-extension AddOrEditBookmarkViewController: Themable {
-    
-    func decorate(with theme: Theme) {
-        decorateNavigationBar(with: theme)
-        decorateToolbar(with: theme)
-        
-        overrideSystemTheme(with: theme)
-    }
 }

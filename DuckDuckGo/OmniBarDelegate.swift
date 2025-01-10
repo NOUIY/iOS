@@ -20,6 +20,11 @@
 import Foundation
 import Suggestions
 
+enum OmniBarEditingEndResult {
+    case suspended
+    case dismissed
+}
+
 protocol OmniBarDelegate: AnyObject {
 
     func onOmniQueryUpdated(_ query: String)
@@ -28,9 +33,9 @@ protocol OmniBarDelegate: AnyObject {
 
     func onOmniSuggestionSelected(_ suggestion: Suggestion)
     
-    func onDismissed()
-    
-    func onPrivacyIconPressed()
+    func onEditingEnd() -> OmniBarEditingEndResult
+
+    func onPrivacyIconPressed(isHighlighted: Bool)
     
     func onMenuPressed()
 
@@ -39,6 +44,10 @@ protocol OmniBarDelegate: AnyObject {
     func onSettingsPressed()
 
     func onSettingsLongPressed()
+
+    func onClearPressed()
+
+    func onAbortPressed()
 
     func onCancelPressed()
     
@@ -50,11 +59,11 @@ protocol OmniBarDelegate: AnyObject {
     
     func onForwardPressed()
     
-    func onSharePressed()
+    func onAccessoryPressed(accessoryType: OmniBar.AccessoryType)
 
-    func onShareLongPressed()
+    func onAccessoryLongPressed(accessoryType: OmniBar.AccessoryType)
 
-    func onTextFieldWillBeginEditing(_ omniBar: OmniBar)
+    func onTextFieldWillBeginEditing(_ omniBar: OmniBar, tapped: Bool)
     
     // Returns whether field should select the text or not
     func onTextFieldDidBeginEditing(_ omniBar: OmniBar) -> Bool
@@ -75,20 +84,16 @@ extension OmniBarDelegate {
         
     }
     
-    func onDismissed() {
-        
-    }
-    
-    func onPrivacyIconPressed() {
-        
+    func onPrivacyIconPressed(isHighlighted: Bool) {
+
     }
     
     func onMenuPressed() {
         
     }
 
-    func onShareLongPressed() {
-        
+    func onAccessoryLongPressed(accessoryType: OmniBar.AccessoryType) {
+
     }
 
     func onBookmarksPressed() {
@@ -119,9 +124,9 @@ extension OmniBarDelegate {
     
     }
 
-    func onSharePressed() {
+    func onAccessoryPressed(accessoryType: OmniBar.AccessoryType) {
     }
-    
+
     func onBackPressed() {
     }
     

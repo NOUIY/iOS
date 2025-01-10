@@ -21,17 +21,15 @@ import Foundation
 import UserScript
 import Combine
 import Core
-
-#if SUBSCRIPTION
 import Subscription
-@available(iOS 15.0, *)
+
 final class SubscriptionRestoreViewModel: ObservableObject {
     
     let userScript: SubscriptionPagesUserScript
     let subFeature: SubscriptionPagesUseSubscriptionFeature
-    let purchaseManager: PurchaseManager
-    let accountManager: AccountManager
-    
+    let subscriptionManager: SubscriptionManager
+    var accountManager: AccountManager { subscriptionManager.accountManager }
+
     private var cancellables = Set<AnyCancellable>()
     
     enum SubscriptionActivationResult {
@@ -39,7 +37,6 @@ final class SubscriptionRestoreViewModel: ObservableObject {
     }
     
     struct State {
-        var isAddingDevice: Bool = false
         var transactionStatus: SubscriptionTransactionStatus = .idle
         var activationResult: SubscriptionActivationResult = .unknown
         var subscriptionEmail: String?
@@ -59,65 +56,29 @@ final class SubscriptionRestoreViewModel: ObservableObject {
         
     init(userScript: SubscriptionPagesUserScript,
          subFeature: SubscriptionPagesUseSubscriptionFeature,
-         purchaseManager: PurchaseManager = PurchaseManager.shared,
-         accountManager: AccountManager = AccountManager(),
+         subscriptionManager: SubscriptionManager,
          isAddingDevice: Bool = false) {
         self.userScript = userScript
         self.subFeature = subFeature
-        self.purchaseManager = purchaseManager
-        self.accountManager = accountManager
-        self.state.isAddingDevice = false
+        self.subscriptionManager = subscriptionManager
     }
     
     func onAppear() {
         DispatchQueue.main.async {
             self.resetState()
         }
-        Task { await setupContent() }
     }
     
     func onFirstAppear() async {
-        Pixel.fire(pixel: .privacyProSettingsAddDevice)
         await setupTransactionObserver()
     }
     
     private func cleanUp() {
-        subFeature.cleanup()
         cancellables.removeAll()
     }
 
-    
-    private func setupContent() async {
-        if state.isAddingDevice {
-            DispatchQueue.main.async {
-                self.state.isLoading = true
-            }
-            
-            guard let token = accountManager.accessToken else { return }
-            switch await accountManager.fetchAccountDetails(with: token) {
-            case .success(let details):
-                DispatchQueue.main.async {
-                    self.state.subscriptionEmail = details.email
-                    self.state.isLoading = false
-                    self.state.viewTitle = UserText.subscriptionAddDeviceTitle
-                }
-            default:
-                state.isLoading = false
-            }
-        } else {
-            DispatchQueue.main.async {
-                self.state.viewTitle = UserText.subscriptionActivate
-            }
-        }
-    }
-    
     @MainActor
     private func resetState() {
-        state.isAddingDevice = false
-        if accountManager.isUserAuthenticated {
-            state.isAddingDevice = true
-        }
-        
         state.isShowingActivationFlow = false
         state.shouldShowPlans = false
         state.isShowingWelcomePage = false
@@ -152,9 +113,11 @@ final class SubscriptionRestoreViewModel: ObservableObject {
         }
 
         if state.activationResult == .notFound {
-            DailyPixel.fireDailyAndCount(pixel: .privacyProRestorePurchaseStoreFailureNotFound)
+            DailyPixel.fireDailyAndCount(pixel: .privacyProRestorePurchaseStoreFailureNotFound,
+                                         pixelNameSuffixes: DailyPixel.Constant.legacyDailyPixelSuffixes)
         } else {
-            DailyPixel.fireDailyAndCount(pixel: .privacyProRestorePurchaseStoreFailureOther)
+            DailyPixel.fireDailyAndCount(pixel: .privacyProRestorePurchaseStoreFailureOther,
+                                         pixelNameSuffixes: DailyPixel.Constant.legacyDailyPixelSuffixes)
         }
     }
     
@@ -165,13 +128,15 @@ final class SubscriptionRestoreViewModel: ObservableObject {
     
     @MainActor
     func restoreAppstoreTransaction() {
-        DailyPixel.fireDailyAndCount(pixel: .privacyProRestorePurchaseStoreStart)
+        DailyPixel.fireDailyAndCount(pixel: .privacyProRestorePurchaseStoreStart,
+                                     pixelNameSuffixes: DailyPixel.Constant.legacyDailyPixelSuffixes)
         Task {
             state.transactionStatus = .restoring
             state.activationResult = .unknown
             do {
                 try await subFeature.restoreAccountFromAppStorePurchase()
-                DailyPixel.fireDailyAndCount(pixel: .privacyProRestorePurchaseStoreSuccess)
+                DailyPixel.fireDailyAndCount(pixel: .privacyProRestorePurchaseStoreSuccess,
+                                             pixelNameSuffixes: DailyPixel.Constant.legacyDailyPixelSuffixes)
                 state.activationResult = .activated
                 state.transactionStatus = .idle
             } catch let error {
@@ -206,4 +171,3 @@ final class SubscriptionRestoreViewModel: ObservableObject {
     
     
 }
-#endif

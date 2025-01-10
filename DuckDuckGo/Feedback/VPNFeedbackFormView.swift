@@ -17,14 +17,15 @@
 //  limitations under the License.
 //
 
-#if NETWORK_PROTECTION
-
 import SwiftUI
 import NetworkProtection
 
-@available(iOS 15.0, *)
 struct VPNFeedbackFormCategoryView: View {
     @Environment(\.dismiss) private var dismiss
+    let collector = DefaultVPNMetadataCollector(
+        statusObserver: AppDependencyProvider.shared.connectionObserver,
+        serverInfoObserver: AppDependencyProvider.shared.serverInfoObserver
+    )
 
     var body: some View {
         VStack {
@@ -32,7 +33,7 @@ struct VPNFeedbackFormCategoryView: View {
                 Section {
                     ForEach(VPNFeedbackCategory.allCases, id: \.self) { category in
                         NavigationLink {
-                            VPNFeedbackFormView(viewModel: VPNFeedbackFormViewModel(category: category)) {
+                            VPNFeedbackFormView(viewModel: VPNFeedbackFormViewModel(metadataCollector: collector, category: category)) {
                                 dismiss()
                                 DispatchQueue.main.async {
                                     ActionMessageView.present(message: UserText.vpnFeedbackFormSubmittedMessage,
@@ -77,7 +78,6 @@ struct VPNFeedbackFormCategoryView: View {
     }
 }
 
-@available(iOS 15.0, *)
 struct VPNFeedbackFormView: View {
     @StateObject var viewModel: VPNFeedbackFormViewModel
     @Environment(\.dismiss) private var dismiss
@@ -108,6 +108,7 @@ struct VPNFeedbackFormView: View {
                             }
                         }
                     submitButton()
+                        .disabled(!viewModel.submitButtonEnabled)
                 }
             }
         }
@@ -198,24 +199,33 @@ struct VPNFeedbackFormView: View {
     private func submitButton() -> some View {
         Button {
             Task {
-                _ = await viewModel.process()
+                _ = await viewModel.sendFeedback()
             }
             dismiss()
             onDismiss()
         } label: {
             Text(UserText.vpnFeedbackFormButtonSubmit)
-                .daxButton()
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 50)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color(designSystemColor: .accent))
-                )
-                .padding(.horizontal, 16)
         }
-        .padding(.vertical, 16)
+        .buttonStyle(VPNFeedbackFormButtonStyle())
+        .padding(16)
     }
 }
 
-#endif
+private struct VPNFeedbackFormButtonStyle: ButtonStyle {
+
+    @Environment(\.isEnabled) private var isEnabled: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .foregroundColor(Color.white)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal)
+            .frame(height: 50)
+            .background(Color(designSystemColor: .accent))
+            .cornerRadius(8)
+            .daxButton()
+            .opacity(isEnabled ? 1.0 : 0.4)
+
+    }
+
+}

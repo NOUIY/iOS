@@ -1,11 +1,14 @@
+/* No comment provided by engineer. */
+"A device password is required to use Sync & Backup." = "Sync & Backup -ominaisuuden käyttäminen edellyttää laitteen salasanaa.";
+
 /* Standard Buttons - Back Button */
 "back.button" = "Takaisin";
 
-/* Sync Paused Errors - Bookmarks Limit Exceeded Action */
-"bookmarks.limit.exceeded.action" = "Hallitse kirjanmerkkejä";
+/* Do not translate - stringsdict entry */
+"bookmarks.invalid.objects.present.description" = "bookmarks.invalid.objects.present.description";
 
-/* Sync Paused Errors - Bookmarks Limit Exceeded Description */
-"bookmarks.limit.exceeded.description" = "Kirjanmerkkiraja ylitetty. Poista jotain jatkaaksesi synkronointia.";
+/* Alert title for invalid bookmarks being filtered out of synced data */
+"bookmarks.invalid.objects.present.title" = "Joitakin kirjanmerkkejä ei synkronoida, koska tiettyjen kenttien sisältö on liian pitkä.";
 
 /* Camera View - Go to Settings Button */
 "camera.go.to.settings.button" = "Siirry kohtaan Asetukset";
@@ -43,17 +46,23 @@
 /* Connect With Server Sheet - Title */
 "connect.with.server.sheet.title" = "Synkronoi ja varmuuskopioi tämä laite";
 
-/* Sync Paused Errors - Credentials Limit Exceeded Action */
-"credentials.limit.exceeded.action" = "Hallitse kirjautumisia";
+/* Standard Buttons - Copy Button */
+"copy.button" = "Kopioi";
 
-/* Sync Paused Errors - Credentials Limit Exceeded Description */
-"credentials.limit.exceeded.description" = "Kirjautumisten raja ylitetty. Poista jotain jatkaaksesi synkronointia.";
+/* Do not translate - stringsdict entry */
+"credentials.invalid.objects.present.description" = "credentials.invalid.objects.present.description";
+
+/* Alert title for invalid logins being filtered out of synced data */
+"credentials.invalid.objects.present.title" = "Joitakin kirjautumisia ei synkronoida, koska tiettyjen kenttien sisältö on liian pitkä.";
 
 /* Delete Server Data - Button */
 "delete.server.data" = "Sammuta ja poista palvelimen tiedot...";
 
 /* No comment provided by engineer. */
 "Dev environment" = "Dev-ympäristö";
+
+/* Device SyncedSheet Button to go get DuckDuckGo on other devices */
+"device.synced.sheet.button.get.other.devices" = "Hanki DuckDuckGo toiselle laitteelle";
 
 /* Device SyncedSheet - Title */
 "device.synced.sheet.title" = "Tietosi on synkronoitu!";
@@ -81,6 +90,9 @@
 
 /* Options - Fetch Favicons Title */
 "fetch.favicons.option.title" = "Automaattisesti ladattavat kuvakkeet";
+
+/* No comment provided by engineer. */
+"Go to Settings" = "Siirry kohtaan Asetukset";
 
 /* No comment provided by engineer. */
 "Keep Development" = "Säilytä kehitys";
@@ -112,8 +124,11 @@
 /* Standard Buttons - Paste Button */
 "paste.button" = "Liitä";
 
-/* Description of rollout banner */
-"preferences.sync.rollout-banner.description" = "Sync & Backup otetaan käyttöön vähitellen, eikä se välttämättä ole vielä käytettävissä DuckDuckGo-sovelluksessa muilla laitteillasi.";
+/* Button title for sync bookmarks limits exceeded warning to go to manage bookmarks */
+"prefrences.sync.bookmarks-limit-exceeded-action" = "Hallitse kirjanmerkkejä";
+
+/* Button title for sync credentials limits exceeded warning to go to manage passwords */
+"prefrences.sync.credentials-limit-exceeded-action" = "Hallitse salasanoja…";
 
 /* Preparing To Sync Sheet - Description */
 "preparing.to.sync.sheet.description" = "Kirjanmerkkejä ja salasanoja valmistellaan synkronointiin. Tähän menee vain pieni hetki.";
@@ -200,10 +215,13 @@
 "scan.or.see.code.scan.code.instructions.title" = "Mobile-to-Mobile?";
 
 /* Scan or See Code View - Share Code Link */
-"scan.or.see.code.share.code.link" = "Jaa tekstikoodi?";
+"scan.or.see.code.share.code.link" = "Jaa tekstikoodi";
 
 /* Scan or See Code View - Title */
 "scan.or.see.code.title" = "Skannaa QR-koodi";
+
+/* No comment provided by engineer. */
+"Secure Your Device to Use Sync & Backup" = "Suojaa laitteesi käyttääksesi Sync & Backup -ominaisuutta";
 
 /* No comment provided by engineer. */
 "Switch to Production" = "Siirry tuotantoon";
@@ -211,8 +229,23 @@
 /* Link label for syncing and backing up the device */
 "sync.and.backup.this.device.link" = "Synkronoi ja varmuuskopioi tämä laite";
 
-/* Sync Paused Errors - Title */
-"sync.limit.exceeded.title" = "Synkronointi keskeytetty";
+/* Button to get DuckDuckGo on other devices */
+"sync.get.other.devices" = "Hanki DuckDuckGo toiselle laitteelle";
+
+/* Button title to share link for downloading DuckDuckGo on other devices */
+"sync.get.other.devices.card.button.title" = "Jaa latauslinkki";
+
+/* Message before share link for downloading DuckDuckGo on other devices */
+"sync.get.other.devices.card.message" = "Lataa DuckDuckGo tietokoneeseen tai toiseen mobiililaitteeseen täältä:";
+
+/* Title of card with share links for users to download DuckDuckGo on other devices */
+"sync.get.other.devices.card.title" = "Hanki DuckDuckGo toiseen laitteeseen synkronoitavaksi tämän laitteen kanssa";
+
+/* Title of screen with share links for users to download DuckDuckGo on other devices */
+"sync.get.other.devices.screen.title" = "Hanki DuckDuckGo";
+
+/* Message included when sharing a url via the system share sheet */
+"sync.get.other.devices.share.link.message" = "Asenna DuckDuckGo-selain laitteisiisi ja synkronoi kirjanmerkkisi ja salasanasi turvallisesti:";
 
 /* Sync Menu Path */
 "sync.menu.path" = "Asetukset > Synkronointi ja varmuuskopiointi > Synkronoi toisen laitteen kanssa";
@@ -225,9 +258,6 @@
 
 /* Data syncing unavailable warning message */
 "sync.warning.data.syncing.disabled.upgrade.required" = "Sync & Backup ei valitettavasti ole käytettävissä tässä sovellusversiossa. Päivitä DuckDuckGo uusimpaan versioon jatkaaksesi.";
-
-/* Title of the warning message */
-"sync.warning.sync.paused" = "Sync & Backup on keskeytetty";
 
 /* Title of the warning message */
 "sync.warning.sync.unavailable" = "Synkronointi ja varmuuskopiointi ei ole käytettävissä";

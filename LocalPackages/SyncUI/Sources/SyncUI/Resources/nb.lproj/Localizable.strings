@@ -1,11 +1,14 @@
+/* No comment provided by engineer. */
+"A device password is required to use Sync & Backup." = "Et enhetspassord for å bruke Sync & Backup.";
+
 /* Standard Buttons - Back Button */
 "back.button" = "Tilbake";
 
-/* Sync Paused Errors - Bookmarks Limit Exceeded Action */
-"bookmarks.limit.exceeded.action" = "Administrer bokmerker";
+/* Do not translate - stringsdict entry */
+"bookmarks.invalid.objects.present.description" = "bookmarks.invalid.objects.present.description";
 
-/* Sync Paused Errors - Bookmarks Limit Exceeded Description */
-"bookmarks.limit.exceeded.description" = "Grensen for bokmerker er overskredet. Slett noen for å fortsette å synkronisere.";
+/* Alert title for invalid bookmarks being filtered out of synced data */
+"bookmarks.invalid.objects.present.title" = "Enkelte bokmerker synkroniseres ikke på grunn av for langt innhold i enkelte felt.";
 
 /* Camera View - Go to Settings Button */
 "camera.go.to.settings.button" = "Gå til Innstillinger";
@@ -43,17 +46,23 @@
 /* Connect With Server Sheet - Title */
 "connect.with.server.sheet.title" = "Synkroniser og sikkerhetskopier denne enheten";
 
-/* Sync Paused Errors - Credentials Limit Exceeded Action */
-"credentials.limit.exceeded.action" = "Administrer pålogginger";
+/* Standard Buttons - Copy Button */
+"copy.button" = "Kopier";
 
-/* Sync Paused Errors - Credentials Limit Exceeded Description */
-"credentials.limit.exceeded.description" = "Grensen for pålogginger er overskredet. Slett noen for å fortsette å synkronisere.";
+/* Do not translate - stringsdict entry */
+"credentials.invalid.objects.present.description" = "credentials.invalid.objects.present.description";
+
+/* Alert title for invalid logins being filtered out of synced data */
+"credentials.invalid.objects.present.title" = "Enkelte pålogginger synkroniseres ikke på grunn av for langt innhold i enkelte felt.";
 
 /* Delete Server Data - Button */
 "delete.server.data" = "Slå av og slett serverdata …";
 
 /* No comment provided by engineer. */
 "Dev environment" = "Utviklermiljø";
+
+/* Device SyncedSheet Button to go get DuckDuckGo on other devices */
+"device.synced.sheet.button.get.other.devices" = "Få DuckDuckGo på andre enheter";
 
 /* Device SyncedSheet - Title */
 "device.synced.sheet.title" = "Dataene dine er synkronisert!";
@@ -81,6 +90,9 @@
 
 /* Options - Fetch Favicons Title */
 "fetch.favicons.option.title" = "Last ned ikoner automatisk";
+
+/* No comment provided by engineer. */
+"Go to Settings" = "Gå til Innstillinger";
 
 /* No comment provided by engineer. */
 "Keep Development" = "Behold utvikling";
@@ -112,8 +124,11 @@
 /* Standard Buttons - Paste Button */
 "paste.button" = "Lim inn";
 
-/* Description of rollout banner */
-"preferences.sync.rollout-banner.description" = "Synkronisering og sikkerhetskopiering rulles ut gradvis og er kanskje ikke tilgjengelig ennå i DuckDuckGo på dine andre enheter.";
+/* Button title for sync bookmarks limits exceeded warning to go to manage bookmarks */
+"prefrences.sync.bookmarks-limit-exceeded-action" = "Administrer bokmerker";
+
+/* Button title for sync credentials limits exceeded warning to go to manage passwords */
+"prefrences.sync.credentials-limit-exceeded-action" = "Administrer passord …";
 
 /* Preparing To Sync Sheet - Description */
 "preparing.to.sync.sheet.description" = "Bokmerkene og passordene dine klargjøres for synkronisering. Dette tar bare et øyeblikk.";
@@ -200,10 +215,13 @@
 "scan.or.see.code.scan.code.instructions.title" = "Mobil til mobil?";
 
 /* Scan or See Code View - Share Code Link */
-"scan.or.see.code.share.code.link" = "Dele tekstkode?";
+"scan.or.see.code.share.code.link" = "Del tekstkode";
 
 /* Scan or See Code View - Title */
 "scan.or.see.code.title" = "Skann QR-kode";
+
+/* No comment provided by engineer. */
+"Secure Your Device to Use Sync & Backup" = "Sikre enheten din for å bruke Sync & Backup";
 
 /* No comment provided by engineer. */
 "Switch to Production" = "Bytt til produksjon";
@@ -211,8 +229,23 @@
 /* Link label for syncing and backing up the device */
 "sync.and.backup.this.device.link" = "Synkroniser og sikkerhetskopier denne enheten";
 
-/* Sync Paused Errors - Title */
-"sync.limit.exceeded.title" = "Synkronisering satt på pause";
+/* Button to get DuckDuckGo on other devices */
+"sync.get.other.devices" = "Få DuckDuckGo på andre enheter";
+
+/* Button title to share link for downloading DuckDuckGo on other devices */
+"sync.get.other.devices.card.button.title" = "Del nedlastingslenke";
+
+/* Message before share link for downloading DuckDuckGo on other devices */
+"sync.get.other.devices.card.message" = "For å laste ned DuckDuckGo på skrivebordet eller en annen mobil enhet, besøk:";
+
+/* Title of card with share links for users to download DuckDuckGo on other devices */
+"sync.get.other.devices.card.title" = "Få DuckDuckGo på andre enheter for å synkronisere med denne";
+
+/* Title of screen with share links for users to download DuckDuckGo on other devices */
+"sync.get.other.devices.screen.title" = "Få DuckDuckGo";
+
+/* Message included when sharing a url via the system share sheet */
+"sync.get.other.devices.share.link.message" = "Installer DuckDuckGo-nettleseren på enhetene dine for å synkronisere bokmerker og passord på en sikker måte:";
 
 /* Sync Menu Path */
 "sync.menu.path" = "Innstillinger > Synkroniser og sikkerhetskopier > Synkroniser med en annen enhet";
@@ -225,9 +258,6 @@
 
 /* Data syncing unavailable warning message */
 "sync.warning.data.syncing.disabled.upgrade.required" = "Beklager, men synkronisering og sikkerhetskopiering er ikke lenger tilgjengelig i denne appversjonen. Oppdater DuckDuckGo til den nyeste versjonen for å fortsette.";
-
-/* Title of the warning message */
-"sync.warning.sync.paused" = "Synkronisering og sikkerhetskopiering er satt på pause";
 
 /* Title of the warning message */
 "sync.warning.sync.unavailable" = "Synkronisering og sikkerhetskopiering er utilgjengelig";

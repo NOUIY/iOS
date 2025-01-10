@@ -17,8 +17,6 @@
 //  limitations under the License.
 //
 
-#if NETWORK_PROTECTION
-
 import Foundation
 
 public extension UserDefaults {
@@ -29,12 +27,18 @@ public extension UserDefaults {
         }
         return defaults
     }
+
+    static var configurationGroupDefaults: UserDefaults {
+        let suiteName = ContentBlockerStoreConstants.configurationGroupName
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            fatalError("Failed to create configuration UserDefaults")
+        }
+        return defaults
+    }
 }
 
 public enum NetworkProtectionUserDefaultKeys {
 
-    public static let lastSelectedServer = "com.duckduckgo.network-protection.last-selected-server"
+    public static let lastSelectedServerCity = "com.duckduckgo.network-protection.last-selected-server-city"
 
 }
-
-#endif
