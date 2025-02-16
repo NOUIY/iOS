@@ -32,26 +32,22 @@ public final class SyncCredentialsAdapter {
     public let syncDidCompletePublisher: AnyPublisher<Void, Never>
     public static let syncCredentialsPausedStateChanged = SyncBookmarksAdapter.syncBookmarksPausedStateChanged
     public static let credentialsSyncLimitReached = Notification.Name("com.duckduckgo.app.SyncCredentialsLimitReached")
+    let syncErrorHandler: SyncErrorHandling
+    let credentialIdentityStoreManager: AutofillCredentialIdentityStoreManaging
 
-    @UserDefaultsWrapper(key: .syncCredentialsPaused, defaultValue: false)
-    static public var isSyncCredentialsPaused: Bool {
-        didSet {
-            NotificationCenter.default.post(name: syncCredentialsPausedStateChanged, object: nil)
-        }
-    }
-
-    @UserDefaultsWrapper(key: .syncCredentialsPausedErrorDisplayed, defaultValue: false)
-    static private var didShowCredentialsSyncPausedError: Bool
-
-    public init(secureVaultFactory: AutofillVaultFactory = AutofillSecureVaultFactory, secureVaultErrorReporter: SecureVaultErrorReporting) {
+    public init(secureVaultFactory: AutofillVaultFactory = AutofillSecureVaultFactory,
+                secureVaultErrorReporter: SecureVaultReporting,
+                syncErrorHandler: SyncErrorHandling,
+                tld: TLD) {
         syncDidCompletePublisher = syncDidCompleteSubject.eraseToAnyPublisher()
         self.secureVaultErrorReporter = secureVaultErrorReporter
+        self.syncErrorHandler = syncErrorHandler
         databaseCleaner = CredentialsDatabaseCleaner(
             secureVaultFactory: secureVaultFactory,
             secureVaultErrorReporter: secureVaultErrorReporter,
-            errorEvents: CredentialsCleanupErrorHandling(),
-            log: .generalLog
+            errorEvents: CredentialsCleanupErrorHandling()
         )
+        credentialIdentityStoreManager = AutofillCredentialIdentityStoreManager(reporter: secureVaultErrorReporter, tld: tld)
     }
 
     public func cleanUpDatabaseAndUpdateSchedule(shouldEnable: Bool) {
@@ -80,40 +76,19 @@ public final class SyncCredentialsAdapter {
                 metricsEvents: metricsEventsHandler,
                 syncDidUpdateData: { [weak self] in
                     self?.syncDidCompleteSubject.send()
-                    Self.isSyncCredentialsPaused = false
-                    Self.didShowCredentialsSyncPausedError = false
-                }
-            )
-
-            syncErrorCancellable = provider.syncErrorPublisher
-                .sink { error in
-                    switch error {
-                    case let syncError as SyncError:
-                        Pixel.fire(pixel: .syncCredentialsFailed, error: syncError)
-
-                        switch syncError {
-                        case .unexpectedStatusCode(409):
-                            // If credentials count limit has been exceeded
-                            Self.isSyncCredentialsPaused = true
-                            DailyPixel.fire(pixel: .syncCredentialsCountLimitExceededDaily)
-                            Self.notifyCredentialsSyncLimitReached()
-                        case .unexpectedStatusCode(413):
-                            // If credentials request size limit has been exceeded
-                            Self.isSyncCredentialsPaused = true
-                            DailyPixel.fire(pixel: .syncCredentialsRequestSizeLimitExceededDaily)
-                            Self.notifyCredentialsSyncLimitReached()
-                        default:
-                            break
-                        }
-                    default:
-                        let nsError = error as NSError
-                        if nsError.domain != NSURLErrorDomain {
-                            let processedErrors = CoreDataErrorsParser.parse(error: error as NSError)
-                            let params = processedErrors.errorPixelParameters
-                            Pixel.fire(pixel: .syncCredentialsFailed, error: error, withAdditionalParameters: params)
+                    self?.syncErrorHandler.syncCredentialsSucceded()
+                },
+                syncDidFinish: { [weak self] credentialsInput in
+                    if let credentialsInput, !credentialsInput.modifiedAccounts.isEmpty || !credentialsInput.deletedAccounts.isEmpty {
+                        Task {
+                            await self?.credentialIdentityStoreManager.updateCredentialStoreWith(updatedAccounts: credentialsInput.modifiedAccounts, deletedAccounts: credentialsInput.deletedAccounts)
                         }
                     }
-                    os_log(.error, log: OSLog.syncLog, "Credentials Sync error: %{public}s", String(reflecting: error))
+                }
+            )
+            syncErrorCancellable = provider.syncErrorPublisher
+                .sink { [weak self] error in
+                    self?.syncErrorHandler.handleCredentialError(error)
                 }
 
             self.provider = provider
@@ -125,14 +100,7 @@ public final class SyncCredentialsAdapter {
        }
     }
 
-    static private func notifyCredentialsSyncLimitReached() {
-        if !Self.didShowCredentialsSyncPausedError {
-            NotificationCenter.default.post(name: Self.credentialsSyncLimitReached, object: nil)
-            Self.didShowCredentialsSyncPausedError = true
-        }
-    }
-
     private var syncDidCompleteSubject = PassthroughSubject<Void, Never>()
     private var syncErrorCancellable: AnyCancellable?
-    private let secureVaultErrorReporter: SecureVaultErrorReporting
+    private let secureVaultErrorReporter: SecureVaultReporting
 }

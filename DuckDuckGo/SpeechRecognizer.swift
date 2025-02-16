@@ -57,12 +57,7 @@ final class SpeechRecognizer: NSObject, SpeechRecognizerProtocol {
         
         operationQueue.addOperation { [weak self] in
             guard let self = self else { return }
-            // https://app.asana.com/0/1201011656765697/1201271104639596
-            if #available(iOS 15.0, *) {
-                self.isAvailable = self.supportsOnDeviceRecognition && (self.speechRecognizer?.isAvailable ?? false)
-            } else {
-                self.isAvailable = false
-            }
+            self.isAvailable = self.supportsOnDeviceRecognition && (self.speechRecognizer?.isAvailable ?? false)
         }
     }
     
@@ -103,12 +98,10 @@ final class SpeechRecognizer: NSObject, SpeechRecognizerProtocol {
         return normalized
     }
     
-    // https://app.asana.com/0/1201011656765697/1201271104639596
-    @available(iOS 15, *)
     func startRecording(resultHandler: @escaping (_ text: String?,
                                                   _ error: Error?,
                                                   _ speechDidFinish: Bool) -> Void,
-                        volumeCallback: @escaping(_ volume: Float) -> Void) {
+                        volumeCallback: @escaping (_ volume: Float) -> Void) {
         
         recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
         audioEngine = AVAudioEngine()

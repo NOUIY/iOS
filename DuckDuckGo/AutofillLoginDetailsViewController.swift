@@ -38,7 +38,8 @@ class AutofillLoginDetailsViewController: UIViewController {
     weak var delegate: AutofillLoginDetailsViewControllerDelegate?
     private let viewModel: AutofillLoginDetailsViewModel
     private var cancellables: Set<AnyCancellable> = []
-    private var authenticator = AutofillLoginListAuthenticator(reason: UserText.autofillLoginListAuthenticationReason)
+    private var authenticator = AutofillLoginListAuthenticator(reason: UserText.autofillLoginListAuthenticationReason,
+                                                               cancelTitle: UserText.autofillLoginListAuthenticationCancelButton)
     private let lockedView = AutofillItemsLockedView()
     private let noAuthAvailableView = AutofillNoAuthAvailableView()
     private var contentView: UIView?
@@ -103,7 +104,7 @@ class AutofillLoginDetailsViewController: UIViewController {
         installSubviews()
         setupCancellables()
         setupTableViewAppearance()
-        applyTheme(ThemeManager.shared.currentTheme)
+        decorate()
         installConstraints()
         configureNotifications()
         setupNavigationBar()
@@ -332,25 +333,22 @@ extension AutofillLoginDetailsViewController: AutofillLoginDetailsViewModelDeleg
 
 // MARK: Themable
 
-extension AutofillLoginDetailsViewController: Themable {
+extension AutofillLoginDetailsViewController {
 
-    func decorate(with theme: Theme) {
+    private func decorate() {
+        let theme = ThemeManager.shared.currentTheme
         lockedView.backgroundColor = theme.backgroundColor
-
-        noAuthAvailableView.decorate(with: theme)
 
         view.backgroundColor = theme.backgroundColor
 
         navigationController?.navigationBar.barTintColor = theme.barBackgroundColor
         navigationController?.navigationBar.tintColor = theme.navigationBarTintColor
 
-        if #available(iOS 15.0, *) {
-            let appearance = UINavigationBarAppearance()
-            appearance.shadowColor = .clear
-            appearance.backgroundColor = theme.backgroundColor
+        let appearance = UINavigationBarAppearance()
+        appearance.shadowColor = .clear
+        appearance.backgroundColor = theme.backgroundColor
 
-            navigationController?.navigationBar.standardAppearance = appearance
-            navigationController?.navigationBar.scrollEdgeAppearance = appearance
-        }
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
     }
 }

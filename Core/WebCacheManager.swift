@@ -19,12 +19,12 @@
 
 import Common
 import WebKit
-import GRDB
+import os.log
 
 extension WKWebsiteDataStore {
 
-    public static func current(dataStoreIdManager: DataStoreIdManager = .shared) -> WKWebsiteDataStore {
-        if #available(iOS 17, *), let id = dataStoreIdManager.id {
+    public static func current(dataStoreIDManager: DataStoreIDManaging = DataStoreIDManager.shared) -> WKWebsiteDataStore {
+        if #available(iOS 17, *), let id = dataStoreIDManager.currentID {
             return WKWebsiteDataStore(forIdentifier: id)
         } else {
             return WKWebsiteDataStore.default()
@@ -33,115 +33,20 @@ extension WKWebsiteDataStore {
 
 }
 
-extension HTTPCookie {
+public protocol WebsiteDataManaging {
 
-    func matchesDomain(_ domain: String) -> Bool {
-        return self.domain == domain || (self.domain.hasPrefix(".") && domain.hasSuffix(self.domain))
-    }
+    func removeCookies(forDomains domains: [String], fromDataStore: WKWebsiteDataStore) async
+    func consumeCookies(into httpCookieStore: WKHTTPCookieStore) async
+    func clear(dataStore: WKWebsiteDataStore) async
 
 }
 
 @MainActor
-public class WebCacheManager {
+public class WebCacheManager: WebsiteDataManaging {
 
-    public static var shared = WebCacheManager()
-
-    private init() { }
-
-    /// We save cookies from the current container rather than copying them to a new container because
-    ///  the container only persists cookies to disk when the web view is used.  If the user presses the fire button
-    ///  twice then the fire proofed cookies will be lost and the user will be logged out any sites they're logged in to.
-    public func consumeCookies(cookieStorage: CookieStorage = CookieStorage(),
-                               httpCookieStore: WKHTTPCookieStore) async {
-        guard !cookieStorage.isConsumed else { return }
-
-        let cookies = cookieStorage.cookies
-        var consumedCookiesCount = 0
-        for cookie in cookies {
-            consumedCookiesCount += 1
-            await httpCookieStore.setCookie(cookie)
-        }
-        cookieStorage.isConsumed = true
-    }
-
-    public func removeCookies(forDomains domains: [String],
-                              dataStore: WKWebsiteDataStore) async {
-
-        let timeoutTask = Task.detached {
-            try? await Task.sleep(interval: 5.0)
-            if !Task.isCancelled {
-                Pixel.fire(pixel: .cookieDeletionTimedOut, withAdditionalParameters: [
-                    PixelParameters.removeCookiesTimedOut: "1"
-                ])
-            }
-        }
-
-        let cookieStore = dataStore.httpCookieStore
-        let cookies = await cookieStore.allCookies()
-        for cookie in cookies where domains.contains(where: { cookie.matchesDomain($0) }) {
-            await cookieStore.deleteCookie(cookie)
-        }
-        timeoutTask.cancel()
-    }
-
-    public func clear(cookieStorage: CookieStorage = CookieStorage(),
-                      logins: PreserveLogins = PreserveLogins.shared,
-                      dataStoreIdManager: DataStoreIdManager = .shared) async {
-
-        var cookiesToUpdate = [HTTPCookie]()
-        if #available(iOS 17, *), dataStoreIdManager.hasId {
-            cookiesToUpdate += await containerBasedClearing(storeIdManager: dataStoreIdManager) ?? []
-        }
-
-        // Perform legacy clearing to migrate to new container
-        cookiesToUpdate += await legacyDataClearing() ?? []
-
-        cookieStorage.updateCookies(cookiesToUpdate, keepingPreservedLogins: logins)
-    }
-
-}
-
-extension WebCacheManager {
-
-    @available(iOS 17, *)
-    private func checkForLeftBehindDataStores() async {
-        let ids = await WKWebsiteDataStore.allDataStoreIdentifiers
-        if ids.count > 1 {
-            Pixel.fire(pixel: .debugWebsiteDataStoresNotClearedMultiple)
-        } else if ids.count > 0 {
-            Pixel.fire(pixel: .debugWebsiteDataStoresNotClearedOne)
-        }
-    }
-
-    @available(iOS 17, *)
-    private func containerBasedClearing(storeIdManager: DataStoreIdManager) async -> [HTTPCookie]? {
-        guard let containerId = storeIdManager.id else { return [] }
-        var dataStore: WKWebsiteDataStore? = WKWebsiteDataStore(forIdentifier: containerId)
-        let cookies = await dataStore?.httpCookieStore.allCookies()
-        dataStore = nil
-
-        let uuids = await WKWebsiteDataStore.allDataStoreIdentifiers
-        for uuid in uuids {
-            try? await WKWebsiteDataStore.remove(forIdentifier: uuid)
-        }
-        await checkForLeftBehindDataStores()
-
-        storeIdManager.allocateNewContainerId()
-        return cookies
-    }
-
-    private func legacyDataClearing() async -> [HTTPCookie]? {
-        let timeoutTask = Task.detached {
-            try? await Task.sleep(interval: 5.0)
-            if !Task.isCancelled {
-                Pixel.fire(pixel: .cookieDeletionTimedOut, withAdditionalParameters: [
-                    PixelParameters.clearWebDataTimedOut: "1"
-                ])
-            }
-        }
-        let dataStore = WKWebsiteDataStore.default()
-        let cookies = await dataStore.httpCookieStore.allCookies()
+    static let safelyRemovableWebsiteDataTypes: Set<String> = {
         var types = WKWebsiteDataStore.allWebsiteDataTypes()
+
         types.insert("_WKWebsiteDataTypeMediaKeys")
         types.insert("_WKWebsiteDataTypeHSTSCache")
         types.insert("_WKWebsiteDataTypeSearchFieldRecentSearches")
@@ -151,52 +56,157 @@ extension WebCacheManager {
         types.insert("_WKWebsiteDataTypePrivateClickMeasurements")
         types.insert("_WKWebsiteDataTypeAlternativeServices")
 
-        await dataStore.removeData(ofTypes: types, modifiedSince: .distantPast)
-        self.removeObservationsData()
-        timeoutTask.cancel()
-        return cookies
-    }
-
-    private func removeObservationsData() {
-        if let pool = getValidDatabasePool() {
-            removeObservationsData(from: pool)
-        } else {
-            os_log("Could not find valid pool to clear observations data", log: .generalLog, type: .debug)
-        }
-    }
-
-    func getValidDatabasePool() -> DatabasePool? {
-        let bundleID = Bundle.main.bundleIdentifier ?? ""
-
-        let databaseURLs = [
-            FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask)[0]
-                       .appendingPathComponent("WebKit/WebsiteData/ResourceLoadStatistics/observations.db"),
-            FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask)[0]
-                       .appendingPathComponent("WebKit/\(bundleID)/WebsiteData/ResourceLoadStatistics/observations.db")
-        ]
-
-        guard let validURL = databaseURLs.first(where: { FileManager.default.fileExists(atPath: $0.path) }),
-              let pool = try? DatabasePool(path: validURL.absoluteString) else {
-            return nil
+        fireproofableDataTypes.forEach {
+            types.remove($0)
         }
 
-        return pool
+        return types
+    }()
+
+    static let fireproofableDataTypes: Set<String> = {
+        Set<String>([
+            WKWebsiteDataTypeLocalStorage,
+            WKWebsiteDataTypeIndexedDBDatabases,
+            WKWebsiteDataTypeCookies,
+        ])
+    }()
+
+    static let fireproofableDataTypesExceptCookies: Set<String> = {
+        var dataTypes = fireproofableDataTypes
+        dataTypes.remove(WKWebsiteDataTypeCookies)
+        return dataTypes
+    }()
+
+    let cookieStorage: MigratableCookieStorage
+    let fireproofing: Fireproofing
+    let dataStoreIDManager: DataStoreIDManaging
+    let dataStoreCleaner: WebsiteDataStoreCleaning
+    let observationsCleaner: ObservationsDataCleaning
+
+    public init(cookieStorage: MigratableCookieStorage,
+                fireproofing: Fireproofing,
+                dataStoreIDManager: DataStoreIDManaging,
+                dataStoreCleaner: WebsiteDataStoreCleaning = DefaultWebsiteDataStoreCleaner(),
+                observationsCleaner: ObservationsDataCleaning = DefaultObservationsDataCleaner()) {
+        self.cookieStorage = cookieStorage
+        self.fireproofing = fireproofing
+        self.dataStoreIDManager = dataStoreIDManager
+        self.dataStoreCleaner = dataStoreCleaner
+        self.observationsCleaner = observationsCleaner
     }
 
-    private func removeObservationsData(from pool: DatabasePool) {
-         do {
-             try pool.write { database in
-                 try database.execute(sql: "PRAGMA wal_checkpoint(TRUNCATE);")
+    /// The previous version saved cookies externally to the data so we can move them between containers.  We now use
+    /// the default persistence so this only needs to happen once when the fire button is pressed.
+    ///
+    /// The migration code removes the key that is used to check for the isConsumed flag so will only be
+    ///  true if the data needs to be migrated.
+    public func consumeCookies(into httpCookieStore: WKHTTPCookieStore) async {
+        // This can only be true if the data has not yet been migrated.
+        guard !cookieStorage.isConsumed else { return }
 
-                 let tables = try String.fetchAll(database, sql: "SELECT name FROM sqlite_master WHERE type='table'")
+        let cookies = cookieStorage.cookies
+        var consumedCookiesCount = 0
+        for cookie in cookies {
+            consumedCookiesCount += 1
+            await httpCookieStore.setCookie(cookie)
+        }
 
-                 for table in tables {
-                     try database.execute(sql: "DELETE FROM \(table)")
-                 }
-             }
-         } catch {
-             Pixel.fire(pixel: .debugCannotClearObservationsDatabase, error: error)
-         }
-     }
+        cookieStorage.setConsumed()
+    }
+
+    public func removeCookies(forDomains domains: [String],
+                              fromDataStore dataStore: WKWebsiteDataStore) async {
+        let startTime = CACurrentMediaTime()
+        let cookieStore = dataStore.httpCookieStore
+        let cookies = await cookieStore.allCookies()
+        for cookie in cookies where domains.contains(where: { HTTPCookie.cookieDomain(cookie.domain, matchesTestDomain: $0) }) {
+            await cookieStore.deleteCookie(cookie)
+        }
+        let totalTime = CACurrentMediaTime() - startTime
+        Pixel.fire(pixel: .cookieDeletionTime(.init(number: totalTime)))
+    }
+
+    public func clear(dataStore: WKWebsiteDataStore) async {
+
+        let count = await dataStoreCleaner.countContainers()
+        await performMigrationIfNeeded(dataStoreIDManager: dataStoreIDManager, cookieStorage: cookieStorage, destinationStore: dataStore)
+        await clearData(inDataStore: dataStore, withFireproofing: fireproofing)
+        await dataStoreCleaner.removeAllContainersAfterDelay(previousCount: count)
+
+    }
+
+}
+
+extension WebCacheManager {
+
+    private func performMigrationIfNeeded(dataStoreIDManager: DataStoreIDManaging,
+                                          cookieStorage: MigratableCookieStorage,
+                                          destinationStore: WKWebsiteDataStore) async {
+
+        // Check version here rather than on function so that we don't need complicated logic related to verison in the calling function.
+        // Also, migration will not be needed if we are on a version lower than this.
+        guard #available(iOS 17, *) else { return }
+
+        // If there's no id, then migration has been done or isn't needed
+        guard dataStoreIDManager.currentID != nil else { return }
+
+        // Get all cookies, we'll clean them later to keep all that logic in the same place
+        let cookies = cookieStorage.cookies
+
+        // The returned cookies should be kept so move them to the data store
+        for cookie in cookies {
+            await destinationStore.httpCookieStore.setCookie(cookie)
+        }
+
+        cookieStorage.migrationComplete()
+        dataStoreIDManager.invalidateCurrentID()
+    }
+
+    private func removeContainersIfNeeded(previousCount: Int) async {
+        await dataStoreCleaner.removeAllContainersAfterDelay(previousCount: previousCount)
+    }
+
+    private func clearData(inDataStore dataStore: WKWebsiteDataStore, withFireproofing fireproofing: Fireproofing) async {
+        let startTime = CACurrentMediaTime()
+
+        await clearDataForSafelyRemovableDataTypes(fromStore: dataStore)
+        await clearFireproofableDataForNonFireproofDomains(fromStore: dataStore, usingFireproofing: fireproofing)
+        await clearCookiesForNonFireproofedDomains(fromStore: dataStore, usingFireproofing: fireproofing)
+        await observationsCleaner.removeObservationsData()
+
+        let totalTime = CACurrentMediaTime() - startTime
+        Pixel.fire(pixel: .clearDataInDefaultPersistence(.init(number: totalTime)))
+    }
+
+    @MainActor
+    private func clearDataForSafelyRemovableDataTypes(fromStore dataStore: WKWebsiteDataStore) async {
+        await dataStore.removeData(ofTypes: Self.safelyRemovableWebsiteDataTypes, modifiedSince: Date.distantPast)
+    }
+
+    @MainActor
+    private func clearFireproofableDataForNonFireproofDomains(fromStore dataStore: WKWebsiteDataStore, usingFireproofing fireproofing: Fireproofing) async {
+        let allRecords = await dataStore.dataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes())
+        let removableRecords = allRecords.filter { record in
+            !fireproofing.isAllowed(fireproofDomain: record.displayName)
+        }
+
+        var fireproofableTypesExceptCookies = Self.fireproofableDataTypesExceptCookies
+        fireproofableTypesExceptCookies.remove(WKWebsiteDataTypeCookies)
+        await dataStore.removeData(ofTypes: fireproofableTypesExceptCookies, for: removableRecords)
+    }
+
+    @MainActor
+    private func clearCookiesForNonFireproofedDomains(fromStore dataStore: WKWebsiteDataStore, usingFireproofing fireproofing: Fireproofing) async {
+        let cookieStore = dataStore.httpCookieStore
+        let cookies = await cookieStore.allCookies()
+
+        let cookiesToRemove = cookies.filter { cookie in
+            !fireproofing.isAllowed(cookieDomain: cookie.domain)
+        }
+
+        for cookie in cookiesToRemove {
+            await cookieStore.deleteCookie(cookie)
+        }
+    }
 
 }

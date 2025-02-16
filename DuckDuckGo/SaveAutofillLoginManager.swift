@@ -29,6 +29,7 @@ protocol SaveAutofillLoginManagerProtocol {
     var isPasswordOnlyAccount: Bool { get }
     var hasOtherCredentialsOnSameDomain: Bool { get }
     var hasSavedMatchingPasswordWithoutUsername: Bool { get }
+    var hasSavedMatchingUsernameWithoutPassword: Bool { get }
     var hasSavedMatchingUsername: Bool { get }
     
     static func saveCredentials(_ credentials: SecureVaultModels.WebsiteCredentials, with factory: AutofillVaultFactory) throws -> Int64
@@ -85,7 +86,15 @@ final class SaveAutofillLoginManager: SaveAutofillLoginManagerProtocol {
     var hasSavedMatchingUsername: Bool {
         savedMatchingUsernameCredential != nil
     }
-    
+
+    var hasSavedMatchingUsernameWithoutPassword: Bool {
+        if let savedMatchingUsernameCredential {
+            return savedMatchingUsernameCredential.password.flatMap { String(data: $0, encoding: .utf8) }.isNilOrEmpty
+        } else {
+            return false
+        }
+    }
+
     func prepareData(completion: @escaping () -> Void) {
         fetchDomainStoredCredentials { [weak self] credentials in
             self?.domainStoredCredentials = credentials
@@ -112,7 +121,7 @@ final class SaveAutofillLoginManager: SaveAutofillLoginManagerProtocol {
         let credentialsWithSameUsername = domainStoredCredentials.filter { $0.account.username == credentials.account.username }
         return credentialsWithSameUsername.first
     }
-    
+
     private func fetchDomainStoredCredentials(completion: @escaping ([SecureVaultModels.WebsiteCredentials]) -> Void) {
         DispatchQueue.global(qos: .userInteractive).async {
             var result = [SecureVaultModels.WebsiteCredentials]()
@@ -146,7 +155,7 @@ final class SaveAutofillLoginManager: SaveAutofillLoginManagerProtocol {
     
     static func saveCredentials(_ credentials: SecureVaultModels.WebsiteCredentials, with factory: AutofillVaultFactory) throws -> Int64 {
         do {
-            return try AutofillSecureVaultFactory.makeVault(errorReporter: SecureVaultErrorReporter.shared).storeWebsiteCredentials(credentials)
+            return try AutofillSecureVaultFactory.makeVault(reporter: SecureVaultReporter()).storeWebsiteCredentials(credentials)
         } catch {
             throw error
         }

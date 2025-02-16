@@ -21,6 +21,7 @@ import Foundation
 import BrowserServicesKit
 import Combine
 import Common
+import PixelExperimentKit
 
 public final class ContentBlocking {
     
@@ -41,6 +42,11 @@ public final class ContentBlocking {
         }
     }
 
+    enum PixelParameterName {
+        static let experimentName = "experimentName"
+        static let etag = "etag"
+    }
+
     private init(privacyConfigurationManager: PrivacyConfigurationManaging? = nil) {
         let internalUserDecider = DefaultInternalUserDecider(store: InternalUserStore())
         let statisticsStore = StatisticsUserDefaults()
@@ -50,7 +56,6 @@ public final class ContentBlocking {
                                            embeddedDataProvider: AppPrivacyConfigurationDataProvider(),
                                            localProtection: DomainsProtectionUserDefaultsStore(),
                                            errorReporting: Self.debugEvents,
-                                           toggleProtectionsCounterEventReporting: toggleProtectionsEvents,
                                            internalUserDecider: internalUserDecider,
                                            installDate: statisticsStore.installDate)
         self.privacyConfigurationManager = privacyConfigurationManager
@@ -70,8 +75,7 @@ public final class ContentBlocking {
         contentBlockingManager = ContentBlockerRulesManager(rulesSource: contentBlockerRulesSource,
                                                             exceptionsSource: exceptionsSource,
                                                             lastCompiledRulesStore: lastCompiledRulesStore,
-                                                            errorReporting: Self.debugEvents,
-                                                            log: .contentBlockingLog)
+                                                            errorReporting: Self.debugEvents)
 
         adClickAttributionRulesProvider = AdClickAttributionRulesProvider(config: adClickAttribution,
                                                                           compiledRulesSource: contentBlockingManager,
@@ -82,9 +86,14 @@ public final class ContentBlocking {
 
     private static let debugEvents = EventMapping<ContentBlockerDebugEvents> { event, error, parameters, onComplete in
         let domainEvent: Pixel.Event
+        var finalParameters = parameters ?? [:]
         switch event {
         case .trackerDataParseFailed:
             domainEvent = .trackerDataParseFailed
+            if let experimentName = TDSOverrideExperimentMetrics.activeTDSExperimentNameWithCohort {
+                finalParameters[PixelParameterName.experimentName] = experimentName
+                finalParameters[PixelParameterName.etag] = UserDefaultsETagStorage().loadEtag(for: .trackerDataSet)
+            }
 
         case .trackerDataReloadFailed:
             domainEvent = .trackerDataReloadFailed
@@ -118,18 +127,35 @@ public final class ContentBlocking {
 
             domainEvent = .contentBlockingCompilationFailed(listType: listType, component: component)
 
-        case .contentBlockingCompilationTime:
-            domainEvent = .contentBlockingCompilationTime
+        case .contentBlockingLookupRulesSucceeded:
+            domainEvent = .contentBlockingLookupRulesSucceeded
+            
+        case .contentBlockingFetchLRCSucceeded:
+            domainEvent = .contentBlockingFetchLRCSucceeded
+            
+        case .contentBlockingNoMatchInLRC:
+            domainEvent = .contentBlockingNoMatchInLRC
+            
+        case .contentBlockingLRCMissing:
+            domainEvent = .contentBlockingLRCMissing
+
+        case .contentBlockingCompilationTaskPerformance(let retryCount, let timeBucketAggregation):
+            domainEvent = .contentBlockingCompilationTaskPerformance(iterationCount: retryCount,
+                                                                     timeBucketAggregation: Pixel.Event.CompileTimeBucketAggregation(number: timeBucketAggregation))
+            if let experimentName = TDSOverrideExperimentMetrics.activeTDSExperimentNameWithCohort {
+                finalParameters[PixelParameterName.experimentName] = experimentName
+                finalParameters[PixelParameterName.etag] = UserDefaultsETagStorage().loadEtag(for: .trackerDataSet)
+            }
         }
 
         if let error = error {
             Pixel.fire(pixel: domainEvent,
                        error: error,
-                       withAdditionalParameters: parameters ?? [:],
+                       withAdditionalParameters: finalParameters,
                        onComplete: onComplete)
         } else {
             Pixel.fire(pixel: domainEvent,
-                       withAdditionalParameters: parameters ?? [:],
+                       withAdditionalParameters: finalParameters,
                        includedParameters: [],
                        onComplete: onComplete)
         }
@@ -140,8 +166,7 @@ public final class ContentBlocking {
         AdClickAttributionDetection(feature: adClickAttribution,
                                     tld: tld,
                                     eventReporting: attributionEvents,
-                                    errorReporting: attributionDebugEvents,
-                                    log: .adAttributionLog)
+                                    errorReporting: attributionDebugEvents)
     }
 
     public func makeAdClickAttributionLogic(tld: TLD) -> AdClickAttributionLogic {
@@ -149,8 +174,7 @@ public final class ContentBlocking {
                                 rulesProvider: adClickAttributionRulesProvider,
                                 tld: tld,
                                 eventReporting: attributionEvents,
-                                errorReporting: attributionDebugEvents,
-                                log: .adAttributionLog)
+                                errorReporting: attributionDebugEvents)
     }
 
     private let attributionEvents = EventMapping<AdClickAttributionEvents> { event, _, parameters, _ in
@@ -195,16 +219,6 @@ public final class ContentBlocking {
         }
 
         Pixel.fire(pixel: domainEvent, includedParameters: [])
-    }
-
-    private let toggleProtectionsEvents = EventMapping<ToggleProtectionsCounterEvent> { event, _, parameters, _ in
-        let domainEvent: Pixel.Event
-        switch event {
-        case .toggleProtectionsCounterDaily:
-            domainEvent = .toggleProtectionsDailyCount
-        }
-
-        Pixel.fire(pixel: domainEvent, withAdditionalParameters: parameters ?? [:])
     }
 
 }

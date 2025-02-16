@@ -3,6 +3,7 @@
 set -eo pipefail
 
 mute=">/dev/null 2>&1"
+is_subsequent_release=0
 base_branch="main"
 build_number=0
 
@@ -78,24 +79,28 @@ read_command_line_arguments() {
 		print_usage_and_exit "💥 Error: Missing argument"
 	fi
 
+	shift 1
+
+	while [[ "$#" -gt 0 ]]; do
+        case "$1" in
+            -v)
+                mute=
+                ;;
+            -s|--subsequent)
+                is_subsequent_release=1
+                ;;
+            *)
+                print_usage_and_exit "💥 Error: Unknown option '$1'"
+                ;;
+        esac
+        shift
+    done
+
 	if [[ $input =~ $version_regexp ]]; then
 		process_release "$input"
 	else
 		process_hotfix "$input"
 	fi
-
-	shift 1
-
-	while getopts 'v' option; do
-		case "${option}" in
-			v)
-				mute=
-				;;
-			*)
-				print_usage_and_exit "💥 Error: Unknown option '${option}'"
-				;;
-		esac
-	done
 }
 
 process_release() { # expected input e.g. "1.72.0"
@@ -104,9 +109,17 @@ process_release() { # expected input e.g. "1.72.0"
 
 	echo "Processing version number: $version"
 
-	if release_branch_exists; then 
-		is_subsequent_release=1		
+	if [[ "$is_subsequent_release" -eq 1 ]]; then
+		# check if the release branch exists (it must exist for a subsequent release)
+		if ! release_branch_exists; then
+			die "💥 Error: Release branch does not exist for a subsequent release!"
+		fi
 		base_branch="$release_branch"
+	else
+		# check if the release branch does NOT exist (it must NOT exist for an initial release)
+		if release_branch_exists; then
+			die "💥 Error: Release branch already exists for an initial release!"
+		fi
 	fi
 }
 
@@ -115,10 +128,10 @@ process_hotfix() { # expected input e.g. "hotfix/1.72.1"
 	release_branch="$1"
 	base_branch="$1"
 	is_hotfix=1
-	
+
 	echo "Processing hotfix branch name: $release_branch"
 
-	if ! release_branch_exists; then 
+	if ! release_branch_exists; then
 		die "💥 Error: Hotfix branch ${release_branch} does not exist. It should be created before you run this script."
 	fi
 }
@@ -144,7 +157,9 @@ create_release_branch() {
 	fi
 
 	eval git checkout -b "${release_branch}" "$mute"
-	eval git push -u origin "${release_branch}" "$mute"
+	if ! eval git push -u origin "${release_branch}" "$mute"; then
+		die "💥 Error: Failed to push ${release_branch} to origin"
+	fi
 	echo "✅"
 }
 
@@ -165,7 +180,10 @@ create_build_branch() {
 	fi
 
 	eval git checkout -b "${build_branch}" "$mute"
-	eval git push -u origin "${build_branch}" "$mute"
+	if ! eval git push -u origin "${build_branch}" "$mute"; then
+		die "💥 Error: Failed to push ${build_branch} to origin"
+	fi
+
 	echo "✅"
 }
 
@@ -175,16 +193,16 @@ update_marketing_version() {
 	"$script_dir/set_version.sh" "${version}"
 	git add "${base_dir}/Configuration/Version.xcconfig" \
 		"${base_dir}/DuckDuckGo/Settings.bundle/Root.plist"
-	eval git commit -m \"Update version number\" "$mute"
+	eval git commit --allow-empty -m \"Update version number\" "$mute"
 	echo "✅"
 }
 
 update_build_version() {
 	echo "Setting build version ..."
 	(cd "$base_dir" && bundle exec fastlane increment_build_number_for_version version:"${version}")
-	git add "${base_dir}/DuckDuckGo.xcodeproj/project.pbxproj"
+	git add "${base_dir}/DuckDuckGo-iOS.xcodeproj/project.pbxproj"
 	if [[ "$(git diff --cached)" ]]; then
-		eval git commit -m \"Update build number\" "$mute"
+		eval git commit --allow-empty -m \"Update build number\" "$mute"
 		echo "Setting build version ... ✅"
 	else
 		printf "\nNo changes to build number ✅\n"
@@ -237,7 +255,7 @@ main() {
 	read_command_line_arguments "$@"
 	checkout_base_branch
 
-	if [[ $is_subsequent_release ]]; then 
+	if [[ "$is_subsequent_release" -eq 1 ]]; then
 		create_build_branch
 	elif [[ $is_hotfix ]]; then
 		create_build_branch

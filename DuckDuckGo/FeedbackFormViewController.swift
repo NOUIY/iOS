@@ -60,7 +60,7 @@ class FeedbackFormViewController: UIViewController {
     @IBOutlet weak var submitFeedbackButton: UIButton!
     
     private var model: FormModel?
-    
+
     static func loadFromStoryboard() -> FeedbackFormViewController {
         let storyboard = UIStoryboard(name: "Feedback", bundle: nil)
         guard let controller = storyboard.instantiateViewController(withIdentifier: "FeedbackForm") as? FeedbackFormViewController else {
@@ -74,7 +74,7 @@ class FeedbackFormViewController: UIViewController {
         
         registerForKeyboardNotifications()
         
-        applyTheme(ThemeManager.shared.currentTheme)
+        decorate()
     }
     
     func configureForPositiveSentiment() {
@@ -98,7 +98,7 @@ class FeedbackFormViewController: UIViewController {
                 fatalError("Feedback model is incomplete!")
         }
         model = .negative(feedbackModel)
-        
+
         loadViewIfNeeded()
         
         headerImage.image = UIImage(named: "sadFace")
@@ -160,7 +160,6 @@ class FeedbackFormViewController: UIViewController {
             if message.trimmingWhitespace().isEmpty == false {
                 feedbackSender.submitPositiveSentiment(message: message)
             }
-            
         case .negative(let feedbackModel):
             feedbackSender.fireNegativeSentimentPixel(with: feedbackModel)
             if message.trimmingWhitespace().isEmpty == false {
@@ -288,9 +287,10 @@ extension FeedbackFormViewController: UITextViewDelegate {
     }
 }
 
-extension FeedbackFormViewController: Themable {
+extension FeedbackFormViewController {
     
-    func decorate(with theme: Theme) {
+    private func decorate() {
+        let theme = ThemeManager.shared.currentTheme
         view.backgroundColor = theme.backgroundColor
         
         headerText.textColor = theme.feedbackPrimaryTextColor

@@ -24,9 +24,9 @@ class MainViewCoordinator {
     let superview: UIView
 
     var contentContainer: UIView!
-    var lastToolbarButton: UIBarButtonItem!
     var logo: UIImageView!
     var logoContainer: UIView!
+    var topSlideContainer: UIView!
     var logoText: UIImageView!
     var navigationBarContainer: UIView!
     var navigationBarCollectionView: MainViewFactory.NavigationBarCollectionView!
@@ -37,12 +37,16 @@ class MainViewCoordinator {
     var suggestionTrayContainer: UIView!
     var tabBarContainer: UIView!
     var toolbar: UIToolbar!
-    var toolbarBackButton: UIBarButtonItem!
-    var toolbarFireButton: UIBarButtonItem!
-    var toolbarForwardButton: UIBarButtonItem!
-    var toolbarTabSwitcherButton: UIBarButtonItem!
+    var toolbarBackButton: UIBarButtonItem { toolbarHandler.backButton }
+    var toolbarFireButton: UIBarButtonItem { toolbarHandler.fireButton }
+    var toolbarForwardButton: UIBarButtonItem { toolbarHandler.forwardButton }
+    var toolbarTabSwitcherButton: UIBarButtonItem { toolbarHandler.tabSwitcherButton }
+    var menuToolbarButton: UIBarButtonItem { toolbarHandler.browserMenuButton }
+    var toolbarPasswordsButton: UIBarButtonItem { toolbarHandler.passwordsButton }
+    var toolbarBookmarksButton: UIBarButtonItem { toolbarHandler.bookmarkButton }
 
     let constraints = Constraints()
+    var toolbarHandler: ToolbarHandler!
 
     // The default after creating the hiearchy is top
     var addressBarPosition: AddressBarPosition = .top
@@ -64,24 +68,48 @@ class MainViewCoordinator {
 
         var navigationBarContainerTop: NSLayoutConstraint!
         var navigationBarContainerBottom: NSLayoutConstraint!
-        var navigationBarCollectionViewBottom: NSLayoutConstraint!
+        var navigationBarContainerHeight: NSLayoutConstraint!
         var toolbarBottom: NSLayoutConstraint!
         var contentContainerTop: NSLayoutConstraint!
         var tabBarContainerTop: NSLayoutConstraint!
-        var notificationContainerTopToNavigationBar: NSLayoutConstraint!
-        var notificationContainerTopToStatusBackground: NSLayoutConstraint!
-        var notificationContainerHeight: NSLayoutConstraint!
         var progressBarTop: NSLayoutConstraint!
         var progressBarBottom: NSLayoutConstraint!
         var statusBackgroundToNavigationBarContainerBottom: NSLayoutConstraint!
         var statusBackgroundBottomToSafeAreaTop: NSLayoutConstraint!
         var contentContainerBottomToToolbarTop: NSLayoutConstraint!
         var contentContainerBottomToNavigationBarContainerTop: NSLayoutConstraint!
+        var topSlideContainerBottomToNavigationBarBottom: NSLayoutConstraint!
+        var topSlideContainerBottomToStatusBackgroundBottom: NSLayoutConstraint!
+        var topSlideContainerTopToNavigationBar: NSLayoutConstraint!
+        var topSlideContainerTopToStatusBackground: NSLayoutConstraint!
+        var topSlideContainerHeight: NSLayoutConstraint!
 
+    }
+
+    func showTopSlideContainer() {
+        if addressBarPosition == .top {
+            constraints.topSlideContainerBottomToNavigationBarBottom.isActive = false
+            constraints.topSlideContainerTopToNavigationBar.isActive = true
+        } else {
+            constraints.topSlideContainerBottomToStatusBackgroundBottom.isActive = false
+            constraints.topSlideContainerTopToStatusBackground.isActive = true
+        }
+    }
+
+    func hideTopSlideContainer() {
+        if addressBarPosition == .top {
+            constraints.topSlideContainerTopToNavigationBar.isActive = false
+            constraints.topSlideContainerBottomToNavigationBarBottom.isActive = true
+        } else {
+            constraints.topSlideContainerTopToStatusBackground.isActive = false
+            constraints.topSlideContainerBottomToStatusBackgroundBottom.isActive = true
+        }
     }
 
     func moveAddressBarToPosition(_ position: AddressBarPosition) {
         guard position != addressBarPosition else { return }
+        hideTopSlideContainer()
+
         switch position {
         case .top:
             setAddressBarBottomActive(false)
@@ -112,36 +140,35 @@ class MainViewCoordinator {
             return
         }
 
-        constraints.contentContainerBottomToToolbarTop.isActive = false
-        constraints.contentContainerBottomToNavigationBarContainerTop.isActive = true
-
         navigationBarContainer.isHidden = false
     }
 
     func setAddressBarTopActive(_ active: Bool) {
-        constraints.contentContainerBottomToToolbarTop.isActive = active
         constraints.navigationBarContainerTop.isActive = active
         constraints.progressBarTop.isActive = active
-        constraints.notificationContainerTopToNavigationBar.isActive = active
+        constraints.topSlideContainerBottomToNavigationBarBottom.isActive = active
         constraints.statusBackgroundToNavigationBarContainerBottom.isActive = active
     }
 
     func setAddressBarBottomActive(_ active: Bool) {
-        constraints.contentContainerBottomToNavigationBarContainerTop.isActive = active
         constraints.progressBarBottom.isActive = active
         constraints.navigationBarContainerBottom.isActive = active
-        constraints.notificationContainerTopToStatusBackground.isActive = active
+        constraints.topSlideContainerBottomToStatusBackgroundBottom.isActive = active
         constraints.statusBackgroundBottomToSafeAreaTop.isActive = active
+    }
+
+    func updateToolbarWithState(_ state: ToolbarContentState) {
+        toolbarHandler.updateToolbarWithState(state)
     }
 
 }
 
-extension MainViewCoordinator: Themable {
+extension MainViewCoordinator {
     
-    func decorate(with theme: Theme) {
+    private func decorate() {
+        let theme = ThemeManager.shared.currentTheme
         superview.backgroundColor = theme.mainViewBackgroundColor
         logoText.tintColor = theme.ddgTextTintColor
-        omniBar.decorate(with: theme)
     }
 
 }

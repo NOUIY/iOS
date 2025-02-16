@@ -22,6 +22,7 @@ import SwiftUI
 import WebKit
 import UserScript
 import BrowserServicesKit
+import Core
 
 struct HeadlessWebView: UIViewRepresentable {
     weak var userScript: UserScriptMessaging?
@@ -85,7 +86,7 @@ struct HeadlessWebView: UIViewRepresentable {
         
         // Enable content blocking rules
         if settings.contentBlocking {
-            let sourceProvider = DefaultScriptSourceProvider()
+            let sourceProvider = DefaultScriptSourceProvider(fireproofing: UserDefaultsFireproofing.xshared)
             let contentBlockerUserScript = ContentBlockerRulesUserScript(configuration: sourceProvider.contentBlockerRulesConfig)
             let contentScopeUserScript = ContentScopeUserScript(sourceProvider.privacyConfigurationManager,
                                                                 properties: sourceProvider.contentScopeProperties)
@@ -118,7 +119,7 @@ struct HeadlessWebView: UIViewRepresentable {
 }
 
 extension UIViewController {
-    static func getCurrentViewController(base: UIViewController? = UIApplication.shared.windows.first { $0.isKeyWindow }?.rootViewController) -> UIViewController? {
+    static func getCurrentViewController(base: UIViewController? = UIApplication.shared.firstKeyWindow?.rootViewController) -> UIViewController? {
         if let nav = base as? UINavigationController {
             return getCurrentViewController(base: nav.visibleViewController)
         } else if let tab = base as? UITabBarController, let selected = tab.selectedViewController {

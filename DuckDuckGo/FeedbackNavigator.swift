@@ -36,7 +36,6 @@ class FeedbackNavigator {
                                                  model: Feedback.Model,
                                                  from controller: UIViewController) {
         let pickerViewController = FeedbackPickerViewController.loadFromStoryboard()
-        
         pickerViewController.configureFor(entries: entries, with: model)
         controller.navigationController?.pushViewController(pickerViewController, animated: true)
     }

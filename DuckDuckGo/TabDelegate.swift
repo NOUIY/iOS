@@ -33,7 +33,7 @@ protocol TabDelegate: AnyObject {
              for navigationAction: WKNavigationAction,
              inheritingAttribution: AdClickAttributionLogic.State?) -> WKWebView?
 
-    func tabDidRequestClose(_ tab: TabViewController)
+    func tabDidRequestClose(_ tab: TabViewController, shouldCreateEmptyTabAtSamePosition: Bool)
 
     func tab(_ tab: TabViewController,
              didRequestNewTabForUrl url: URL,
@@ -59,6 +59,8 @@ protocol TabDelegate: AnyObject {
     
     func tabDidRequestDownloads(tab: TabViewController)
 
+    func tabDidRequestAIChat(tab: TabViewController)
+
     func tabDidRequestAutofillLogins(tab: TabViewController)
 
     func tabDidRequestSettings(tab: TabViewController)
@@ -71,10 +73,10 @@ protocol TabDelegate: AnyObject {
 
     func tabContentProcessDidTerminate(tab: TabViewController)
     
-    func tabDidRequestForgetAll(tab: TabViewController)
-    
     func tabDidRequestFireButtonPulse(tab: TabViewController)
-        
+
+    func tabDidRequestPrivacyDashboardButtonPulse(tab: TabViewController, animated: Bool)
+
     func tabDidRequestSearchBarRect(tab: TabViewController) -> CGRect
 
     func tab(_ tab: TabViewController,
@@ -88,4 +90,18 @@ protocol TabDelegate: AnyObject {
     func tabCheckIfItsBeingCurrentlyPresented(_ tab: TabViewController) -> Bool
     
     func showBars()
+
+    func tab(_ tab: TabViewController, didRequestLoadURL url: URL)
+    func tab(_ tab: TabViewController, didRequestLoadQuery query: String)
+
+    func tabDidRequestRefresh(tab: TabViewController)
+    func tabDidRequestNavigationToDifferentSite(tab: TabViewController)
+}
+
+extension TabDelegate {
+
+    func tabDidRequestClose(_ tab: TabViewController) {
+        tabDidRequestClose(tab, shouldCreateEmptyTabAtSamePosition: false)
+    }
+    
 }

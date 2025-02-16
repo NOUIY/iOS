@@ -59,18 +59,20 @@ final class VPNFeedbackFormViewModel: ObservableObject {
     private let feedbackSender: VPNFeedbackSender
     private let category: VPNFeedbackCategory
 
-    init(metadataCollector: VPNMetadataCollector = DefaultVPNMetadataCollector(), feedbackSender: VPNFeedbackSender = DefaultVPNFeedbackSender(), category: VPNFeedbackCategory) {
+    init(metadataCollector: VPNMetadataCollector,
+         feedbackSender: VPNFeedbackSender = DefaultVPNFeedbackSender(),
+         category: VPNFeedbackCategory) {
         self.metadataCollector = metadataCollector
         self.feedbackSender = feedbackSender
         self.category = category
     }
 
     @MainActor
-    func process() async -> Bool {
+    func sendFeedback() async -> Bool {
         viewState = .feedbackSending
 
         do {
-            let metadata = await metadataCollector.collectMetadata()
+            let metadata = await metadataCollector.collectVPNMetadata()
             try await feedbackSender.send(metadata: metadata, category: category, userText: feedbackFormText)
             viewState = .feedbackSent
             return true

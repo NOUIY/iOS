@@ -21,23 +21,20 @@ import Foundation
 import UserScript
 import Combine
 import Core
-
-
-#if SUBSCRIPTION
 import Subscription
-@available(iOS 15.0, *)
+
 final class SubscriptionFlowViewModel: ObservableObject {
     
     let userScript: SubscriptionPagesUserScript
     let subFeature: SubscriptionPagesUseSubscriptionFeature
-    let purchaseManager: PurchaseManager
     var webViewModel: AsyncHeadlessWebViewViewModel
-        
-    var purchaseURL = URL.subscriptionPurchase
-    
+    let subscriptionManager: SubscriptionManager
+    let purchaseURL: URL
+
     private var cancellables = Set<AnyCancellable>()
     private var canGoBackCancellable: AnyCancellable?
     private var urlCancellable: AnyCancellable?
+    private var transactionStatusTimer: Timer?
     
     enum Constants {
         static let navigationBarHideThreshold = 80.0
@@ -57,6 +54,7 @@ final class SubscriptionFlowViewModel: ObservableObject {
         var shouldHideBackButton = false
         var selectedFeature: SelectedFeature = .none
         var viewTitle: String = UserText.subscriptionTitle
+        var shouldGoBackToSettings: Bool = false
     }
     
     // Read only View State - Should only be modified from the VM
@@ -68,13 +66,20 @@ final class SubscriptionFlowViewModel: ObservableObject {
                                                                 allowedDomains: allowedDomains,
                                                                 contentBlocking: false)
         
-    init(userScript: SubscriptionPagesUserScript,
+    init(origin: String?,
+         userScript: SubscriptionPagesUserScript,
          subFeature: SubscriptionPagesUseSubscriptionFeature,
-         purchaseManager: PurchaseManager = PurchaseManager.shared,
+         subscriptionManager: SubscriptionManager,
          selectedFeature: SettingsViewModel.SettingsDeepLinkSection? = nil) {
+        let url = subscriptionManager.url(for: .purchase)
+        if let origin {
+            purchaseURL = url.appendingParameter(name: AttributionParameter.origin, value: origin)
+        } else {
+            purchaseURL = url
+        }
         self.userScript = userScript
         self.subFeature = subFeature
-        self.purchaseManager = purchaseManager
+        self.subscriptionManager = subscriptionManager
         self.webViewModel = AsyncHeadlessWebViewViewModel(userScript: userScript,
                                                           subFeature: subFeature,
                                                           settings: webViewSettings)
@@ -95,27 +100,32 @@ final class SubscriptionFlowViewModel: ObservableObject {
         
         
         subFeature.onBackToSettings = {
-            self.webViewModel.navigationCoordinator.navigateTo(url: URL.subscriptionPurchase)
+            DispatchQueue.main.async {
+                self.state.shouldGoBackToSettings = true
+            }
         }
         
         subFeature.onActivateSubscription = {
             DispatchQueue.main.async {
                 self.state.shouldActivateSubscription = true
+                self.setTransactionStatus(.idle)
             }
         }
         
          subFeature.onFeatureSelected = { feature in
              DispatchQueue.main.async {
                  switch feature {
-                 case .netP:
+                 case .networkProtection:
                      UniquePixel.fire(pixel: .privacyProWelcomeVPN)
                      self.state.selectedFeature = .netP
-                 case .dbp:
+                 case .dataBrokerProtection:
                      UniquePixel.fire(pixel: .privacyProWelcomePersonalInformationRemoval)
                      self.state.selectedFeature = .dbp
-                 case .itr:
+                 case .identityTheftRestoration, .identityTheftRestorationGlobal:
                      UniquePixel.fire(pixel: .privacyProWelcomeIdentityRestoration)
                      self.state.selectedFeature = .itr
+                 case .unknown:
+                     break
                  }
              }
          }
@@ -125,6 +135,7 @@ final class SubscriptionFlowViewModel: ObservableObject {
             .removeDuplicates()
             .sink { [weak self] value in
                 guard let strongSelf = self else { return }
+                Task { await strongSelf.setTransactionStatus(.idle) }
                 if let value {
                     Task { await strongSelf.handleTransactionError(error: value) }
                 }
@@ -132,14 +143,16 @@ final class SubscriptionFlowViewModel: ObservableObject {
         .store(in: &cancellables)
        
     }
-    
-    // swiftlint:disable cyclomatic_complexity
+
     @MainActor
     private func handleTransactionError(error: SubscriptionPagesUseSubscriptionFeature.UseSubscriptionError) {
 
         var isStoreError = false
         var isBackendError = false
 
+        // Reset the transaction Status
+        self.setTransactionStatus(.idle)
+        
         switch error {
         case .purchaseFailed:
             isStoreError = true
@@ -170,29 +183,32 @@ final class SubscriptionFlowViewModel: ObservableObject {
             isBackendError = true
             state.transactionError = .hasActiveSubscription
         case .cancelledByUser:
-            state.transactionError = nil
+            state.transactionError = .cancelledByUser
         case .accountCreationFailed:
-            DailyPixel.fireDailyAndCount(pixel: .privacyProPurchaseFailureAccountNotCreated)
+            DailyPixel.fireDailyAndCount(pixel: .privacyProPurchaseFailureAccountNotCreated,
+                                         pixelNameSuffixes: DailyPixel.Constant.legacyDailyPixelSuffixes)
             state.transactionError = .generalError
         default:
             state.transactionError = .generalError
         }
 
         if isStoreError {
-            DailyPixel.fireDailyAndCount(pixel: .privacyProPurchaseFailureStoreError)
+            DailyPixel.fireDailyAndCount(pixel: .privacyProPurchaseFailureStoreError,
+                                         pixelNameSuffixes: DailyPixel.Constant.legacyDailyPixelSuffixes)
         }
 
         if isBackendError {
-            DailyPixel.fireDailyAndCount(pixel: .privacyProPurchaseFailureBackendError)
+            DailyPixel.fireDailyAndCount(pixel: .privacyProPurchaseFailureBackendError,
+                                         pixelNameSuffixes: DailyPixel.Constant.legacyDailyPixelSuffixes)
         }
 
         if state.transactionError != .hasActiveSubscription &&
            state.transactionError != .cancelledByUser {
             // The observer of `transactionError` does the same calculation, if the error is anything else than .hasActiveSubscription then shows a "Something went wrong" alert
-            DailyPixel.fireDailyAndCount(pixel: .privacyProPurchaseFailure)
+            DailyPixel.fireDailyAndCount(pixel: .privacyProPurchaseFailure,
+                                         pixelNameSuffixes: DailyPixel.Constant.legacyDailyPixelSuffixes)
         }
     }
-    // swiftlint:enable cyclomatic_complexity
     
     private func setupWebViewObservers() async {
         webViewModel.$navigationError
@@ -201,6 +217,7 @@ final class SubscriptionFlowViewModel: ObservableObject {
                 guard let strongSelf = self else { return }
                 DispatchQueue.main.async {
                     strongSelf.state.transactionError = error != nil ? .generalError : nil
+                    strongSelf.setTransactionStatus(.idle)
                 }
                 
             }
@@ -225,9 +242,12 @@ final class SubscriptionFlowViewModel: ObservableObject {
                 guard let strongSelf = self else { return }
                 strongSelf.state.canNavigateBack = false
                 guard let currentURL = self?.webViewModel.url else { return }
-                if currentURL.forComparison() == URL.addEmailToSubscription.forComparison() ||
-                    currentURL.forComparison() == URL.addEmailToSubscriptionSuccess.forComparison() ||
-                    currentURL.forComparison() == URL.addEmailToSubscriptionSuccess.forComparison() {
+                Task { await strongSelf.setTransactionStatus(.idle) }
+
+                let addEmailURL = strongSelf.subscriptionManager.url(for: .addEmail)
+                let addEmailSuccessURL = strongSelf.subscriptionManager.url(for: .addEmailToSubscriptionSuccess)
+                if currentURL.forComparison() == addEmailURL.forComparison() ||
+                    currentURL.forComparison() == addEmailSuccessURL.forComparison() {
                     strongSelf.state.viewTitle = UserText.subscriptionRestoreAddEmailTitle
                 } else {
                     strongSelf.state.viewTitle = UserText.subscriptionTitle
@@ -235,27 +255,29 @@ final class SubscriptionFlowViewModel: ObservableObject {
             }
         
     }
-    
+
     private func backButtonForURL(currentURL: URL) -> Bool {
-        return currentURL.forComparison() != URL.subscriptionBaseURL.forComparison() &&
-        currentURL.forComparison() != URL.subscriptionActivateSuccess.forComparison() &&
-        currentURL.forComparison() != URL.subscriptionPurchase.forComparison()
+        return currentURL.forComparison() != subscriptionManager.url(for: .baseURL).forComparison() &&
+        currentURL.forComparison() != subscriptionManager.url(for: .activateSuccess).forComparison() &&
+        currentURL.forComparison() != subscriptionManager.url(for: .purchase).forComparison()
     }
     
     private func cleanUp() {
+        transactionStatusTimer?.invalidate()
         canGoBackCancellable?.cancel()
         urlCancellable?.cancel()
-        subFeature.cleanup()
         cancellables.removeAll()
     }
 
     @MainActor
     func resetState() {
+        self.setTransactionStatus(.idle)
         self.state = State()
     }
     
     deinit {
         cleanUp()
+        transactionStatusTimer = nil
         canGoBackCancellable = nil
         urlCancellable = nil
     }
@@ -263,6 +285,18 @@ final class SubscriptionFlowViewModel: ObservableObject {
     @MainActor
     private func setTransactionStatus(_ status: SubscriptionTransactionStatus) {
         self.state.transactionStatus = status
+        
+        // Invalidate existing timer if any
+        transactionStatusTimer?.invalidate()
+        
+        if status != .idle {
+            // Schedule a new timer
+            transactionStatusTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: false) { [weak self] _ in
+                guard let strongSelf = self else { return }
+                strongSelf.transactionStatusTimer?.invalidate()
+                strongSelf.transactionStatusTimer = nil
+            }
+        }
     }
         
     @MainActor
@@ -274,14 +308,15 @@ final class SubscriptionFlowViewModel: ObservableObject {
     
     func onAppear() {
         self.state.selectedFeature = .none
+        self.state.shouldGoBackToSettings = false
     }
     
     func onFirstAppear() async {
         DispatchQueue.main.async {
             self.resetState()
         }
-        if webViewModel.url != URL.subscriptionPurchase.forComparison() {
-            self.webViewModel.navigationCoordinator.navigateTo(url: self.purchaseURL)
+        if webViewModel.url != subscriptionManager.url(for: .purchase).forComparison() {
+             self.webViewModel.navigationCoordinator.navigateTo(url: purchaseURL)
         }
         await self.setupTransactionObserver()
         await self.setupWebViewObservers()
@@ -313,20 +348,6 @@ final class SubscriptionFlowViewModel: ObservableObject {
     @MainActor
     func clearTransactionError() {
         state.transactionError = nil
-    }
-    
-}
-#endif
-
-// TODO: Move to BSK later
-private extension URL {
-    
-    static var addEmailToSubscriptionSuccess: URL {
-        subscriptionBaseURL.appendingPathComponent("add-email/success")
-    }
-    
-    static var addEmailToSubscriptionOTP: URL {
-        subscriptionBaseURL.appendingPathComponent("add-email/otp")
     }
     
 }

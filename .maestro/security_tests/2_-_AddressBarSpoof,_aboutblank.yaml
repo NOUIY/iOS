@@ -2,11 +2,20 @@ appId: com.duckduckgo.mobile.ios
 tags:
     - securityTest
 ---
-- doubleTapOn:
+
+# Set up 
+- runFlow: 
+    file: ../shared/setup.yaml
+
+# Load Site
+- assertVisible:
     id: "searchEntry"
-- pressKey: Backspace
+- tapOn: 
+    id: "searchEntry"
 - inputText: "https://privacy-test-pages.site/security/address-bar-spoofing/spoof-about-blank-rewrite.html"
 - pressKey: Enter
+
+# Test
 - tapOn: "Start"
 # This test is expected to load "about:blank" not spoof the address bar with duckduckgo.com with the spoofed content.
 - extendedWaitUntil:

@@ -19,13 +19,12 @@
 
 import UIKit
 import Core
+import DuckPlayer
 
 class TabViewGridCell: TabViewCell {
 
     struct Constants {
         
-        static let selectedBorderWidth: CGFloat = 2.0
-        static let unselectedBorderWidth: CGFloat = 0.0
         static let swipeToDeleteAlpha: CGFloat = 0.5
         
         static let cellCornerRadius: CGFloat = 8.0
@@ -43,7 +42,8 @@ class TabViewGridCell: TabViewCell {
     @IBOutlet weak var removeButton: UIButton!
     @IBOutlet weak var unread: UIImageView!
     @IBOutlet weak var preview: UIImageView!
-    
+    @IBOutlet weak var selectionIndicator: UIImageView!
+
     weak var previewAspectRatio: NSLayoutConstraint?
     @IBOutlet var previewTopConstraint: NSLayoutConstraint?
     @IBOutlet var previewBottomConstraint: NSLayoutConstraint?
@@ -84,22 +84,23 @@ class TabViewGridCell: TabViewCell {
         previewTrailingConstraint?.isActive = true
     }
     
-    private static var darkThemeUnreadImage = UIImage.stackedIconImage(withIconImage: UIImage(named: "TabUnread")!,
-                                                                       borderWidth: 6.0,
-                                                                       foregroundColor: .cornflowerBlue,
-                                                                       borderColor: DarkTheme().tabSwitcherCellBackgroundColor)
-    private static var lighThemeUnreadImage = UIImage.stackedIconImage(withIconImage: UIImage(named: "TabUnread")!,
-                                                                       borderWidth: 6.0,
-                                                                       foregroundColor: .cornflowerBlue,
-                                                                       borderColor: LightTheme().tabSwitcherCellBackgroundColor)
-    
-    private static func unreadImage(for theme: Theme) -> UIImage {
-        switch theme.currentImageSet {
-        case .dark:
-            return darkThemeUnreadImage
-        case .light:
-            return lighThemeUnreadImage
+    private static var unreadImageAsset: UIImageAsset {
+
+        func unreadImage(for style: UIUserInterfaceStyle) -> UIImage {
+            let color = ThemeManager.shared.currentTheme.tabSwitcherCellBackgroundColor.resolvedColor(with: .init(userInterfaceStyle: style))
+            let image = UIImage.stackedIconImage(withIconImage: UIImage(named: "TabUnread")!,
+                                                 borderWidth: 6.0,
+                                                 foregroundColor: .cornflowerBlue,
+                                                 borderColor: color)
+            return image
         }
+
+        let asset = UIImageAsset()
+
+        asset.register(unreadImage(for: .dark), with: .init(userInterfaceStyle: .dark))
+        asset.register(unreadImage(for: .light), with: .init(userInterfaceStyle: .light))
+
+        return asset
     }
     
     static let logoImage: UIImage = {
@@ -118,21 +119,21 @@ class TabViewGridCell: TabViewCell {
     }()
     
     override func update(withTab tab: Tab,
-                         preview: UIImage?,
-                         reorderRecognizer: UIGestureRecognizer?) {
+                         isSelectionModeEnabled: Bool,
+                         preview: UIImage?) {
         accessibilityElements = [ title as Any, removeButton as Any ]
         
         self.tab = tab
-        self.collectionReorderRecognizer = reorderRecognizer
+        self.isSelectionModeEnabled = isSelectionModeEnabled
         
         if !isDeleting {
             isHidden = false
         }
         isCurrent = delegate?.isCurrent(tab: tab) ?? false
         
-        decorate(with: ThemeManager.shared.currentTheme)
-        
-        border.layer.borderWidth = isCurrent ? Constants.selectedBorderWidth : Constants.unselectedBorderWidth
+        decorate()
+
+        updateCurrentTabBorder(border)
 
         if let link = tab.link {
             removeButton.accessibilityLabel = UserText.closeTab(withTitle: link.displayTitle, atAddress: link.url.host ?? "")
@@ -141,7 +142,7 @@ class TabViewGridCell: TabViewCell {
         }
         
         unread.isHidden = tab.viewed
-        
+
         if tab.link == nil {
             updatePreviewToDisplayLogo()
             self.preview.image = Self.logoImage
@@ -154,7 +155,16 @@ class TabViewGridCell: TabViewCell {
             title.isHidden = !tab.viewed
             favicon.isHidden = !tab.viewed
             removeButton.isHidden = !tab.viewed
+            
         } else {
+            
+            // Duck Player videos
+            if let url = tab.link?.url, url.isDuckPlayer {
+                favicon.image = UIImage(named: "DuckPlayerURLIcon")
+            } else {
+                favicon.loadFavicon(forDomain: tab.link?.url.host, usingCache: .tabs)
+            }
+            
             if let preview = preview {
                 self.updatePreviewToDisplay(image: preview)
                 self.preview.contentMode = .scaleAspectFill
@@ -164,16 +174,31 @@ class TabViewGridCell: TabViewCell {
             }
             
             removeButton.isHidden = false
-            favicon.loadFavicon(forDomain: tab.link?.url.host, usingCache: .tabs)
+            
+        }
+
+        updateUIForSelectionMode(removeButton, selectionIndicator)
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            setBorderColor()
         }
     }
-    
-    override func decorate(with theme: Theme) {
-        super.decorate(with: theme)
-        border.layer.borderColor = theme.tabSwitcherCellBorderColor.cgColor
-        unread.image = Self.unreadImage(for: theme)
-        
+
+    private func decorate() {
+        let theme = ThemeManager.shared.currentTheme
+        setBorderColor()
+        unread.image = Self.unreadImageAsset.image(with: .current)
+
         background.backgroundColor = theme.tabSwitcherCellBackgroundColor
         title.textColor = theme.tabSwitcherCellTextColor
     }
+
+    private func setBorderColor() {
+        border.layer.borderColor = ThemeManager.shared.currentTheme.tabSwitcherCellBorderColor.cgColor
+    }
+
 }

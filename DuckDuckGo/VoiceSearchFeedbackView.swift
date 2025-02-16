@@ -29,9 +29,7 @@ struct VoiceSearchFeedbackView: View {
             voiceFeedbackView
         }
         .onAppear {
-            if #available(iOS 15, *) {
-                speechModel.startSpeechRecognizer()
-            }
+            speechModel.startSpeechRecognizer()
             speechModel.startSilenceAnimation()
         }.onDisappear {
             speechModel.stopSpeechRecognizer()
@@ -82,7 +80,7 @@ extension VoiceSearchFeedbackView {
             .padding(.bottom, voiceCircleVerticalPadding)
             .padding(.top, voiceCircleVerticalPadding)
             
-            Text(UserText.voiceSearchFooter)
+            Text(UserText.voiceSearchFooterOld)
                 .font(.footnote)
                 .multilineTextAlignment(.center)
                 .foregroundColor(Colors.footerText)
@@ -172,10 +170,9 @@ struct VoiceSearchFeedbackView_Previews: PreviewProvider {
                 VoiceSearchFeedbackView(speechModel: VoiceSearchFeedbackViewModel(speechRecognizer: PreviewMockSpeechRecognizer()))
                     .preferredColorScheme($0)
             }
-            if #available(iOS 15.0, *) {
-                VoiceSearchFeedbackView(speechModel: VoiceSearchFeedbackViewModel(speechRecognizer: PreviewMockSpeechRecognizer()))
-                    .previewInterfaceOrientation(.landscapeRight)
-            }
+
+            VoiceSearchFeedbackView(speechModel: VoiceSearchFeedbackViewModel(speechRecognizer: PreviewMockSpeechRecognizer()))
+                .previewInterfaceOrientation(.landscapeRight)
         }
     }
 }

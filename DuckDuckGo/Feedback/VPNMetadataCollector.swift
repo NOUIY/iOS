@@ -48,7 +48,8 @@ struct VPNMetadata: Encodable {
 
     struct VPNState: Encodable {
         let connectionState: String
-        let lastDisconnectError: String
+        let lastDisconnectError: LastDisconnectError?
+        let underlyingErrors: [LastDisconnectError]?
         let connectedServer: String
         let connectedServerIP: String
     }
@@ -60,21 +61,18 @@ struct VPNMetadata: Encodable {
         let excludeLocalNetworksEnabled: Bool
         let notifyStatusChangesEnabled: Bool
         let selectedServer: String
+        let customDNS: Bool
     }
 
     struct PrivacyProInfo: Encodable {
-        // swiftlint:disable nesting
-        enum Source: String, Encodable {
-            case `internal`
-            case waitlist
-            case other
-        }
-        // swiftlint:enable nesting
+        let hasPrivacyProAccount: Bool
+        let hasVPNEntitlement: Bool
+    }
 
-        let enableSource: Source
-        let betaParticipant: Bool
-        let hasToken: Bool
-        let subscriptionActive: Bool
+    struct LastDisconnectError: Encodable {
+        let domain: String
+        let code: Int
+        let description: String
     }
 
     let appInfo: AppInfo
@@ -95,53 +93,38 @@ struct VPNMetadata: Encodable {
 
         return String(data: encodedMetadata, encoding: .utf8)
     }
-
-    func toBase64() -> String {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.sortedKeys]
-
-        do {
-            let encodedMetadata = try encoder.encode(self)
-            return encodedMetadata.base64EncodedString()
-        } catch {
-            return "Failed to encode metadata to JSON, error message: \(error.localizedDescription)"
-        }
-    }
 }
 
 protocol VPNMetadataCollector {
-    func collectMetadata() async -> VPNMetadata
+    func collectVPNMetadata() async -> VPNMetadata
 }
 
 final class DefaultVPNMetadataCollector: VPNMetadataCollector {
     private let statusObserver: ConnectionStatusObserver
     private let serverInfoObserver: ConnectionServerInfoObserver
-    private let accessManager: NetworkProtectionAccessController
-    private let tokenStore: NetworkProtectionTokenStore
+    private let accountManager: AccountManager
     private let settings: VPNSettings
     private let defaults: UserDefaults
 
-    init(statusObserver: ConnectionStatusObserver = ConnectionStatusObserverThroughSession(),
-         serverInfoObserver: ConnectionServerInfoObserver = ConnectionServerInfoObserverThroughSession(),
-         networkProtectionAccessManager: NetworkProtectionAccessController = NetworkProtectionAccessController(),
-         tokenStore: NetworkProtectionTokenStore = NetworkProtectionKeychainTokenStore(),
+    init(statusObserver: ConnectionStatusObserver,
+         serverInfoObserver: ConnectionServerInfoObserver,
+         accountManager: AccountManager = AppDependencyProvider.shared.subscriptionManager.accountManager,
          settings: VPNSettings = .init(defaults: .networkProtectionGroupDefaults),
          defaults: UserDefaults = .networkProtectionGroupDefaults) {
         self.statusObserver = statusObserver
         self.serverInfoObserver = serverInfoObserver
-        self.accessManager = networkProtectionAccessManager
-        self.tokenStore = tokenStore
+        self.accountManager = accountManager
         self.settings = settings
         self.defaults = defaults
     }
 
-    func collectMetadata() async -> VPNMetadata {
+    func collectVPNMetadata() async -> VPNMetadata {
         let appInfoMetadata = collectAppInfoMetadata()
         let deviceInfoMetadata = collectDeviceInfoMetadata()
         let networkInfoMetadata = await collectNetworkInformation()
         let vpnState = await collectVPNState()
         let vpnSettingsState = collectVPNSettingsState()
-        let privacyProInfo = collectPrivacyProInfo()
+        let privacyProInfo = await collectPrivacyProInfo()
 
         return VPNMetadata(
             appInfo: appInfoMetadata,
@@ -220,50 +203,30 @@ final class DefaultVPNMetadataCollector: VPNMetadataCollector {
         let connectionState = String(describing: statusObserver.recentValue)
         let connectedServer = serverInfoObserver.recentValue.serverLocation?.serverLocation ?? "none"
         let connectedServerIP = serverInfoObserver.recentValue.serverAddress ?? "none"
+        let lastDisconnectError = await lastDisconnectError()
 
         return .init(connectionState: connectionState,
-                     lastDisconnectError: await lastDisconnectError(),
+                     lastDisconnectError: lastDisconnectError?.error,
+                     underlyingErrors: lastDisconnectError?.underlyingErrors,
                      connectedServer: connectedServer,
                      connectedServerIP: connectedServerIP)
     }
 
-    public func lastDisconnectError() async -> String {
+    public func lastDisconnectError() async -> (error: VPNMetadata.LastDisconnectError, underlyingErrors: [VPNMetadata.LastDisconnectError])? {
         if #available(iOS 16, *) {
             guard let tunnelManager = try? await NETunnelProviderManager.loadAllFromPreferences().first else {
-                return "none"
+                return nil
             }
 
-            return await withCheckedContinuation { continuation in
-                tunnelManager.connection.fetchLastDisconnectError { error in
-                    let message = {
-                        if let error = error as? NSError {
-                            if error.domain == NEVPNConnectionErrorDomain, let code = NEDNSSettingsManagerError(rawValue: error.code) {
-                                switch code {
-                                case .configurationCannotBeRemoved:
-                                    return "configurationCannotBeRemoved"
-                                case .configurationDisabled:
-                                    return "configurationDisabled"
-                                case .configurationInvalid:
-                                    return "configurationInvalid"
-                                case .configurationStale:
-                                    return "configurationStale"
-                                default:
-                                    return error.localizedDescription
-                                }
-                            } else {
-                                return error.localizedDescription
-                            }
-                        }
-
-                        return "none"
-                    }()
-
-                    continuation.resume(returning: message)
-                }
+            do {
+                try await tunnelManager.connection.fetchLastDisconnectError()
+                return nil
+            } catch {
+                return (error as NSError).toMetadataError()
             }
         }
 
-        return "none"
+        return nil
     }
 
     func collectVPNSettingsState() -> VPNMetadata.VPNSettingsState {
@@ -273,38 +236,54 @@ final class DefaultVPNMetadataCollector: VPNMetadataCollector {
             enforceRoutesEnabled: settings.enforceRoutes,
             excludeLocalNetworksEnabled: settings.excludeLocalNetworks,
             notifyStatusChangesEnabled: settings.notifyStatusChanges,
-            selectedServer: settings.selectedServer.stringValue ?? "automatic"
+            selectedServer: settings.selectedServer.stringValue ?? "automatic",
+            customDNS: settings.dnsSettings.usesCustomDNS
         )
     }
 
-    func collectPrivacyProInfo() -> VPNMetadata.PrivacyProInfo {
-        let accessType = accessManager.networkProtectionAccessType()
-        var hasToken: Bool {
-            guard let token = try? tokenStore.fetchToken(),
-                  !token.hasPrefix(NetworkProtectionKeychainTokenStore.authTokenPrefix) else {
-                return false
-            }
-            return true
-        }
-
+    func collectPrivacyProInfo() async -> VPNMetadata.PrivacyProInfo {
+        let hasVPNEntitlement = (try? await accountManager.hasEntitlement(forProductName: .networkProtection).get()) ?? false
         return .init(
-            enableSource: .init(from: accessManager.networkProtectionAccessType()),
-            betaParticipant: accessType == .waitlistInvited,
-            hasToken: hasToken,
-            subscriptionActive: AccountManager(subscriptionAppGroup: Bundle.main.appGroup(bundle: .subs)).isUserAuthenticated
+            hasPrivacyProAccount: accountManager.isUserAuthenticated,
+            hasVPNEntitlement: hasVPNEntitlement
         )
     }
+
 }
 
-extension VPNMetadata.PrivacyProInfo.Source {
-    init(from accessType: NetworkProtectionAccessType) {
-        switch accessType {
-        case .inviteCodeInvited:
-            self = .internal
-        case .waitlistInvited:
-            self = .waitlist
-        default:
-            self = .other
+private extension NSError {
+
+    @available(iOS 16.0, *)
+    func toMetadataError() -> (error: VPNMetadata.LastDisconnectError, underlyingErrors: [VPNMetadata.LastDisconnectError]) {
+        let metadataError = VPNMetadata.LastDisconnectError(domain: self.domain, code: self.code, description: self.localizedDescription)
+
+        let underlyingErrors = self.underlyingErrors.compactMap { underlyingError in
+            let underlyingNSError = underlyingError as NSError
+            return VPNMetadata.LastDisconnectError(
+                domain: underlyingNSError.domain,
+                code: underlyingNSError.code,
+                description: underlyingNSError.localizedDescription
+            )
         }
+
+        return (metadataError, underlyingErrors)
+    }
+
+}
+
+// MARK: - Unified feedback form support
+
+extension VPNMetadata: UnifiedFeedbackMetadata {}
+
+extension DefaultVPNMetadataCollector: UnifiedMetadataCollector {
+    convenience init() {
+        self.init(
+            statusObserver: AppDependencyProvider.shared.connectionObserver,
+            serverInfoObserver: AppDependencyProvider.shared.serverInfoObserver
+        )
+    }
+
+    func collectMetadata() async -> VPNMetadata? {
+        await collectVPNMetadata()
     }
 }

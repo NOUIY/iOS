@@ -21,6 +21,9 @@ import Common
 import Foundation
 import BrowserServicesKit
 import Networking
+import PixelKit
+import PixelExperimentKit
+import os.log
 
 public class StatisticsLoader {
 
@@ -30,15 +33,31 @@ public class StatisticsLoader {
 
     private let statisticsStore: StatisticsStore
     private let returnUserMeasurement: ReturnUserMeasurement
+    private let usageSegmentation: UsageSegmenting
     private let parser = AtbParser()
+    private let fireSearchExperimentPixels: () -> Void
+    private let fireAppRetentionExperimentPixels: () -> Void
+    private let pixelFiring: PixelFiring.Type
 
     init(statisticsStore: StatisticsStore = StatisticsUserDefaults(),
-         returnUserMeasurement: ReturnUserMeasurement = KeychainReturnUserMeasurement()) {
+         returnUserMeasurement: ReturnUserMeasurement = KeychainReturnUserMeasurement(),
+         usageSegmentation: UsageSegmenting = UsageSegmentation(pixelEvents: UsageSegmentation.pixelEvents),
+         fireAppRetentionExperimentPixels: @escaping () -> Void = PixelKit.fireAppRetentionExperimentPixels,
+         fireSearchExperimentPixels: @escaping () -> Void = PixelKit.fireSearchExperimentPixels,
+         pixelFiring: PixelFiring.Type = Pixel.self) {
         self.statisticsStore = statisticsStore
         self.returnUserMeasurement = returnUserMeasurement
+        self.usageSegmentation = usageSegmentation
+        self.fireSearchExperimentPixels = fireSearchExperimentPixels
+        self.fireAppRetentionExperimentPixels = fireAppRetentionExperimentPixels
+        self.pixelFiring = pixelFiring
     }
 
     public func load(completion: @escaping Completion = {}) {
+        let completion = {
+            self.refreshAppRetentionAtb()
+            completion()
+        }
         if statisticsStore.hasInstallStatistics {
             completion()
             return
@@ -52,7 +71,7 @@ public class StatisticsLoader {
 
         request.fetch { response, error in
             if let error = error {
-                os_log("Initial atb request failed with error %s", log: .generalLog, type: .debug, error.localizedDescription)
+                Logger.general.error("Initial atb request failed with error: \(error.localizedDescription, privacy: .public)")
                 completion()
                 return
             }
@@ -74,10 +93,11 @@ public class StatisticsLoader {
 
         request.fetch { _, error in
             if let error = error {
-                os_log("Exti request failed with error %s", log: .generalLog, type: .debug, error.localizedDescription)
+                Logger.general.error("Exit request failed with error: \(error.localizedDescription, privacy: .public)")
                 completion()
                 return
             }
+            self.fireInstallPixel()
             self.statisticsStore.installDate = Date()
             self.statisticsStore.atb = atb.version
             self.returnUserMeasurement.installCompletedWithATB(atb)
@@ -85,9 +105,27 @@ public class StatisticsLoader {
         }
     }
 
+    private func fireInstallPixel() {
+        let formattedLocale = Locale.current.localeIdentifierAsJsonFormat
+        let isReinstall = String(statisticsStore.variant == VariantIOS.returningUser.name)
+        let parameters = [
+            "locale": formattedLocale,
+            "reinstall": isReinstall
+        ]
+        pixelFiring.fire(.appInstall, withAdditionalParameters: parameters, includedParameters: [.appVersion], onComplete: { error in
+            if let error {
+                Logger.general.error("Install pixel failed with error: \(error.localizedDescription, privacy: .public)")
+            }
+        })
+    }
+
     public func refreshSearchRetentionAtb(completion: @escaping Completion = {}) {
+        fireSearchExperimentPixels()
         guard let url = StatisticsDependentURLFactory(statisticsStore: statisticsStore).makeSearchAtbURL() else {
-            requestInstallStatistics(completion: completion)
+            requestInstallStatistics {
+                self.updateUsageSegmentationAfterInstall(activityType: .search)
+                completion()
+            }
             return
         }
 
@@ -96,21 +134,28 @@ public class StatisticsLoader {
 
         request.fetch { response, error in
             if let error = error {
-                os_log("Search atb request failed with error %s", log: .generalLog, type: .debug, error.localizedDescription)
+                Logger.general.error("Search atb request failed with error: \(error.localizedDescription, privacy: .public)")
                 completion()
                 return
             }
             if let data = response?.data, let atb = try? self.parser.convert(fromJsonData: data) {
                 self.statisticsStore.searchRetentionAtb = atb.version
                 self.storeUpdateVersionIfPresent(atb)
+                self.updateUsageSegmentationWithAtb(atb, activityType: .search)
+                NotificationCenter.default.post(name: .searchDAU,
+                                                object: nil, userInfo: nil)
             }
             completion()
         }
     }
 
     public func refreshAppRetentionAtb(completion: @escaping Completion = {}) {
+        fireAppRetentionExperimentPixels()
         guard let url = StatisticsDependentURLFactory(statisticsStore: statisticsStore).makeAppAtbURL() else {
-            requestInstallStatistics(completion: completion)
+            requestInstallStatistics {
+                self.updateUsageSegmentationAfterInstall(activityType: .appUse)
+                completion()
+            }
             return
         }
 
@@ -119,13 +164,14 @@ public class StatisticsLoader {
 
         request.fetch { response, error in
             if let error = error {
-                os_log("App atb request failed with error %s", log: .generalLog, type: .debug, error.localizedDescription)
+                Logger.general.error("App atb request failed with error: \(error.localizedDescription, privacy: .public)")
                 completion()
                 return
             }
             if let data = response?.data, let atb = try? self.parser.convert(fromJsonData: data) {
                 self.statisticsStore.appRetentionAtb = atb.version
                 self.storeUpdateVersionIfPresent(atb)
+                self.updateUsageSegmentationWithAtb(atb, activityType: .appUse)
             }
             completion()
         }
@@ -136,6 +182,41 @@ public class StatisticsLoader {
             statisticsStore.atb = updateVersion
             statisticsStore.variant = nil
             returnUserMeasurement.updateStoredATB(atb)
+        }
+    }
+
+    private func processUsageSegmentation(atb: Atb?, activityType: UsageActivityType) {
+        guard let installAtbValue = statisticsStore.atb else { return }
+        let installAtb = Atb(version: installAtbValue + (statisticsStore.variant ?? ""), updateVersion: nil)
+        let usageAtb = atb ?? installAtb
+
+        self.usageSegmentation.processATB(usageAtb, withInstallAtb: installAtb, andActivityType: activityType)
+    }
+
+    private func updateUsageSegmentationWithAtb(_ atb: Atb, activityType: UsageActivityType) {
+        processUsageSegmentation(atb: atb, activityType: activityType)
+    }
+
+    private func updateUsageSegmentationAfterInstall(activityType: UsageActivityType) {
+        processUsageSegmentation(atb: nil, activityType: activityType)
+    }
+}
+
+private extension BoolFileMarker.Name {
+    static let isATBPresent = BoolFileMarker.Name(rawValue: "atb-present")
+}
+
+extension UsageSegmentation {
+
+    static let pixelEvents: EventMapping<UsageSegmentationPixel> = .init { event, _, params, _ in
+        switch event {
+        case .usageSegments:
+            guard let params = params else {
+                assertionFailure("Missing pixel parameters")
+                return
+            }
+
+            Pixel.fire(pixel: .usageSegments, withAdditionalParameters: params)
         }
     }
 }

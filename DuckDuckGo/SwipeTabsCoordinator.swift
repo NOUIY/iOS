@@ -18,6 +18,8 @@
 //
 
 import UIKit
+import Core
+import BrowserServicesKit
 
 class SwipeTabsCoordinator: NSObject {
     
@@ -29,7 +31,8 @@ class SwipeTabsCoordinator: NSObject {
     weak var coordinator: MainViewCoordinator!
     weak var tabPreviewsSource: TabPreviewsSource!
     weak var appSettings: AppSettings!
-    
+    private let omnibarDependencies: OmnibarDependencyProvider
+
     let selectTab: (Int) -> Void
     let newTab: () -> Void
     let onSwipeStarted: () -> Void
@@ -49,10 +52,14 @@ class SwipeTabsCoordinator: NSObject {
     var collectionView: MainViewFactory.NavigationBarCollectionView {
         coordinator.navigationBarCollectionView
     }
-    
+
+    private let omnibarAccessoryHandler: OmnibarAccessoryHandler
+
     init(coordinator: MainViewCoordinator,
          tabPreviewsSource: TabPreviewsSource,
          appSettings: AppSettings,
+         omnibarDependencies: OmnibarDependencyProvider,
+         omnibarAccessoryHandler: OmnibarAccessoryHandler,
          selectTab: @escaping (Int) -> Void,
          newTab: @escaping () -> Void,
          onSwipeStarted: @escaping () -> Void) {
@@ -60,7 +67,8 @@ class SwipeTabsCoordinator: NSObject {
         self.coordinator = coordinator
         self.tabPreviewsSource = tabPreviewsSource
         self.appSettings = appSettings
-        
+        self.omnibarDependencies = omnibarDependencies
+        self.omnibarAccessoryHandler = omnibarAccessoryHandler
         self.selectTab = selectTab
         self.newTab = newTab
         self.onSwipeStarted = onSwipeStarted
@@ -85,21 +93,37 @@ class SwipeTabsCoordinator: NSObject {
         case starting(CGPoint)
         case swiping(CGPoint, FloatingPointSign)
         
+        var isIdle: Bool {
+            if case .idle = self {
+                return true
+            }
+
+            return false
+        }
+
     }
     
     var state: State = .idle
     
     weak var preview: UIView?
     weak var currentView: UIView?
-    
+
+    func invalidateLayout() {
+        updateLayout()
+        scrollToCurrent()
+
+        collectionView.reloadData()
+    }
+
     private func updateLayout() {
         let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout
         layout?.itemSize = CGSize(width: coordinator.superview.frame.size.width, height: coordinator.omniBar.frame.height)
         layout?.minimumLineSpacing = 0
         layout?.minimumInteritemSpacing = 0
         layout?.scrollDirection = .horizontal
+        layout?.invalidateLayout()
     }
-    
+
     private func scrollToCurrent() {
         guard isEnabled else { return }
         let targetOffset = collectionView.frame.width * CGFloat(tabsModel.currentIndex)
@@ -217,6 +241,12 @@ extension SwipeTabsCoordinator: UICollectionViewDelegate {
     }
 
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        guard !state.isIdle else {
+            // Turns out this is needed (we used to have a pixel here)
+            assertionFailure("invalid state")
+            return
+        }
+
         defer {
             cleanUpViews()
             state = .idle
@@ -291,11 +321,12 @@ extension SwipeTabsCoordinator: UICollectionViewDataSource {
         if !isEnabled || tabsModel.currentIndex == indexPath.row {
             cell.omniBar = coordinator.omniBar
         } else {
-            cell.omniBar = OmniBar.loadFromXib()
+            // Strong reference while we use the omnibar
+            let omniBar = OmniBar.loadFromXib(dependencies: omnibarDependencies)
+
+            cell.omniBar = omniBar
             cell.omniBar?.translatesAutoresizingMaskIntoConstraints = false
-            cell.updateConstraints()
-            cell.omniBar?.decorate(with: ThemeManager.shared.currentTheme)
-            
+
             cell.omniBar?.showSeparator()
             if self.appSettings.currentAddressBarPosition.isBottom {
                 cell.omniBar?.moveSeparatorToTop()
@@ -307,10 +338,13 @@ extension SwipeTabsCoordinator: UICollectionViewDataSource {
                 cell.omniBar?.startBrowsing()
                 cell.omniBar?.refreshText(forUrl: url, forceFullURL: appSettings.showFullSiteAddress)
                 cell.omniBar?.resetPrivacyIcon(for: url)
-            }
+                cell.omniBar?.updateAccessoryType(omnibarAccessoryHandler.omnibarAccessory(for: url))
 
+            }
         }
-        
+
+        cell.setNeedsUpdateConstraints()
+
         return cell
     }
     
@@ -323,7 +357,7 @@ class OmniBarCell: UICollectionViewCell {
             subviews.forEach { $0.removeFromSuperview() }
             if let omniBar {
                 addSubview(omniBar)
-                
+
                 NSLayoutConstraint.activate([
                     constrainView(omniBar, by: .leadingMargin),
                     constrainView(omniBar, by: .trailingMargin),
@@ -334,14 +368,14 @@ class OmniBarCell: UICollectionViewCell {
             }
         }
     }
-    
+
     override func updateConstraints() {
-        super.updateConstraints()
         let left = superview?.safeAreaInsets.left ?? 0
         let right = superview?.safeAreaInsets.right ?? 0
         omniBar?.updateOmniBarPadding(left: left, right: right)
+
+        super.updateConstraints()
     }
-    
 }
 
 extension TabsModel {

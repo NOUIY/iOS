@@ -24,7 +24,7 @@ class FeedbackPickerViewController: UITableViewController {
     @IBOutlet weak var headerView: UIView!
     @IBOutlet weak var headerText: UILabel!
     @IBOutlet weak var supplementaryText: UILabel!
-    
+
     private var entries = [FeedbackEntry]()
     private var selectionHandler: (Feedback.Model) -> Void = { _ in }
     
@@ -41,7 +41,7 @@ class FeedbackPickerViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        applyTheme(ThemeManager.shared.currentTheme)
+        decorate()
     }
     
     override func viewDidLayoutSubviews() {
@@ -61,7 +61,7 @@ class FeedbackPickerViewController: UITableViewController {
     
     func configure(with categories: [Feedback.Category]) {
         entries = categories
-        
+
         headerText.setAttributedTextString(UserText.feedbackNegativeHeader)
         supplementaryText.setAttributedTextString(UserText.feedbackNegativeSupplementary)
     }
@@ -70,7 +70,7 @@ class FeedbackPickerViewController: UITableViewController {
         guard let category = model.category else {
             fatalError("Feedback model has empty category")
         }
-        
+
         loadViewIfNeeded()
         feedbackModel = model
         
@@ -126,9 +126,12 @@ class FeedbackPickerViewController: UITableViewController {
     }
 }
 
-extension FeedbackPickerViewController: Themable {
+extension FeedbackPickerViewController: UIPopoverPresentationControllerDelegate {}
+
+extension FeedbackPickerViewController {
     
-    func decorate(with theme: Theme) {
+    private func decorate() {
+        let theme = ThemeManager.shared.currentTheme
         tableView.separatorColor = theme.tableCellSeparatorColor
         tableView.backgroundColor = theme.backgroundColor
         

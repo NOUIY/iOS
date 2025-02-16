@@ -26,7 +26,7 @@ extension MainViewController {
 
     func newEmailAddress() {
         guard emailManager.isSignedIn else {
-            UIApplication.shared.open(URL.emailProtectionQuickLink, options: [:], completionHandler: nil)
+            UIApplication.shared.open(URL.emailProtectionQuickLink)
             return
         }
 
@@ -61,7 +61,6 @@ extension MainViewController {
 // MARK: - EmailManagerRequestDelegate
 extension MainViewController: EmailManagerRequestDelegate {
 
-    // swiftlint:disable function_parameter_count
     func emailManager(_ emailManager: EmailManager, requested url: URL, method: String, headers: HTTPHeaders, parameters: [String: String]?, httpBody: Data?, timeoutInterval: TimeInterval) async throws -> Data {
         let method = APIRequest.HTTPMethod(rawValue: method) ?? .post
         let configuration = APIRequest.Configuration(url: url,
@@ -73,8 +72,6 @@ extension MainViewController: EmailManagerRequestDelegate {
         let request = APIRequest(configuration: configuration, urlSession: .session())
         return try await request.fetch().data ?? { throw AliasRequestError.noDataError }()
     }
-    // swiftlint:enable function_parameter_count
-
 }
 
 // MARK: - EmailManagerAliasPermissionDelegate
@@ -88,15 +85,13 @@ extension MainViewController: EmailManagerAliasPermissionDelegate {
                 didRequestPermissionToProvideAliasWithCompletion(addressType, autosave)
             }
 
-            if #available(iOS 15.0, *) {
-                if let presentationController = emailAddressPromptViewController.presentationController as? UISheetPresentationController {
-                    if #available(iOS 16.0, *) {
-                        presentationController.detents = [.custom(resolver: { _ in
-                            AutofillViews.emailSignupPromptMinHeight
-                        })]
-                    } else {
-                        presentationController.detents = [.medium()]
-                    }
+            if let presentationController = emailAddressPromptViewController.presentationController as? UISheetPresentationController {
+                if #available(iOS 16.0, *) {
+                    presentationController.detents = [.custom(resolver: { _ in
+                        AutofillViews.emailSignupPromptMinHeight
+                    })]
+                } else {
+                    presentationController.detents = [.medium()]
                 }
             }
             self.present(emailAddressPromptViewController, animated: true)
@@ -118,15 +113,13 @@ extension MainViewController: EmailManagerAliasPermissionDelegate {
             }
         }
 
-        if #available(iOS 15.0, *) {
-            if let presentationController = emailSignupPromptViewController.presentationController as? UISheetPresentationController {
-                if #available(iOS 16.0, *) {
-                    presentationController.detents = [.custom(resolver: { _ in
-                        AutofillViews.emailSignupPromptMinHeight
-                    })]
-                } else {
-                    presentationController.detents = [.medium()]
-                }
+        if let presentationController = emailSignupPromptViewController.presentationController as? UISheetPresentationController {
+            if #available(iOS 16.0, *) {
+                presentationController.detents = [.custom(resolver: { _ in
+                    AutofillViews.emailSignupPromptMinHeight
+                })]
+            } else {
+                presentationController.detents = [.medium()]
             }
         }
 

@@ -17,8 +17,6 @@
 //  limitations under the License.
 //
 
-// swiftlint:disable file_length
-
 import BrowserServicesKit
 import Common
 import Core
@@ -40,8 +38,6 @@ struct ConfirmationAlert {
     var message: String
     var button: String
 }
-
-// swiftlint:disable type_body_length
 
 final class AutofillLoginDetailsViewModel: ObservableObject {
     enum ViewMode {
@@ -247,9 +243,11 @@ final class AutofillLoginDetailsViewModel: ObservableObject {
         case .username:
             message = UserText.autofillCopyToastUsernameCopied
             UIPasteboard.general.string = username
+            Pixel.fire(pixel: .autofillManagementCopyUsername)
         case .password:
             message = UserText.autofillCopyToastPasswordCopied
             UIPasteboard.general.string = password
+            Pixel.fire(pixel: .autofillManagementCopyPassword)
         case .address:
             message = UserText.autofillCopyToastAddressCopied
             UIPasteboard.general.string = address
@@ -272,7 +270,7 @@ final class AutofillLoginDetailsViewModel: ObservableObject {
     private func setupPassword(with account: SecureVaultModels.WebsiteAccount) {
         do {
             if let accountID = account.id, let accountIdInt = Int64(accountID) {
-                let vault = try AutofillSecureVaultFactory.makeVault(errorReporter: SecureVaultErrorReporter.shared)
+                let vault = try AutofillSecureVaultFactory.makeVault(reporter: SecureVaultReporter())
                 
                 if let credential = try
                     vault.websiteCredentialsFor(accountId: accountIdInt) {
@@ -284,9 +282,8 @@ final class AutofillLoginDetailsViewModel: ObservableObject {
         }
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     func save() {
-        guard let vault = try? AutofillSecureVaultFactory.makeVault(errorReporter: SecureVaultErrorReporter.shared) else {
+        guard let vault = try? AutofillSecureVaultFactory.makeVault(reporter: SecureVaultReporter()) else {
             return
         }
 
@@ -341,6 +338,7 @@ final class AutofillLoginDetailsViewModel: ObservableObject {
                     self.updateData(with: newCredential.account)
                 }
                 
+                NotificationCenter.default.post(name: .autofillSaveEvent, object: nil)
             } catch let error {
                 handleSecureVaultError(error)
             }
@@ -451,8 +449,6 @@ final class AutofillLoginDetailsViewModel: ObservableObject {
         privateEmailRequestInProgress = true
     }
 }
-
-// swiftlint:enable type_body_length
 
 final class AutofillLoginDetailsHeaderViewModel: ObservableObject {
     private var dateFormatter: DateFormatter = {

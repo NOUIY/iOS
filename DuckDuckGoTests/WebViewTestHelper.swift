@@ -53,6 +53,10 @@ class MockSurrogatesUserScriptDelegate: NSObject, SurrogatesUserScriptDelegate {
     func surrogatesUserScriptShouldProcessTrackers(_ script: SurrogatesUserScript) -> Bool {
         return shouldProcessTrackers
     }
+    
+    func surrogatesUserScriptShouldProcessCTLTrackers(_ script: SurrogatesUserScript) -> Bool {
+        false
+    }
 
     func surrogatesUserScript(_ script: SurrogatesUserScript,
                               detectedTracker tracker: DetectedRequest,
@@ -108,8 +112,7 @@ class WebKitTestHelper {
         return AppPrivacyConfiguration(data: privacyData,
                                        identifier: "",
                                        localProtection: localProtection,
-                                       internalUserDecider: DefaultInternalUserDecider(),
-                                       toggleProtectionsCounter: ToggleProtectionsCounter(eventReporting: nil))
+                                       internalUserDecider: DefaultInternalUserDecider())
     }
 
     static func prepareContentBlockingRules(trackerData: TrackerData,

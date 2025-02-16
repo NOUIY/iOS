@@ -18,15 +18,16 @@
 //
 
 import WebKit
+import Persistence
 
 extension WKWebViewConfiguration {
 
     @MainActor
-    public static func persistent(idManager: DataStoreIdManager = .shared) -> WKWebViewConfiguration {
+    public static func persistent(idManager: DataStoreIDManaging = DataStoreIDManager.shared) -> WKWebViewConfiguration {
         let config = configuration(persistsData: true)
 
-        // Only use a container if there's an id which will be allocated next time the fire button is used.
-        if #available(iOS 17, *), let containerId = idManager.id {
+        // Only use a container if there's an id.  We no longer allocate ids so this should not happen.
+        if #available(iOS 17, *), let containerId = idManager.currentID {
             config.websiteDataStore = WKWebsiteDataStore(forIdentifier: containerId)
         }
         return config
@@ -52,30 +53,6 @@ extension WKWebViewConfiguration {
         configuration.preferences.isFraudulentWebsiteWarningEnabled = false
 
         return configuration
-    }
-
-}
-
-public class DataStoreIdManager {
-
-    public static let shared = DataStoreIdManager()
-
-    @UserDefaultsWrapper(key: .webContainerId, defaultValue: nil)
-    private var containerId: String?
-
-    var id: UUID? {
-        if let containerId {
-            return UUID(uuidString: containerId)
-        }
-        return nil
-    }
-
-    var hasId: Bool {
-        return containerId != nil
-    }
-
-    public func allocateNewContainerId() {
-        self.containerId = UUID().uuidString
     }
 
 }

@@ -17,6 +17,7 @@
 //  limitations under the License.
 //
 
+import AppIntents
 import Common
 import WidgetKit
 import SwiftUI
@@ -26,6 +27,7 @@ import Kingfisher
 import Bookmarks
 import Persistence
 import NetworkExtension
+import os.log
 
 struct Favorite {
 
@@ -103,24 +105,24 @@ class Provider: TimelineProvider {
         
         if bookmarksDB == nil {
             let db = BookmarksDatabase.make(readOnly: true)
-            os_log("BookmarksDatabase load store started")
+            Logger.general.debug("BookmarksDatabase load store started")
             db.loadStore { _, error in
                 guard error == nil else { return }
                 self.bookmarksDB = db
             }
-            os_log("BookmarksDatabase store loaded")
+            Logger.general.debug("BookmarksDatabase store loaded")
         }
         
         if maxFavorites > 0,
            let db = bookmarksDB {
             let model = FavoritesListViewModel(bookmarksDatabase: db, favoritesDisplayMode: fetchFavoritesDisplayMode())
-            os_log("model created")
+            Logger.general.debug("model created")
             let dbFavorites = model.favorites
-            os_log("dbFavorites loaded %d", dbFavorites.count)
+            Logger.general.debug("dbFavorites loaded \(dbFavorites.count)")
             let favorites = coreDataFavoritesToFavorites(dbFavorites, returningNoMoreThan: maxFavorites)
-            os_log("favorites converted %d", favorites.count)
+            Logger.general.debug("favorites converted \(favorites.count)")
             let entry = FavoritesEntry(date: Date(), favorites: favorites, isPreview: favorites.isEmpty && context.isPreview)
-            os_log("entry created")
+            Logger.general.debug("entry created")
             completion(entry)
         } else {
             let entry = FavoritesEntry(date: Date(), favorites: [], isPreview: context.isPreview)
@@ -141,8 +143,8 @@ class Provider: TimelineProvider {
     private func loadImageFromCache(forDomain domain: String?) -> UIImage? {
         guard let domain = domain else { return nil }
 
-        let key = Favicons.createHash(ofDomain: domain)
-        guard let cacheUrl = Favicons.CacheType.fireproof.cacheLocation() else { return nil }
+        let key = FaviconHasher.createHash(ofDomain: domain)
+        guard let cacheUrl = FaviconsCacheType.fireproof.cacheLocation() else { return nil }
 
         // Slight leap here to avoid loading Kingisher as a library for the widgets.
         // Once dependency management is fixed, link it and use Favicons directly.
@@ -195,31 +197,79 @@ struct FavoritesWidget: Widget {
     }
 }
 
+struct PasswordsWidget: Widget {
+    let kind: String = "PasswordsWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: Provider()) { entry in
+            PasswordsWidgetView(entry: entry).widgetURL(DeepLinks.openPasswords)
+        }
+        .configurationDisplayName(UserText.passwordsWidgetGalleryDisplayName)
+        .description(UserText.passwordsWidgetGalleryDescription)
+        .supportedFamilies([.systemSmall])
+    }
+
+}
+
 @main
 struct Widgets: WidgetBundle {
 
     @WidgetBundleBuilder
     var body: some Widget {
-        SearchWidget()
-        FavoritesWidget()
-
-#if ALPHA
-        if #available(iOSApplicationExtension 17.0, *) {
-            VPNStatusWidget()
-        }
-#endif
-
-        if #available(iOSApplicationExtension 16.0, *) {
-            SearchLockScreenWidget()
-            VoiceSearchLockScreenWidget()
-            EmailProtectionLockScreenWidget()
-            FireButtonLockScreenWidget()
-            FavoritesLockScreenWidget()
-        }
-
+        makeWidgets()
     }
 
+    @available(iOSApplicationExtension 16.0, *)
+    private var lockScreenWidgets: some Widget {
+        WidgetBundleBuilder.buildBlock(
+                 SearchLockScreenWidget(),
+                 VoiceSearchLockScreenWidget(),
+                 EmailProtectionLockScreenWidget(),
+                 FireButtonLockScreenWidget(),
+                 FavoritesLockScreenWidget(),
+                 AIChatLockScreenWidget(),
+                 PasswordsLockScreenWidget()
+             )
+    }
+
+    private func makeWidgets() -> some Widget {
+        if #available(iOS 17, *) {
+            return WidgetBundleBuilder.buildBlock(QuickActionsWidget(),
+                                                  FavoritesWidget(),
+                                                  PasswordsWidget(),
+                                                  VPNBundle().body,
+                                                  SearchWidget(),
+                                                  lockScreenWidgets)
+        }
+        
+        if #available(iOS 16.0, *) {
+            return WidgetBundleBuilder.buildBlock(SearchWidget(),
+                                                  PasswordsWidget(),
+                                                  FavoritesWidget(),
+                                                  lockScreenWidgets)
+        } else {
+            return WidgetBundleBuilder.buildBlock(SearchWidget(),
+                                                  PasswordsWidget(),
+                                                  FavoritesWidget())
+        }
+    }
 }
+
+struct VPNBundle: WidgetBundle {
+    @WidgetBundleBuilder
+    var body: some Widget {
+        if #available(iOS 17, *) {
+            VPNStatusWidget()
+            VPNSnoozeLiveActivity()
+        }
+
+        if #available(iOS 18, *) {
+            VPNControlWidget()
+            AIChatControlWidget()
+        }
+    }
+}
+
 
 extension UIImage {
 

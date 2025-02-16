@@ -34,12 +34,15 @@ final class PrivacyIconLogic {
     static func privacyIcon(for privacyInfo: PrivacyInfo) -> PrivacyIcon {
         if privacyInfo.url.isDuckDuckGoSearch {
             return .daxLogo
+        } else if privacyInfo.malicousSiteThreatKind != .none {
+            return .alert
         } else {
             let config = ContentBlocking.shared.privacyConfigurationManager.privacyConfig
             let isUserUnprotected = config.isUserUnprotected(domain: privacyInfo.url.host)
- 
-            let notFullyProtected = !privacyInfo.https || isUserUnprotected
-            
+
+            let isServerTrustInvalid = (privacyInfo.shouldCheckServerTrust ? privacyInfo.serverTrust == nil : false)
+            let notFullyProtected = !privacyInfo.https || isUserUnprotected || isServerTrustInvalid
+
             return notFullyProtected ? .shieldWithDot : .shield
         }
     }

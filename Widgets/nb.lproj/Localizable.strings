@@ -1,17 +1,11 @@
-/* No comment provided by engineer. */
-"Connect" = "Connect";
+/* Message that comes up when trying to enable the VPN from intents, asking the user to enable it from the app so it's configured */
+"intent.vpn.needs.to.be.enabled.from.app" = "Du må aktivere VPN-en i DuckDuckGo-appen.";
 
-/* No comment provided by engineer. */
-"Disconnect" = "Disconnect";
+/* Description shown to the user when adding the Duck.ai lock screen widget */
+"lock.screen.widget.aichat.description" = "Start raskt en ny AI-chat i Duck.ai";
 
-/* No comment provided by engineer. */
-"Error" = "Feil";
-
-/* No comment provided by engineer. */
-"iOS 17 required" = "iOS 17 required";
-
-/* No comment provided by engineer. */
-"Label" = "Etikett";
+/* Title shown to the user when adding the Duck.ai lock screen widget */
+"lock.screen.widget.aichat.title" = "Duck.ai";
 
 /* Description shown to the user when adding the Email Protection lock screen widget */
 "lock.screen.widget.email.description" = "Generer en ny privat Duck Address på et øyeblikk.";
@@ -31,6 +25,12 @@
 /* Title shown to the user when adding the Fire Button lock screen widget */
 "lock.screen.widget.fire.title" = "Fire Button";
 
+/* Description shown to the user when adding the Search Passwords lock screen widget */
+"lock.screen.widget.passwords.description" = "Søk raskt i de lagrede DuckDuckGo-passordene dine.";
+
+/* Title shown to the user when adding the Search Passwords lock screen widget */
+"lock.screen.widget.passwords.title" = "Søk i passord";
+
 /* Description shown to the user when adding the Search lock screen widget */
 "lock.screen.widget.search.description" = "Start et privat søk i DuckDuckGo på et øyeblikk.";
 
@@ -43,8 +43,35 @@
 /* Title shown to the user when adding the Voice Search lock screen widget */
 "lock.screen.widget.voice.title" = "Talesøk";
 
-/* No comment provided by engineer. */
-"VPN Not Configured" = "VPN Not Configured";
+/* Description for the control widget when connecting */
+"vpn.control.widget.connecting" = "Kobler til...";
+
+/* Description for the control widget when disconnecting */
+"vpn.control.widget.disconnecting" = "Kobler fra...";
+
+/* Description for the control widget when the location is unknown */
+"vpn.control.widget.location-unknown" = "Ukjent sted";
+
+/* Description for the control widget when not connected */
+"vpn.control.widget.not-connected" = "Ikke tilkoblet";
+
+/* Title for the control widget when disabled */
+"vpn.control.widget.off" = "VPN er av";
+
+/* Title for the control widget when enabled */
+"vpn.control.widget.on" = "VPN er på";
+
+/* Description of search passwords widget in widget gallery */
+"widget.gallery.passwords.description" = "Søk raskt i de lagrede DuckDuckGo-passordene dine.";
+
+/* Display name for search passwords widget in widget gallery */
+"widget.gallery.passwords.display.name" = "Søk i passord";
+
+/* Description of quickActions widget in widget gallery */
+"widget.gallery.quickactions.description" = "Søk, chat på Duck.ai eller se passordene dine.";
+
+/* Display name for quick actions widget in widget gallery */
+"widget.gallery.quickactions.display.name" = "Snarveier";
 
 /* Description of search and favorites widget in widget gallery */
 "widget.gallery.search.and.favorites.description" = "Søk eller besøk favorittsider privat med ett trykk.";
@@ -58,12 +85,57 @@
 /* Display name for search only widget in widget gallery */
 "widget.gallery.search.display.name" = "Søk";
 
+/* Description of VPN widget in widget gallery */
+"widget.gallery.vpn.description" = "Se og administrer VPN-tilkoblingen din. Krever et Privacy Pro-abonnement.";
+
+/* Display name for VPN widget in widget gallery */
+"widget.gallery.vpn.display.name" = "VPN";
+
 /* CTA shown in the favorites widget empty state. */
 "widget.no.favorites.cta" = "Legg til favoritter";
 
 /* Message shown in the favorites widget empty state. */
 "widget.no.favorites.message" = "Besøk favorittsidene dine raskt.";
 
+/* Text in passwords widget */
+"widget.passwords" = "Søk i passord";
+
+/* Placeholder text in search field on the quick actions widget */
+"widget.quickactions.search" = "Søk";
+
 /* Placeholder text in search field on the search and favorites widget */
 "widget.search.duckduckgo" = "Søk i DuckDuckGo";
+
+/* VPN connect button text */
+"widget.vpn.button.connect" = "Koble til";
+
+/* VPN disconnect button text */
+"widget.vpn.button.disconnect" = "Koble fra";
+
+/* Label for the snooze end date, e.g. 'Until 9:51 AM' */
+"widget.vpn.label.snoozing-until" = "Til %@";
+
+/* VPN Live Activity dismiss button text */
+"widget.vpn.live-activity.button.dismiss" = "Avvis";
+
+/* VPN Live Activity wake up button text */
+"widget.vpn.live-activity.button.wake-up" = "Vekk opp";
+
+/* VPN Live Activity active label text */
+"widget.vpn.live-activity.label.active" = "VPN er på";
+
+/* VPN Live Activity snoozing label text */
+"widget.vpn.live-activity.label.snoozing" = "VPN slumrer";
+
+/* Message describing VPN connected status */
+"widget.vpn.status.connected" = "VPN er på";
+
+/* Message describing VPN disconnected status */
+"widget.vpn.status.disconnected" = "VPN er av";
+
+/* Message describing VPN snoozing status */
+"widget.vpn.status.snoozed" = "VPN slumrer";
+
+/* Subtitle describing VPN disconnected status */
+"widget.vpn.subtitle.disconnected" = "Ikke tilkoblet";
 

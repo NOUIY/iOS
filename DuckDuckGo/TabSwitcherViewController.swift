@@ -24,11 +24,12 @@ import DDGSync
 import WebKit
 import Bookmarks
 import Persistence
+import os.log
+import SwiftUI
+import BrowserServicesKit
 
-// swiftlint:disable file_length
-// swiftlint:disable:next type_body_length
 class TabSwitcherViewController: UIViewController {
-    
+
     struct Constants {
         static let preferredMinNumberOfRows: CGFloat = 2.7
 
@@ -40,159 +41,153 @@ class TabSwitcherViewController: UIViewController {
         let newCount: Int
         let existingCount: Int
     }
-    
-    @IBOutlet weak var titleView: UILabel!
+
+    enum InterfaceMode {
+
+        var isMultiSelection: Bool {
+            return !isSingleSelection
+        }
+
+        var isSingleSelection: Bool {
+            return [InterfaceMode.singleSelectNormal, .singleSelectLarge].contains(self)
+        }
+
+        var isLarge: Bool {
+            return [InterfaceMode.singleSelectLarge, .multiSelectAvailableLarge, .multiSelectedEditingLarge].contains(self)
+        }
+
+        var isNormal: Bool {
+            return !isLarge
+        }
+
+        case singleSelectNormal
+        case singleSelectLarge
+        case multiSelectAvailableNormal
+        case multiSelectAvailableLarge
+        case multiSelectEditingNormal
+        case multiSelectedEditingLarge
+
+    }
+
+    enum TabsStyle: String {
+
+        case list = "tabsToggleList"
+        case grid = "tabsToggleGrid"
+
+    }
+
+    @IBOutlet weak var topBarView: UINavigationBar!
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var toolbar: UIToolbar!
-    
-    @IBOutlet weak var displayModeButton: UIButton!
-    @IBOutlet weak var bookmarkAllButton: UIButton!
-    
-    @IBOutlet weak var fireButton: UIBarButtonItem!
-    @IBOutlet weak var doneButton: UIBarButtonItem!
-    @IBOutlet weak var plusButton: UIBarButtonItem!
-    
-    @IBOutlet weak var topFireButton: UIButton!
-    @IBOutlet weak var topPlusButton: UIButton!
-    @IBOutlet weak var topDoneButton: UIButton!
-
-    @IBOutlet var displayModeTrailingConstraint: NSLayoutConstraint!
 
     weak var delegate: TabSwitcherDelegate!
     weak var tabsModel: TabsModel!
     weak var previewsSource: TabPreviewsSource!
-    
-    private var bookmarksDatabase: CoreDataDatabase
-    private let syncService: DDGSyncing
-    
-    weak var reorderGestureRecognizer: UIGestureRecognizer?
-    
+
+    private(set) var bookmarksDatabase: CoreDataDatabase
+    let syncService: DDGSyncing
+
     override var canBecomeFirstResponder: Bool { return true }
-    
+
     var currentSelection: Int?
-    
-    private var tabSwitcherSettings: TabSwitcherSettings = DefaultTabSwitcherSettings()
-    private var isProcessingUpdates = false
+
+    var tabSwitcherSettings: TabSwitcherSettings = DefaultTabSwitcherSettings()
+    var isProcessingUpdates = false
     private var canUpdateCollection = true
 
-    let favicons = Favicons.shared
-    
+    let favicons: Favicons
+
+    var tabsStyle: TabsStyle = .list
+    var interfaceMode: InterfaceMode = .singleSelectNormal
+
+    let featureFlagger: FeatureFlagger
+
+    let barsHandler = TabSwitcherBarsStateHandler()
+
     required init?(coder: NSCoder,
                    bookmarksDatabase: CoreDataDatabase,
-                   syncService: DDGSyncing) {
+                   syncService: DDGSyncing,
+                   featureFlagger: FeatureFlagger,
+                   favicons: Favicons = Favicons.shared) {
         self.bookmarksDatabase = bookmarksDatabase
         self.syncService = syncService
+        self.featureFlagger = featureFlagger
+        self.favicons = favicons
         super.init(coder: coder)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("Not implemented")
     }
 
+    fileprivate func createTopBar() {
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithTransparentBackground()
+        topBarView.standardAppearance = appearance
+        topBarView.scrollEdgeAppearance = appearance
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        createTopBar()
+
         refreshTitle()
         setupBackgroundView()
         currentSelection = tabsModel.currentIndex
-        applyTheme(ThemeManager.shared.currentTheme)
+        decorate()
         becomeFirstResponder()
-        
+        updateUIForSelectionMode()
+
+        collectionView.allowsSelection = true
+        collectionView.allowsMultipleSelection = true
+        collectionView.allowsMultipleSelectionDuringEditing = true
+
         if !tabSwitcherSettings.hasSeenNewLayout {
             Pixel.fire(pixel: .tabSwitcherNewLayoutSeen)
             tabSwitcherSettings.hasSeenNewLayout = true
         }
-        
-        displayModeButton.isPointerInteractionEnabled = true
-        bookmarkAllButton.isPointerInteractionEnabled = true
-        topFireButton.isPointerInteractionEnabled = true
-        topPlusButton.isPointerInteractionEnabled = true
-        topDoneButton.isPointerInteractionEnabled = true
     }
-    
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        toolbar.isHidden = AppWidthObserver.shared.isLargeWidth
-        displayModeTrailingConstraint.isActive = !AppWidthObserver.shared.isLargeWidth
-        topFireButton.isHidden = !AppWidthObserver.shared.isLargeWidth
-        topDoneButton.isHidden = !AppWidthObserver.shared.isLargeWidth
-        topPlusButton.isHidden = !AppWidthObserver.shared.isLargeWidth
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        updateUIForSelectionMode()
     }
-    
+
     private func setupBackgroundView() {
         let view = UIView(frame: collectionView.frame)
         view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleTap(gesture:))))
         collectionView.backgroundView = view
     }
-    
-    private func refreshDisplayModeButton(theme: Theme = ThemeManager.shared.currentTheme) {
-        switch theme.currentImageSet {
-        case .dark:
-            if tabSwitcherSettings.isGridViewEnabled {
-                displayModeButton.setImage(UIImage(named: "tabsToggleGrid-Dark"), for: .normal)
-            } else {
-                displayModeButton.setImage(UIImage(named: "tabsToggleList-Dark"), for: .normal)
-            }
-        case .light:
-            if tabSwitcherSettings.isGridViewEnabled {
-                displayModeButton.setImage(UIImage(named: "tabsToggleGrid-Light"), for: .normal)
-            } else {
-                displayModeButton.setImage(UIImage(named: "tabsToggleList-Light"), for: .normal)
-            }
-        }
+
+    func refreshDisplayModeButton() {
+        tabsStyle = tabSwitcherSettings.isGridViewEnabled ? .grid : .list
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        if reorderGestureRecognizer == nil {
-            let recognizer = UILongPressGestureRecognizer(target: self,
-                                                          action: #selector(handleLongPress(gesture:)))
-            collectionView.addGestureRecognizer(recognizer)
-            reorderGestureRecognizer = recognizer
-        }
+
+        collectionView.dragInteractionEnabled = true
+        collectionView.dragDelegate = self
+        collectionView.dropDelegate = self
+
+        updateUIForSelectionMode()
     }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        
-        if DaxDialogs.shared.shouldShowFireButtonPulse {
-            DaxDialogs.shared.fireButtonPulseStarted()
-            guard let window = view.window else { return }
-            
-            let fireButtonView: UIView?
-            if !topFireButton.isHidden {
-                fireButtonView = topFireButton
-            } else {
-                fireButtonView = fireButton.value(forKey: "view") as? UIView
-            }
-            guard let view = fireButtonView else { return }
-            
-            if !ViewHighlighter.highlightedViews.contains(where: { $0.view == view }) {
-                ViewHighlighter.hideAll()
-                ViewHighlighter.showIn(window, focussedOnView: view)
-            }
-        }
-    }
-    
+
     func prepareForPresentation() {
         view.layoutIfNeeded()
         self.scrollToInitialTab()
     }
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
 
-        ViewHighlighter.hideAll()
-        
-        if let controller = segue.destination as? ActionSheetDaxDialogViewController {
-            let spec = sender as? DaxDialogs.ActionSheetSpec
-            controller.spec = spec
-            controller.delegate = self
-        }
-
-    }
-    
     @objc func handleTap(gesture: UITapGestureRecognizer) {
-        dismiss()
+        // TODO FIX: If the user taps between tabs this will dismiss.
+        //  Only dimiss if it's in the big whitespace below the collection view.
+
+        if isEditing {
+            transitionFromMultiSelect()
+        } else {
+            dismiss()
+        }
     }
 
     @objc func handleLongPress(gesture: UILongPressGestureRecognizer) {
@@ -200,24 +195,24 @@ class TabSwitcherViewController: UIViewController {
         case .began:
             guard let path = collectionView.indexPathForItem(at: gesture.location(in: collectionView)) else { return }
             collectionView.beginInteractiveMovementForItem(at: path)
-            
+
         case .changed:
             collectionView.updateInteractiveMovementTargetPosition(gesture.location(in: collectionView))
-            
+
         case .ended:
             collectionView.endInteractiveMovement()
-            
+
         default:
             collectionView.cancelInteractiveMovement()
         }
-        
+
     }
-    
+
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         collectionView.collectionViewLayout.invalidateLayout()
     }
-    
+
     private func scrollToInitialTab() {
         let index = tabsModel.currentIndex
         guard index < collectionView.numberOfItems(inSection: 0) else { return }
@@ -225,41 +220,25 @@ class TabSwitcherViewController: UIViewController {
         collectionView.scrollToItem(at: indexPath, at: .bottom, animated: false)
     }
 
-    private func refreshTitle() {
-        titleView.text = UserText.numberOfTabs(tabsModel.count)
-    }
-    
-    fileprivate func displayBookmarkAllStatusMessage(with results: BookmarkAllResult, openTabsCount: Int) {
-        if results.newCount == openTabsCount {
-            ActionMessageView.present(message: UserText.bookmarkAllTabsSaved)
-        } else {
-            let failedToSaveCount = openTabsCount - results.newCount - results.existingCount
-            os_log("Failed to save %d tabs", log: .generalLog, type: .debug, failedToSaveCount)
-            ActionMessageView.present(message: UserText.bookmarkAllTabsFailedToSave)
-        }
-    }
-   
-    @IBAction func onBookmarkAllOpenTabsPressed(_ sender: UIButton) {
-         
-        let alert = UIAlertController(title: UserText.alertBookmarkAllTitle,
-                                      message: UserText.alertBookmarkAllMessage,
-                                      preferredStyle: .alert)
-        alert.overrideUserInterfaceStyle()
-        alert.addAction(UIAlertAction(title: UserText.actionCancel, style: .cancel))
-        alert.addAction(title: UserText.actionBookmark, style: .default) {
-            let model = MenuBookmarksViewModel(bookmarksDatabase: self.bookmarksDatabase, syncService: self.syncService)
-            model.favoritesDisplayMode = AppDependencyProvider.shared.appSettings.favoritesDisplayMode
-            let result = self.bookmarkAll(viewModel: model)
-            self.displayBookmarkAllStatusMessage(with: result, openTabsCount: self.tabsModel.tabs.count)
-        }
-        
-        present(alert, animated: true, completion: nil)
+    func refreshTitle() {
+        topBarView.topItem?.title = UserText.numberOfTabs(tabsModel.count)
     }
 
-    private func bookmarkAll(viewModel: MenuBookmarksInteracting) -> BookmarkAllResult {
+    func displayBookmarkAllStatusMessage(with results: BookmarkAllResult, openTabsCount: Int) {
+        if interfaceMode.isMultiSelection {
+            ActionMessageView.present(message: UserText.tabsBookmarked(withCount: results.newCount))
+        } else {
+            ActionMessageView.present(message: UserText.bookmarkAllTabsSaved)
+        }
+    }
+
+    func bookmarkTabs(withIndices indexes: [Int], viewModel: MenuBookmarksInteracting) -> BookmarkAllResult {
         let tabs = self.tabsModel.tabs
         var newCount = 0
-        tabs.forEach { tab in
+
+        indexes.compactMap {
+            tabsModel.safeGetTabAt($0)
+        }.forEach { tab in
             guard let link = tab.link else { return }
             if viewModel.bookmark(for: link.url) == nil {
                 viewModel.createBookmark(title: link.displayTitle, url: link.url)
@@ -269,32 +248,17 @@ class TabSwitcherViewController: UIViewController {
         }
         return .init(newCount: newCount, existingCount: tabs.count - newCount)
     }
-    
-    @IBAction func onDisplayModeButtonPressed(_ sender: UIButton) {
-        tabSwitcherSettings.isGridViewEnabled = !tabSwitcherSettings.isGridViewEnabled
-        
-        if tabSwitcherSettings.isGridViewEnabled {
-            Pixel.fire(pixel: .tabSwitcherGridEnabled)
-        } else {
-            Pixel.fire(pixel: .tabSwitcherListEnabled)
-        }
-        
-        refreshDisplayModeButton()
-        
-        UIView.transition(with: view,
-                          duration: 0.3,
-                          options: .transitionCrossDissolve, animations: {
-                            self.collectionView.reloadData()
-        }, completion: nil)
-    }
 
     @IBAction func onAddPressed(_ sender: UIBarButtonItem) {
-        delegate.tabSwitcherDidRequestNewTab(tabSwitcher: self)
-        dismiss()
+        addNewTab()
     }
 
     @IBAction func onDonePressed(_ sender: UIBarButtonItem) {
-        dismiss()
+        if isEditing {
+            transitionFromMultiSelect()
+        } else {
+            dismiss()
+        }
     }
     
     func markCurrentAsViewedAndDismiss() {
@@ -311,25 +275,10 @@ class TabSwitcherViewController: UIViewController {
     }
 
     @IBAction func onFirePressed(sender: AnyObject) {
-        Pixel.fire(pixel: .forgetAllPressedTabSwitching)
-        
-        if DaxDialogs.shared.shouldShowFireButtonPulse {
-            let spec = DaxDialogs.shared.fireButtonEducationMessage()
-            performSegue(withIdentifier: "ActionSheetDaxDialog", sender: spec)
-        } else {
-            let alert = ForgetDataAlert.buildAlert(forgetTabsAndDataHandler: { [weak self] in
-                self?.forgetAll()
-            })
-            
-            if let anchor = sender as? UIView {
-                self.present(controller: alert, fromView: anchor)
-            } else {
-                self.present(controller: alert, fromView: toolbar)
-            }
-        }
+        burn(sender: sender)
     }
 
-    private func forgetAll() {
+    func forgetAll() {
         self.delegate.tabSwitcherDidRequestForgetAll(tabSwitcher: self)
     }
 
@@ -398,14 +347,14 @@ extension TabSwitcherViewController: UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
-    
+
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return tabsModel.count
     }
 
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        let cellIdentifier = tabSwitcherSettings.isGridViewEnabled ? TabViewGridCell.reuseIdentifier : TabViewListCell.reuseIdentifier
+        let cellIdentifier = tabSwitcherSettings.isGridViewEnabled ? TabViewCell.gridReuseIdentifier : TabViewCell.listReuseIdentifier
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath) as? TabViewCell else {
             fatalError("Failed to dequeue cell \(cellIdentifier) as TabViewCell")
         }
@@ -416,8 +365,8 @@ extension TabSwitcherViewController: UICollectionViewDataSource {
             let tab = tabsModel.get(tabAt: indexPath.row)
             tab.addObserver(self)
             cell.update(withTab: tab,
-                        preview: previewsSource.preview(for: tab),
-                        reorderRecognizer: reorderGestureRecognizer)
+                        isSelectionModeEnabled: self.isEditing,
+                        preview: previewsSource.preview(for: tab))
         }
         
         return cell
@@ -427,10 +376,21 @@ extension TabSwitcherViewController: UICollectionViewDataSource {
 extension TabSwitcherViewController: UICollectionViewDelegate {
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        Pixel.fire(pixel: .tabSwitcherSwitchTabs)
         currentSelection = indexPath.row
-        markCurrentAsViewedAndDismiss()
+        if isEditing {
+            (collectionView.cellForItem(at: indexPath) as? TabViewCell)?.toggleSelection()
+            updateUIForSelectionMode()
+        } else {
+            markCurrentAsViewedAndDismiss()
+        }
     }
-   
+
+    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+        (collectionView.cellForItem(at: indexPath) as? TabViewCell)?.toggleSelection()
+        updateUIForSelectionMode()
+    }
+
     func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
         return true
     }
@@ -438,15 +398,29 @@ extension TabSwitcherViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, canMoveItemAt indexPath: IndexPath) -> Bool {
         return true
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, targetIndexPathForMoveFromItemAt originalIndexPath: IndexPath,
                         toProposedIndexPath proposedIndexPath: IndexPath) -> IndexPath {
         return proposedIndexPath
     }
-    
-    func collectionView(_ collectionView: UICollectionView, moveItemAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
-        tabsModel.moveTab(from: sourceIndexPath.row, to: destinationIndexPath.row)
-        currentSelection = tabsModel.currentIndex
+
+    func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemsAt indexPaths: [IndexPath], point: CGPoint) -> UIContextMenuConfiguration? {
+
+        assert(!indexPaths.isEmpty)
+
+        guard interfaceMode.isMultiSelection else { return nil }
+
+        let title = indexPaths.count == 1 ?
+            trimMenuTitleIfNeeded(tabsModel.get(tabAt: indexPaths[0].row).link?.displayTitle ?? "", 50) :
+            UserText.numberOfTabs(indexPaths.count)
+
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
+            let menuItems = indexPaths.count == 1 ?
+                self.createLongPressMenuItemsForSingleTab(forIndex: indexPaths[0].row) :
+                self.createLongPressMenuItemsForMultipleTabs()
+            return UIMenu(title: title, children: menuItems.compactMap { $0 })
+        }
+
     }
 
 }
@@ -467,7 +441,7 @@ extension TabSwitcherViewController: UICollectionViewDelegateFlowLayout {
         
         // Calculate height based on the view size
         let contentAspectRatio = collectionView.bounds.width / collectionView.bounds.height
-        let heightToFit = (columnWidth / contentAspectRatio) + TabViewGridCell.Constants.cellHeaderHeight
+        let heightToFit = (columnWidth / contentAspectRatio) + TabViewCell.Constants.cellHeaderHeight
         
         // Try to display at least `preferredMinNumberOfRows`
         let preferredMaxHeight = collectionView.bounds.height / Constants.preferredMinNumberOfRows
@@ -506,33 +480,78 @@ extension TabSwitcherViewController: TabObserver {
             return
         }
 
-        if let index = tabsModel.indexOf(tab: tab), index < collectionView.numberOfItems(inSection: 0) {
-            if #available(iOS 15.0, *) {
-                collectionView.reconfigureItems(at: [IndexPath(row: index, section: 0)])
-            } else {
-                collectionView.reloadItems(at: [IndexPath(row: index, section: 0)])
+        collectionView.performBatchUpdates({}, completion: { [weak self] completed in
+            guard completed, let self = self else { return }
+            if let index = self.tabsModel.indexOf(tab: tab), index < self.collectionView.numberOfItems(inSection: 0) {
+                self.collectionView.reconfigureItems(at: [IndexPath(row: index, section: 0)])
             }
-        }
+        })
     }
 }
 
-extension TabSwitcherViewController: Themable {
+extension TabSwitcherViewController {
     
-    func decorate(with theme: Theme) {
+    private func decorate() {
+        let theme = ThemeManager.shared.currentTheme
         view.backgroundColor = theme.backgroundColor
         
-        refreshDisplayModeButton(theme: theme)
+        refreshDisplayModeButton()
         
-        titleView.textColor = theme.barTintColor
-        bookmarkAllButton.tintColor = theme.barTintColor
-        topDoneButton.tintColor = theme.barTintColor
-        topPlusButton.tintColor = theme.barTintColor
-        topFireButton.tintColor = theme.barTintColor
-        
+        topBarView.tintColor = theme.barTintColor
+
         toolbar.barTintColor = theme.barBackgroundColor
         toolbar.tintColor = theme.barTintColor
                 
         collectionView.reloadData()
     }
 }
-// swiftlint:enable file_length
+
+extension TabSwitcherViewController: UICollectionViewDragDelegate {
+
+    func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: any UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
+        guard let cell = collectionView.cellForItem(at: indexPath),
+              let snapshot = cell.createImageSnapshot() else { return [] }
+        return [.init(itemProvider: .init(object: snapshot))]
+    }
+
+}
+
+extension TabSwitcherViewController: UICollectionViewDropDelegate {
+
+    func collectionView(_ collectionView: UICollectionView, canHandle session: any UIDropSession) -> Bool {
+        return true
+    }
+
+    func collectionView(_ collectionView: UICollectionView, dropSessionDidUpdate session: any UIDropSession, withDestinationIndexPath destinationIndexPath: IndexPath?) -> UICollectionViewDropProposal {
+        return .init(operation: .move, intent: .insertAtDestinationIndexPath)
+    }
+
+    func collectionView(_ collectionView: UICollectionView, performDropWith coordinator: any UICollectionViewDropCoordinator) {
+
+        guard let destination = coordinator.destinationIndexPath,
+              let item = coordinator.items.first,
+              let source = item.sourceIndexPath
+        else {
+            // This can happen if the menu is shown and the user then drags to an invalid location
+            return
+        }
+
+        collectionView.performBatchUpdates {
+            tabsModel.moveTab(from: source.row, to: destination.row)
+            currentSelection = tabsModel.currentIndex
+            collectionView.deleteItems(at: [source])
+            collectionView.insertItems(at: [destination])
+        } completion: { _ in
+            if self.isEditing {
+                collectionView.reloadData()
+                collectionView.selectItem(at: destination, animated: true, scrollPosition: [])
+            } else {
+                collectionView.reloadItems(at: [IndexPath(row: self.currentSelection ?? 0, section: 0)])
+            }
+            self.delegate.tabSwitcherDidReorderTabs(tabSwitcher: self)
+        }
+
+        coordinator.drop(item.dragItem, toItemAt: destination)
+    }
+
+}

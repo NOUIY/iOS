@@ -20,19 +20,91 @@
 import Core
 import UIKit
 import SwiftUI
-import SyncUI
+import SyncUI_iOS
 import DDGSync
 import AVFoundation
 
 extension SyncSettingsViewController: SyncManagementViewModelDelegate {
+    var syncBookmarksPausedTitle: String? {
+        UserText.syncLimitExceededTitle
+    }
+    
+    var syncCredentialsPausedTitle: String? {
+        UserText.syncLimitExceededTitle
+    }
+    
+    var syncPausedTitle: String? {
+        guard let error = getErrorType(from: syncPausedStateManager.currentSyncAllPausedError) else { return nil }
+        switch error {
+        case .invalidLoginCredentials:
+            return UserText.syncLimitExceededTitle
+        case .tooManyRequests:
+            return UserText.syncErrorTitle
+        default:
+            assertionFailure("Sync Paused error should be one of those listed")
+            return nil
+        }
+    }
+    
+    var syncBookmarksPausedDescription: String? {
+        guard let error = getErrorType(from: syncPausedStateManager.currentSyncBookmarksPausedError) else { return nil }
+        switch error {
+        case .bookmarksCountLimitExceeded, .bookmarksRequestSizeLimitExceeded:
+            return UserText.bookmarksLimitExceededDescription
+        case .badRequestBookmarks:
+            return UserText.badRequestErrorDescription
+        default:
+            assertionFailure("Sync Bookmarks Paused error should be one of those listed")
+            return nil
+        }
+    }
+    
+    var syncCredentialsPausedDescription: String? {
+        guard let error = getErrorType(from: syncPausedStateManager.currentSyncCredentialsPausedError) else { return nil }
+        switch error {
+        case .credentialsCountLimitExceeded, .credentialsRequestSizeLimitExceeded:
+            return UserText.credentialsLimitExceededDescription
+        case .badRequestBookmarks:
+            return UserText.badRequestErrorDescription
+        default:
+            assertionFailure("Sync Bookmarks Paused error should be one of those listed")
+            return nil
+        }
+    }
+    
+    var syncPausedDescription: String? {
+        guard let error = getErrorType(from: syncPausedStateManager.currentSyncAllPausedError) else { return nil }
+        switch error {
+        case .invalidLoginCredentials:
+            return UserText.invalidLoginCredentialErrorDescription
+        case .tooManyRequests:
+            return UserText.tooManyRequestsErrorDescription
+        default:
+            assertionFailure("Sync Paused error should be one of those listed")
+            return nil
+        }
+    }
+    
+    var syncBookmarksPausedButtonTitle: String? {
+        UserText.bookmarksLimitExceededAction
+    }
+    
+    var syncCredentialsPausedButtonTitle: String? {
+        UserText.bookmarksLimitExceededAction
+    }
 
-    func authenticateUser() async -> Bool {
-        return await withCheckedContinuation { continuation in
+    func authenticateUser() async throws {
+        return try await withCheckedThrowingContinuation { continuation in
             authenticateUser { error in
-                if error == nil {
-                    continuation.resume(returning: true)
+                if let error {
+                    switch error {
+                    case .failedToAuthenticate:
+                        continuation.resume(throwing: SyncSettingsViewModel.UserAuthenticationError.authFailed)
+                    case .noAuthAvailable:
+                        continuation.resume(throwing: SyncSettingsViewModel.UserAuthenticationError.authUnavailable)
+                    }
                 } else {
-                    continuation.resume(returning: false)
+                    continuation.resume()
                 }
             }
         }
@@ -41,7 +113,7 @@ extension SyncSettingsViewController: SyncManagementViewModelDelegate {
     func launchAutofillViewController() {
         guard let mainVC = view.window?.rootViewController as? MainViewController else { return }
         dismiss(animated: true)
-        mainVC.launchAutofillLogins()
+        mainVC.launchAutofillLogins(source: .sync)
     }
 
     func launchBookmarksViewController() {
@@ -72,7 +144,8 @@ extension SyncSettingsViewController: SyncManagementViewModelDelegate {
                     self.dismissPresentedViewController()
                     self.showPreparingSync()
                     try await self.syncService.createAccount(deviceName: self.deviceName, deviceType: self.deviceType)
-                    Pixel.fire(pixel: .syncSignupDirect, includedParameters: [.appVersion])
+                    let additionalParameters = self.source.map { ["source": $0] } ?? [:]
+                    try await Pixel.fire(pixel: .syncSignupDirect, withAdditionalParameters: additionalParameters, includedParameters: [.appVersion])
                     self.rootView.model.syncEnabled(recoveryCode: self.recoveryCode)
                     self.refreshDevices()
                     self.navigationController?.topViewController?.dismiss(animated: true, completion: self.showRecoveryPDF)
@@ -90,7 +163,6 @@ extension SyncSettingsViewController: SyncManagementViewModelDelegate {
             title: type.title,
             message: [type.description, error?.localizedDescription].compactMap({ $0 }).joined(separator: "\n"),
             preferredStyle: .alert)
-
         let okAction = UIAlertAction(title: UserText.syncPausedAlertOkButton, style: .default, handler: nil)
         alertController.addAction(okAction)
 
@@ -110,6 +182,50 @@ extension SyncSettingsViewController: SyncManagementViewModelDelegate {
         }
     }
 
+    @MainActor
+    func promptToSwitchAccounts(recoveryKey: SyncCode.RecoveryKey) {
+        let alertController = UIAlertController(
+            title: UserText.syncAlertSwitchAccountTitle,
+            message: UserText.syncAlertSwitchAccountMessage,
+            preferredStyle: .alert)
+        alertController.addAction(title: UserText.syncAlertSwitchAccountButton, style: .default) { [weak self] in
+            Task {
+                Pixel.fire(pixel: .syncUserAcceptedSwitchingAccount)
+                await self?.switchAccounts(recoveryKey: recoveryKey)
+            }
+        }
+        alertController.addAction(title: UserText.actionCancel, style: .cancel) { [weak self] in
+            Pixel.fire(pixel: .syncUserCancelledSwitchingAccount)
+            self?.navigationController?.presentedViewController?.dismiss(animated: true)
+        }
+
+        let viewControllerToPresentFrom = navigationController?.presentedViewController ?? self
+        viewControllerToPresentFrom.present(alertController, animated: true, completion: nil)
+        Pixel.fire(pixel: .syncAskUserToSwitchAccount)
+    }
+
+    func switchAccounts(recoveryKey: SyncCode.RecoveryKey) async {
+        do {
+            try await syncService.disconnect()
+        } catch {
+            Pixel.fire(pixel: .syncUserSwitchedLogoutError)
+        }
+
+        do {
+            try await loginAndShowDeviceConnected(recoveryKey: recoveryKey)
+        } catch {
+            Pixel.fire(pixel: .syncUserSwitchedLoginError)
+        }
+        Pixel.fire(pixel: .syncUserSwitchedAccount)
+    }
+
+    private func getErrorType(from errorString: String?) -> AsyncErrorType? {
+        guard let errorString = errorString else {
+            return nil
+        }
+        return AsyncErrorType(rawValue: errorString)
+    }
+
     private func firePixelIfNeededFor(event: Pixel.Event, error: Error?) {
         guard let syncError = error as? SyncError else { return }
         if !syncError.isServerError {
@@ -117,12 +233,9 @@ extension SyncSettingsViewController: SyncManagementViewModelDelegate {
         }
     }
 
+    @MainActor
     func showSyncWithAnotherDevice() {
-        authenticateUser { [weak self] error in
-            guard error == nil, let self else { return }
-
-            self.collectCode(showConnectMode: true)
-        }
+        collectCode(showConnectMode: true)
     }
 
     func showRecoverData() {
@@ -135,16 +248,50 @@ extension SyncSettingsViewController: SyncManagementViewModelDelegate {
     }
 
     func showDeviceConnected() {
+        guard let viewModel = viewModel else {
+            return
+        }
+
         let controller = UIHostingController(
-            rootView: DeviceConnectedView())
+            rootView: DeviceConnectedView(model: viewModel))
         navigationController?.present(controller, animated: true) { [weak self] in
             self?.rootView.model.syncEnabled(recoveryCode: self!.recoveryCode)
         }
     }
 
-    func showPreparingSync() {
+    func showOtherPlatformLinks() {
+        guard let viewModel = viewModel else {
+            return
+        }
+
+        let controller = UIHostingController(rootView: PlatformLinksView(model: viewModel, source: .activating))
+        navigationController?.pushViewController(controller, animated: true)
+    }
+
+    func fireOtherPlatformLinksPixel(event: SyncSettingsViewModel.PlatformLinksPixelEvent, with source: SyncSettingsViewModel.PlatformLinksPixelSource) {
+        let params = ["source": source.rawValue]
+
+        switch event {
+        case .appear:
+            Pixel.fire(.syncGetOtherDevices, withAdditionalParameters: params)
+        case .copy:
+            Pixel.fire(.syncGetOtherDevicesCopy, withAdditionalParameters: params)
+        case .share:
+            Pixel.fire(.syncGetOtherDevicesShare, withAdditionalParameters: params)
+        }
+    }
+
+    func showPreparingSyncAsync() async {
+        await withCheckedContinuation { continuation in
+            showPreparingSync {
+                continuation.resume()
+            }
+        }
+    }
+
+    func showPreparingSync(_ completion: (() -> Void)? = nil) {
         let controller = UIHostingController(rootView: PreparingToSyncView())
-        navigationController?.present(controller, animated: true)
+        navigationController?.present(controller, animated: true, completion: completion)
     }
 
     @MainActor
@@ -205,23 +352,27 @@ extension SyncSettingsViewController: SyncManagementViewModelDelegate {
             let alert = UIAlertController(title: UserText.syncTurnOffConfirmTitle,
                                           message: UserText.syncTurnOffConfirmMessage,
                                           preferredStyle: .alert)
-            alert.addAction(title: UserText.actionCancel, style: .cancel) {
+            self.onConfirmSyncDisable = {
+                   Task { @MainActor in
+                       do {
+                           try await self.syncService.disconnect()
+                           self.rootView.model.isSyncEnabled = false
+                           self.syncPausedStateManager.syncDidTurnOff()
+                           continuation.resume(returning: true)
+                       } catch {
+                           self.handleError(SyncErrorMessage.unableToTurnSyncOff, error: error, event: .syncLogoutError)
+                           continuation.resume(returning: false)
+                       }
+                   }
+               }
+            let cancelAction = UIAlertAction(title: UserText.actionCancel, style: .cancel) { _ in
                 continuation.resume(returning: false)
             }
-            alert.addAction(title: UserText.syncTurnOffConfirmAction, style: .destructive) {
-                Task { @MainActor in
-                    do {
-                        try await self.syncService.disconnect()
-                        self.rootView.model.isSyncEnabled = false
-                        AppUserDefaults().isSyncBookmarksPaused = false
-                        AppUserDefaults().isSyncCredentialsPaused = false
-                        continuation.resume(returning: true)
-                    } catch {
-                        self.handleError(SyncErrorMessage.unableToTurnSyncOff, error: error, event: .syncLogoutError)
-                        continuation.resume(returning: false)
-                    }
-                }
+            let confirmAction = UIAlertAction(title: UserText.syncTurnOffConfirmAction, style: .destructive) { _ in
+                self.onConfirmSyncDisable?()
             }
+            alert.addAction(cancelAction)
+            alert.addAction(confirmAction)
             self.present(alert, animated: true)
         }
     }
@@ -234,19 +385,21 @@ extension SyncSettingsViewController: SyncManagementViewModelDelegate {
             alert.addAction(title: UserText.actionCancel, style: .cancel) {
                 continuation.resume(returning: false)
             }
-            alert.addAction(title: UserText.syncDeleteAllConfirmAction, style: .destructive) {
+            self.onConfirmAndDeleteAllData = {
                 Task { @MainActor in
                     do {
                         try await self.syncService.deleteAccount()
                         self.rootView.model.isSyncEnabled = false
-                        AppUserDefaults().isSyncBookmarksPaused = false
-                        AppUserDefaults().isSyncCredentialsPaused = false
+                        self.syncPausedStateManager.syncDidTurnOff()
                         continuation.resume(returning: true)
                     } catch {
                         self.handleError(SyncErrorMessage.unableToDeleteData, error: error, event: .syncDeleteAccountError)
                         continuation.resume(returning: false)
                     }
                 }
+            }
+            alert.addAction(title: UserText.syncDeleteAllConfirmAction, style: .destructive) {
+                self.onConfirmAndDeleteAllData?()
             }
             self.present(alert, animated: true)
         }
@@ -283,7 +436,6 @@ extension SyncSettingsViewController: SyncManagementViewModelDelegate {
             }
         }
     }
-
 }
 
 private class DismissibleHostingController<Content: View>: UIHostingController<Content> {
@@ -313,42 +465,5 @@ private class PortraitNavigationController: UINavigationController {
 
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         [.portrait, .portraitUpsideDown]
-    }
-
-}
-
-enum SyncErrorMessage {
-    case unableToSyncToServer
-    case unableToSyncWithDevice
-    case unableToMergeTwoAccounts
-    case unableToUpdateDeviceName
-    case unableToTurnSyncOff
-    case unableToDeleteData
-    case unableToRemoveDevice
-    case unableToCreateRecoveryPdf
-
-    var title: String {
-        return UserText.syncErrorAlertTitle
-    }
-
-    var description: String {
-        switch self {
-        case .unableToSyncToServer:
-            return UserText.unableToSyncToServerDescription
-        case .unableToSyncWithDevice:
-            return UserText.unableToSyncWithOtherDeviceDescription
-        case .unableToMergeTwoAccounts:
-            return UserText.unableToMergeTwoAccountsErrorDescription
-        case .unableToUpdateDeviceName:
-            return UserText.unableToUpdateDeviceNameDescription
-        case .unableToTurnSyncOff:
-            return UserText.unableToTurnSyncOffDescription
-        case .unableToDeleteData:
-            return UserText.unableToDeleteDataDescription
-        case .unableToRemoveDevice:
-            return UserText.unableToRemoveDeviceDescription
-        case .unableToCreateRecoveryPdf:
-            return UserText.unableToCreateRecoveryPDF
-        }
     }
 }

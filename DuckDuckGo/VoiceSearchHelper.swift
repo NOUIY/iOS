@@ -25,7 +25,6 @@ protocol VoiceSearchHelperProtocol {
     var isVoiceSearchEnabled: Bool { get }
     
     func enableVoiceSearch(_ enable: Bool)
-    func migrateSettingsFlagIfNecessary()
 }
 
 class VoiceSearchHelper: VoiceSearchHelperProtocol {
@@ -42,27 +41,12 @@ class VoiceSearchHelper: VoiceSearchHelperProtocol {
     }
     
     init() {
-        // https://app.asana.com/0/1201011656765697/1201271104639596
-        if #available(iOS 15.0, *) {
 #if targetEnvironment(simulator)
             isSpeechRecognizerAvailable = true
 #else
             speechRecognizer.delegate = self
             isSpeechRecognizerAvailable = speechRecognizer.isAvailable
 #endif
-        }
-    }
-    
-    func migrateSettingsFlagIfNecessary() {
-        // Users that allowed mic permission before we added voice search settings
-        // should be migrated to an enabled settings
-        // https://app.asana.com/0/0/1202533216912528/1202573665735222/f
-        
-        let settings = UserDefaults.app.object(forKey: UserDefaultsWrapper<Any>.Key.voiceSearchEnabled.rawValue) as? Bool
-    
-        if settings == nil && SpeechRecognizer.recordPermission == .granted {
-            enableVoiceSearch(true)
-        }
     }
     
     func enableVoiceSearch(_ enable: Bool) {

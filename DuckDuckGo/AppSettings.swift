@@ -18,6 +18,7 @@
 //
 
 import Bookmarks
+import Foundation
 
 enum AddressBarPosition: String, CaseIterable, CustomStringConvertible {
     case top
@@ -41,8 +42,9 @@ enum AddressBarPosition: String, CaseIterable, CustomStringConvertible {
     }
 }
 
-protocol AppSettings: AnyObject {
+protocol AppSettings: AnyObject, AppDebugSettings {
     var autocomplete: Bool { get set }
+    var recentlyVisitedSites: Bool { get set }
     var currentThemeName: ThemeName { get set }
     
     var autoClearAction: AutoClearSettingsModel.Action { get set }
@@ -58,7 +60,7 @@ protocol AppSettings: AnyObject {
     var currentAddressBarPosition: AddressBarPosition { get set }
     var showFullSiteAddress: Bool { get set }
 
-    var textSize: Int { get set }
+    var defaultTextZoomLevel: TextZoomLevel { get set }
 
     var favoritesDisplayMode: FavoritesDisplayMode { get set }
     
@@ -67,6 +69,8 @@ protocol AppSettings: AnyObject {
     var autofillCredentialsHasBeenEnabledAutomaticallyIfNecessary: Bool { get set }
     var autofillIsNewInstallForOnByDefault: Bool? { get set }
     func setAutofillIsNewInstallForOnByDefault()
+    var autofillImportViaSyncStart: Date? { get set }
+    func clearAutofillImportViaSyncStart()
 
     var voiceSearchEnabled: Bool { get set }
 
@@ -74,6 +78,17 @@ protocol AppSettings: AnyObject {
     
     var autoconsentEnabled: Bool { get set }
 
-    var isSyncBookmarksPaused: Bool { get }
-    var isSyncCredentialsPaused: Bool { get }
+    var crashCollectionOptInStatus: CrashCollectionOptInStatus { get set }
+    var crashCollectionShouldRevertOptedInStatusTrigger: Int { get set }
+    
+    var duckPlayerMode: DuckPlayerMode { get set }
+    var duckPlayerAskModeOverlayHidden: Bool { get set }
+    var duckPlayerOpenInNewTab: Bool { get set }
+    var duckPlayerNativeUI: Bool { get set }
+    var duckPlayerAutoplay: Bool { get set }
+}
+
+protocol AppDebugSettings {
+    var onboardingHighlightsEnabled: Bool { get set }
+    var onboardingAddToDockState: OnboardingAddToDockState { get set }
 }

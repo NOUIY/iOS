@@ -22,13 +22,12 @@ import Bookmarks
 import Core
 import WidgetKit
 
-// swiftlint:disable file_length
 public class AppUserDefaults: AppSettings {
     
     public struct Notifications {
         public static let doNotSellStatusChange = Notification.Name("com.duckduckgo.app.DoNotSellStatusChange")
         public static let currentFireButtonAnimationChange = Notification.Name("com.duckduckgo.app.CurrentFireButtonAnimationChange")
-        public static let textSizeChange = Notification.Name("com.duckduckgo.app.TextSizeChange")
+        public static let textZoomChange = Notification.Name("com.duckduckgo.app.TextZoomChange")
         public static let favoritesDisplayModeChange = Notification.Name("com.duckduckgo.app.FavoritesDisplayModeChange")
         public static let syncPausedStateChanged = SyncBookmarksAdapter.syncBookmarksPausedStateChanged
         public static let syncCredentialsPausedStateChanged = SyncCredentialsAdapter.syncCredentialsPausedStateChanged
@@ -38,12 +37,15 @@ public class AppUserDefaults: AppSettings {
         public static let addressBarPositionChanged = Notification.Name("com.duckduckgo.app.AddressBarPositionChanged")
         public static let showsFullURLAddressSettingChanged = Notification.Name("com.duckduckgo.app.ShowsFullURLAddressSettingChanged")
         public static let autofillDebugScriptToggled = Notification.Name("com.duckduckgo.app.DidToggleAutofillDebugScript")
+        public static let duckPlayerSettingsUpdated = Notification.Name("com.duckduckgo.app.DuckPlayerSettingsUpdated")
+        public static let appDataClearingUpdated = Notification.Name("com.duckduckgo.app.dataClearingUpdates")
     }
 
     private let groupName: String
 
     struct Keys {
         static let autocompleteKey = "com.duckduckgo.app.autocompleteDisabledKey"
+        static let recentlyVisitedSites = "com.duckduckgo.app.recentlyVisitedSitesKey"
         static let currentThemeNameKey = "com.duckduckgo.app.currentThemeNameKey"
         
         static let autoClearActionKey = "com.duckduckgo.app.autoClearActionKey"
@@ -71,11 +73,19 @@ public class AppUserDefaults: AppSettings {
         static let autofillIsNewInstallForOnByDefault = "com.duckduckgo.ios.autofillIsNewInstallForOnByDefault"
 
         static let favoritesDisplayMode = "com.duckduckgo.ios.favoritesDisplayMode"
+
+        static let crashCollectionOptInStatus = "com.duckduckgo.ios.crashCollectionOptInStatus"
+        static let crashCollectionShouldRevertOptedInStatusTrigger = "com.duckduckgo.ios.crashCollectionShouldRevertOptedInStatusTrigger"
+
+        static let duckPlayerMode = "com.duckduckgo.ios.duckPlayerMode"
+        static let duckPlayerAskModeOverlayHidden = "com.duckduckgo.ios.duckPlayerAskModeOverlayHidden"
+        static let duckPlayerOpenInNewTab = "com.duckduckgo.ios.duckPlayerOpenInNewTab"
     }
 
     private struct DebugKeys {
         static let inspectableWebViewsEnabledKey = "com.duckduckgo.ios.debug.inspectableWebViewsEnabled"
         static let autofillDebugScriptEnabledKey = "com.duckduckgo.ios.debug.autofillDebugScriptEnabled"
+        static let onboardingAddToDockStateKey = "com.duckduckgo.ios.debug.onboardingAddToDockState"
     }
 
     private var userDefaults: UserDefaults? {
@@ -104,6 +114,18 @@ public class AppUserDefaults: AppSettings {
 
     }
     
+    var recentlyVisitedSites: Bool {
+
+        get {
+            return userDefaults?.bool(forKey: Keys.recentlyVisitedSites, defaultValue: true) ?? true
+        }
+
+        set {
+            userDefaults?.setValue(newValue, forKey: Keys.recentlyVisitedSites)
+        }
+
+    }
+
     var currentThemeName: ThemeName {
         
         get {
@@ -124,7 +146,7 @@ public class AppUserDefaults: AppSettings {
         }
         
     }
-    
+
     var autoClearAction: AutoClearSettingsModel.Action {
         
         get {
@@ -134,6 +156,7 @@ public class AppUserDefaults: AppSettings {
         
         set {
             userDefaults?.setValue(newValue.rawValue, forKey: Keys.autoClearActionKey)
+            NotificationCenter.default.post(name: Notifications.appDataClearingUpdated, object: nil)
         }
         
     }
@@ -213,14 +236,21 @@ public class AppUserDefaults: AppSettings {
         }
     }
 
-    @UserDefaultsWrapper(key: .textSize, defaultValue: 100)
-    var textSize: Int
+    @UserDefaultsWrapper(key: .textZoom, defaultValue: 100)
+    private var textZoom: Int {
+        didSet {
+            NotificationCenter.default.post(name: Notifications.textZoomChange, object: textZoom)
+        }
+    }
 
-    @UserDefaultsWrapper(key: .syncBookmarksPaused, defaultValue: false)
-    var isSyncBookmarksPaused: Bool
-
-    @UserDefaultsWrapper(key: .syncCredentialsPaused, defaultValue: false)
-    var isSyncCredentialsPaused: Bool
+    var defaultTextZoomLevel: TextZoomLevel {
+        get {
+            return TextZoomLevel(rawValue: textZoom) ?? .percent100
+        }
+        set {
+            textZoom = newValue.rawValue
+        }
+    }
 
     public var favoritesDisplayMode: FavoritesDisplayMode {
         get {
@@ -243,12 +273,18 @@ public class AppUserDefaults: AppSettings {
             if let isNewInstall = autofillIsNewInstallForOnByDefault,
                isNewInstall,
                featureFlagger.isFeatureOn(.autofillOnByDefault) {
-                autofillCredentialsHasBeenEnabledAutomaticallyIfNecessary = true
-                autofillCredentialsEnabled = true
+                enableAutofillCredentials()
+            } else if featureFlagger.isFeatureOn(.autofillOnForExistingUsers) {
+                enableAutofillCredentials()
             }
         }
     }
-    
+
+    private func enableAutofillCredentials() {
+        autofillCredentialsHasBeenEnabledAutomaticallyIfNecessary = true
+        autofillCredentialsEnabled = true
+    }
+
     var autofillCredentialsEnabled: Bool {
         get {
             // setAutofillCredentialsEnabledAutomaticallyIfNecessary() used here to automatically turn on autofill for people if:
@@ -281,6 +317,13 @@ public class AppUserDefaults: AppSettings {
 
     func setAutofillIsNewInstallForOnByDefault() {
         autofillIsNewInstallForOnByDefault = StatisticsUserDefaults().installDate == nil
+    }
+
+    @UserDefaultsWrapper(key: .autofillImportViaSyncStart, defaultValue: nil)
+    var autofillImportViaSyncStart: Date?
+
+    func clearAutofillImportViaSyncStart() {
+        autofillImportViaSyncStart = nil
     }
 
     @UserDefaultsWrapper(key: .voiceSearchEnabled, defaultValue: false)
@@ -343,6 +386,85 @@ public class AppUserDefaults: AppSettings {
         }
     }
 
+    var crashCollectionOptInStatus: CrashCollectionOptInStatus {
+        get {
+            guard let string = userDefaults?.string(forKey: Keys.crashCollectionOptInStatus),
+                  let optInStatus = CrashCollectionOptInStatus(rawValue: string)
+            else {
+                return .undetermined
+            }
+            return optInStatus
+        }
+        set {
+            userDefaults?.setValue(newValue.rawValue, forKey: Keys.crashCollectionOptInStatus)
+        }
+    }
+    
+    var crashCollectionShouldRevertOptedInStatusTrigger: Int {
+        get {
+            if let resetTrigger = userDefaults?.integer(forKey: Keys.crashCollectionShouldRevertOptedInStatusTrigger) {
+                return resetTrigger
+            } else {
+                return 0
+            }
+        }
+        set {
+            userDefaults?.setValue(newValue, forKey: Keys.crashCollectionShouldRevertOptedInStatusTrigger)
+        }
+    }
+    
+    var duckPlayerMode: DuckPlayerMode {
+        get {
+            if let value = userDefaults?.string(forKey: Keys.duckPlayerMode),
+               let mode = DuckPlayerMode(stringValue: value) {
+                return mode
+            }
+            return .alwaysAsk
+        }
+        set {
+            userDefaults?.set(newValue.stringValue, forKey: Keys.duckPlayerMode)
+            // Reset Hidden overlay setting when changing Mode
+            userDefaults?.set(false, forKey: Keys.duckPlayerAskModeOverlayHidden)
+            NotificationCenter.default.post(name: AppUserDefaults.Notifications.duckPlayerSettingsUpdated,
+                                            object: duckPlayerMode)
+        }
+    }
+    
+    var duckPlayerAskModeOverlayHidden: Bool {
+        get {
+            if let value = userDefaults?.bool(forKey: Keys.duckPlayerAskModeOverlayHidden) {
+                return value
+            }
+            return false
+        }
+        set {
+            userDefaults?.set(newValue, forKey: Keys.duckPlayerAskModeOverlayHidden)
+            NotificationCenter.default.post(name: AppUserDefaults.Notifications.duckPlayerSettingsUpdated,
+                                            object: duckPlayerMode)
+        }
+    }
+    
+    @UserDefaultsWrapper(key: .duckPlayerOpenInNewTab, defaultValue: true)
+    var duckPlayerOpenInNewTab: Bool
+    
+    @UserDefaultsWrapper(key: .duckPlayerNativeUI, defaultValue: false)
+    var duckPlayerNativeUI: Bool
+    
+    @UserDefaultsWrapper(key: .duckPlayerAutoplay, defaultValue: true)
+    var duckPlayerAutoplay: Bool
+
+    @UserDefaultsWrapper(key: .debugOnboardingHighlightsEnabledKey, defaultValue: false)
+    var onboardingHighlightsEnabled: Bool
+
+    var onboardingAddToDockState: OnboardingAddToDockState {
+        get {
+            guard let rawValue = userDefaults?.string(forKey: DebugKeys.onboardingAddToDockStateKey) else { return .disabled }
+            return OnboardingAddToDockState(rawValue: rawValue) ?? .disabled
+        }
+        set {
+            userDefaults?.set(newValue.rawValue, forKey: DebugKeys.onboardingAddToDockStateKey)
+        }
+    }
 }
 
 extension AppUserDefaults: AppConfigurationFetchStatistics {

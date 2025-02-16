@@ -22,35 +22,49 @@ import SwiftUI
 import DDGSync
 import Core
 import BrowserServicesKit
-import SyncUI
+import SyncUI_iOS
 import Persistence
 import Common
 
 class SettingsLegacyViewProvider: ObservableObject {
+
+    enum StoryboardName {
+        static let settings = "Settings"
+        static let homeRow = "HomeRow"
+        static let feedback = "Feedback"
+    }
 
     let syncService: DDGSyncing
     let syncDataProviders: SyncDataProviders
     let appSettings: AppSettings
     let bookmarksDatabase: CoreDataDatabase
     let tabManager: TabManager
+    let syncPausedStateManager: any SyncPausedStateManaging
+    let fireproofing: Fireproofing
+    let websiteDataManager: WebsiteDataManaging
 
     init(syncService: any DDGSyncing,
          syncDataProviders: SyncDataProviders,
          appSettings: any AppSettings,
          bookmarksDatabase: CoreDataDatabase,
-         tabManager: TabManager) {
+         tabManager: TabManager,
+         syncPausedStateManager: any SyncPausedStateManaging,
+         fireproofing: Fireproofing,
+         websiteDataManager: WebsiteDataManaging) {
         self.syncService = syncService
         self.syncDataProviders = syncDataProviders
         self.appSettings = appSettings
         self.bookmarksDatabase = bookmarksDatabase
         self.tabManager = tabManager
+        self.syncPausedStateManager = syncPausedStateManager
+        self.fireproofing = fireproofing
+        self.websiteDataManager = websiteDataManager
     }
     
     enum LegacyView {
         case addToDock,
              sync,
              logins,
-             textSize,
              appIcon,
              gpc,
              autoconsent,
@@ -58,41 +72,62 @@ class SettingsLegacyViewProvider: ObservableObject {
              fireproofSites,
              autoclearData,
              keyboard,
-             netP,
-             about,
-             feedback, debug
+             feedback,
+             debug
     }
-    
+
     private func instantiate(_ identifier: String, fromStoryboard name: String) -> UIViewController {
         let storyboard = UIStoryboard(name: name, bundle: nil)
         return storyboard.instantiateViewController(withIdentifier: identifier)
     }
-    
+
+    private func instantiateFireproofingController() -> UIViewController {
+        let storyboard = UIStoryboard(name: StoryboardName.settings, bundle: nil)
+        return storyboard.instantiateViewController(identifier: "FireProofSites") { coder in
+            return FireproofingSettingsViewController(coder: coder, fireproofing: self.fireproofing, websiteDataManager: self.websiteDataManager)
+        }
+    }
+
+    private func instantiateAutoClearController() -> UIViewController {
+        let storyboard = UIStoryboard(name: StoryboardName.settings, bundle: nil)
+        return storyboard.instantiateViewController(identifier: "AutoClearSettingsViewController", creator: { coder in
+            return AutoClearSettingsViewController(appSettings: self.appSettings, coder: coder)
+        })
+    }
+
+    private func instantiateDebugController() -> UIViewController {
+        let storyboard = UIStoryboard(name: "Debug", bundle: nil)
+        return storyboard.instantiateViewController(identifier: "DebugMenu") { coder in
+            RootDebugViewController(coder: coder,
+                                    sync: self.syncService,
+                                    bookmarksDatabase: self.bookmarksDatabase,
+                                    internalUserDecider: AppDependencyProvider.shared.internalUserDecider,
+                                    tabManager: self.tabManager,
+                                    fireproofing: self.fireproofing)
+        }
+    }
+
     // Legacy UIKit Views (Pushed unmodified)
-    var addToDock: UIViewController { instantiate( "instructions", fromStoryboard: "HomeRow") }
-    var textSettings: UIViewController { return instantiate("TextSize", fromStoryboard: "Settings") }
-    var appIcon: UIViewController { instantiate("AppIcon", fromStoryboard: "Settings") }
-    var gpc: UIViewController { instantiate("DoNotSell", fromStoryboard: "Settings") }
-    var autoConsent: UIViewController { instantiate("AutoconsentSettingsViewController", fromStoryboard: "Settings") }
-    var unprotectedSites: UIViewController { instantiate("UnprotectedSites", fromStoryboard: "Settings") }
-    var fireproofSites: UIViewController { instantiate("FireProofSites", fromStoryboard: "Settings") }
-    var autoclearData: UIViewController { instantiate("AutoClearSettingsViewController", fromStoryboard: "Settings") }
-    var keyboard: UIViewController { instantiate("Keyboard", fromStoryboard: "Settings") }
-    var feedback: UIViewController { instantiate("Feedback", fromStoryboard: "Feedback") }
-    var about: UIViewController { AboutViewController() }
-    
-    @available(iOS 15, *)
-    var netPWaitlist: UIViewController { VPNWaitlistViewController(nibName: nil, bundle: nil) }
-    
-    @available(iOS 15, *)
-    var netP: UIViewController { NetworkProtectionRootViewController() }
-    
+    var addToDock: UIViewController { instantiate( "instructions", fromStoryboard: StoryboardName.homeRow) }
+    var appIcon: UIViewController { instantiate("AppIcon", fromStoryboard: StoryboardName.settings) }
+    var gpc: UIViewController { instantiate("DoNotSell", fromStoryboard: StoryboardName.settings) }
+    var autoConsent: UIViewController { instantiate("AutoconsentSettingsViewController", fromStoryboard: StoryboardName.settings) }
+    var unprotectedSites: UIViewController { instantiate("UnprotectedSites", fromStoryboard: StoryboardName.settings) }
+    var fireproofSites: UIViewController { instantiateFireproofingController() }
+    var keyboard: UIViewController { instantiate("Keyboard", fromStoryboard: StoryboardName.settings) }
+    var feedback: UIViewController { instantiate("Feedback", fromStoryboard: StoryboardName.feedback) }
+    var autoclearData: UIViewController { instantiateAutoClearController() }
+    var debug: UIViewController { instantiateDebugController() }
+
+
     @MainActor
-    var syncSettings: UIViewController {
+    func syncSettings(source: String? = nil) -> SyncSettingsViewController {
         return SyncSettingsViewController(syncService: self.syncService,
                                           syncBookmarksAdapter: self.syncDataProviders.bookmarksAdapter,
                                           syncCredentialsAdapter: self.syncDataProviders.credentialsAdapter,
-                                          appSettings: self.appSettings)
+                                          appSettings: self.appSettings,
+                                          syncPausedStateManager: self.syncPausedStateManager,
+                                          source: source)
     }
     
     func loginSettings(delegate: AutofillLoginSettingsListViewControllerDelegate,
@@ -100,19 +135,8 @@ class SettingsLegacyViewProvider: ObservableObject {
         return AutofillLoginSettingsListViewController(appSettings: self.appSettings,
                                                        syncService: self.syncService,
                                                        syncDataProviders: self.syncDataProviders,
-                                                       selectedAccount: selectedAccount)
+                                                       selectedAccount: selectedAccount,
+                                                       source: .settings)
     }
-    
-    var debug: UIViewController {
-        let storyboard = UIStoryboard(name: "Debug", bundle: nil)
-        if let viewController = storyboard.instantiateViewController(withIdentifier: "DebugMenu") as? RootDebugViewController {
-            viewController.configure(sync: syncService,
-                                     bookmarksDatabase: bookmarksDatabase,
-                                     internalUserDecider: AppDependencyProvider.shared.internalUserDecider,
-                                     tabManager: tabManager)
-            return viewController
-        }
-        return UIViewController()
-    }
-        
+
 }

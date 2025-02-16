@@ -20,9 +20,11 @@
 import SwiftUI
 import Core
 import Combine
-import SyncUI
+import SyncUI_iOS
 import DDGSync
 import Common
+import os.log
+import BrowserServicesKit
 
 @MainActor
 class SyncSettingsViewController: UIHostingController<SyncSettingsView> {
@@ -34,8 +36,10 @@ class SyncSettingsViewController: UIHostingController<SyncSettingsView> {
     let syncCredentialsAdapter: SyncCredentialsAdapter
     var connector: RemoteConnecting?
 
-    let userAuthenticator = UserAuthenticator(reason: UserText.syncUserUserAuthenticationReason)
+    let userAuthenticator = UserAuthenticator(reason: UserText.syncUserUserAuthenticationReason,
+                                              cancelTitle: UserText.autofillLoginListAuthenticationCancelButton)
     let userSession = UserSession()
+    let featureFlagger: FeatureFlagger
 
     var recoveryCode: String {
         guard let code = syncService.account?.recoveryCode else {
@@ -54,17 +58,30 @@ class SyncSettingsViewController: UIHostingController<SyncSettingsView> {
     }
 
     var cancellables = Set<AnyCancellable>()
+    let syncPausedStateManager: any SyncPausedStateManaging
+    var viewModel: SyncSettingsViewModel?
+
+    var source: String?
+
+    var onConfirmSyncDisable: (() -> Void)?
+    var onConfirmAndDeleteAllData: (() -> Void)?
 
     // For some reason, on iOS 14, the viewDidLoad wasn't getting called so do some setup here
     init(
         syncService: DDGSyncing,
         syncBookmarksAdapter: SyncBookmarksAdapter,
         syncCredentialsAdapter: SyncCredentialsAdapter,
-        appSettings: AppSettings = AppDependencyProvider.shared.appSettings
+        appSettings: AppSettings = AppDependencyProvider.shared.appSettings,
+        syncPausedStateManager: any SyncPausedStateManaging,
+        source: String? = nil,
+        featureFlagger: FeatureFlagger = AppDependencyProvider.shared.featureFlagger
     ) {
         self.syncService = syncService
         self.syncBookmarksAdapter = syncBookmarksAdapter
         self.syncCredentialsAdapter = syncCredentialsAdapter
+        self.syncPausedStateManager = syncPausedStateManager
+        self.source = source
+        self.featureFlagger = featureFlagger
 
         let viewModel = SyncSettingsViewModel(
             isOnDevEnvironment: { syncService.serverEnvironment == .development },
@@ -73,15 +90,14 @@ class SyncSettingsViewController: UIHostingController<SyncSettingsView> {
                 UserDefaults.standard.set(ServerEnvironment.production.description, forKey: UserDefaultsWrapper<String>.Key.syncEnvironment.rawValue)
             }
         )
+        self.viewModel = viewModel
 
         super.init(rootView: SyncSettingsView(model: viewModel))
 
         setUpFaviconsFetcherSwitch(viewModel)
         setUpFavoritesDisplayModeSwitch(viewModel, appSettings)
-        setUpSyncPaused(viewModel, appSettings)
-        if DDGSync.isFieldValidationEnabled {
-            setUpSyncInvalidObjectsInfo(viewModel)
-        }
+        setUpSyncPaused(viewModel, syncPausedStateManager: syncPausedStateManager)
+        setUpSyncInvalidObjectsInfo(viewModel)
         setUpSyncFeatureFlags(viewModel)
         refreshForState(syncService.authState)
 
@@ -94,7 +110,7 @@ class SyncSettingsViewController: UIHostingController<SyncSettingsView> {
             .store(in: &cancellables)
 
         rootView.model.delegate = self
-        navigationItem.title = SyncUI.UserText.syncTitle
+        navigationItem.title = SyncUI_iOS.UserText.syncTitle
     }
     
     @MainActor required dynamic init?(coder aDecoder: NSCoder) {
@@ -184,16 +200,20 @@ class SyncSettingsViewController: UIHostingController<SyncSettingsView> {
             .store(in: &cancellables)
     }
 
-    private func setUpSyncPaused(_ viewModel: SyncSettingsViewModel, _ appSettings: AppSettings) {
-        viewModel.isSyncBookmarksPaused = appSettings.isSyncBookmarksPaused
-        viewModel.isSyncCredentialsPaused = appSettings.isSyncCredentialsPaused
-        NotificationCenter.default.publisher(for: AppUserDefaults.Notifications.syncPausedStateChanged)
+    private func setUpSyncPaused(_ viewModel: SyncSettingsViewModel, syncPausedStateManager: any SyncPausedStateManaging) {
+        updateSyncPausedState(viewModel, syncPausedStateManager: syncPausedStateManager)
+        syncPausedStateManager.syncPausedChangedPublisher
             .receive(on: DispatchQueue.main)
-            .sink { _ in
-                viewModel.isSyncBookmarksPaused = appSettings.isSyncBookmarksPaused
-                viewModel.isSyncCredentialsPaused = appSettings.isSyncCredentialsPaused
+            .sink { [weak self] _ in
+                self?.updateSyncPausedState(viewModel, syncPausedStateManager: syncPausedStateManager)
             }
             .store(in: &cancellables)
+    }
+
+    private func updateSyncPausedState(_ viewModel: SyncSettingsViewModel, syncPausedStateManager: any SyncPausedStateManaging) {
+        viewModel.isSyncBookmarksPaused = syncPausedStateManager.isSyncBookmarksPaused
+        viewModel.isSyncCredentialsPaused = syncPausedStateManager.isSyncCredentialsPaused
+        viewModel.isSyncPaused = syncPausedStateManager.isSyncPaused
     }
 
     private func setUpSyncInvalidObjectsInfo(_ viewModel: SyncSettingsViewModel) {
@@ -219,13 +239,18 @@ class SyncSettingsViewController: UIHostingController<SyncSettingsView> {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        applyTheme(ThemeManager.shared.currentTheme)
+        decorate()
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         connector = nil
         syncService.scheduler.requestSyncImmediately()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        Pixel.fire(pixel: .settingsSyncOpen)
     }
 
     func updateOptions() {
@@ -263,7 +288,7 @@ class SyncSettingsViewController: UIHostingController<SyncSettingsView> {
                 mapDevices(devices)
             } catch {
                 // Not displaying error since there is the spinner and it is called every few seconds
-                os_log(error.localizedDescription, log: .syncLog, type: .error)
+                Logger.sync.error("Error: \(error.localizedDescription, privacy: .public)")
             }
         }
     }
@@ -334,16 +359,12 @@ extension SyncSettingsViewController: ScanOrPasteCodeViewModelDelegate {
         }
         if let recoveryKey = syncCode.recovery {
             dismissPresentedViewController()
-            showPreparingSync()
+            await showPreparingSyncAsync()
             do {
                 try await loginAndShowDeviceConnected(recoveryKey: recoveryKey)
                 return true
             } catch {
-                if self.rootView.model.isSyncEnabled {
-                    handleError(.unableToMergeTwoAccounts, error: error, event: .syncLoginExistingAccountError)
-                } else {
-                    handleError(.unableToSyncToServer, error: error, event: .syncLoginError)
-                }
+                await handleRecoveryCodeLoginError(recoveryKey: recoveryKey, error: error)
             }
         } else if let connectKey = syncCode.connect {
             dismissPresentedViewController()
@@ -351,7 +372,8 @@ extension SyncSettingsViewController: ScanOrPasteCodeViewModelDelegate {
             if syncService.account == nil {
                 do {
                     try await syncService.createAccount(deviceName: deviceName, deviceType: deviceType)
-                    Pixel.fire(pixel: .syncSignupConnect, includedParameters: [.appVersion])
+                    let additionalParameters = source.map { ["source": $0] } ?? [:]
+                    try await Pixel.fire(pixel: .syncSignupConnect, withAdditionalParameters: additionalParameters, includedParameters: [.appVersion])
                     self.dismissVCAndShowRecoveryPDF()
                     shouldShowSyncEnabled = false
                     rootView.model.syncEnabled(recoveryCode: recoveryCode)
@@ -380,6 +402,24 @@ extension SyncSettingsViewController: ScanOrPasteCodeViewModelDelegate {
         return false
     }
 
+    private func handleRecoveryCodeLoginError(recoveryKey: SyncCode.RecoveryKey, error: Error) async {
+        if self.rootView.model.isSyncEnabled && featureFlagger.isFeatureOn(.syncSeamlessAccountSwitching) {
+            await handleTwoSyncAccountsFoundDuringRecovery(recoveryKey)
+        } else if self.rootView.model.isSyncEnabled {
+            handleError(.unableToMergeTwoAccounts, error: error, event: .syncLoginExistingAccountError)
+        } else {
+            handleError(.unableToSyncToServer, error: error, event: .syncLoginError)
+        }
+    }
+
+    private func handleTwoSyncAccountsFoundDuringRecovery(_ recoveryKey: SyncCode.RecoveryKey) async {
+        if rootView.model.devices.count > 1 {
+            promptToSwitchAccounts(recoveryKey: recoveryKey)
+        } else {
+            await switchAccounts(recoveryKey: recoveryKey)
+        }
+    }
+
     func dismissVCAndShowRecoveryPDF() {
         self.navigationController?.topViewController?.dismiss(animated: true, completion: self.showRecoveryPDF)
     }
@@ -391,8 +431,28 @@ extension SyncSettingsViewController: ScanOrPasteCodeViewModelDelegate {
 
     func gotoSettings() {
         if let appSettings = URL(string: UIApplication.openSettingsURLString) {
-            UIApplication.shared.open(appSettings, options: [:], completionHandler: nil)
+            UIApplication.shared.open(appSettings)
         }
+    }
+
+}
+
+extension SyncSettingsViewController {
+
+    private func decorate() {
+        let theme = ThemeManager.shared.currentTheme
+        view.backgroundColor = theme.backgroundColor
+
+        navigationController?.navigationBar.barTintColor = theme.barBackgroundColor
+        navigationController?.navigationBar.tintColor = theme.navigationBarTintColor
+
+        let appearance = UINavigationBarAppearance()
+        appearance.shadowColor = .clear
+        appearance.backgroundColor = theme.backgroundColor
+
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
+
     }
 
 }

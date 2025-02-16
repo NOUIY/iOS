@@ -68,6 +68,7 @@ class PrivacyIconLogicTests: XCTestCase {
         let entity = Entity(displayName: "E", domains: [], prevalence: 1.0)
         let protectionStatus = ProtectionStatus(unprotectedTemporary: false, enabledFeatures: [], allowlisted: false, denylisted: false)
         let privacyInfo = PrivacyInfo(url: url, parentEntity: entity, protectionStatus: protectionStatus)
+        privacyInfo.serverTrust = MockSecTrust()
 
         let icon = PrivacyIconLogic.privacyIcon(for: privacyInfo)
         
@@ -75,14 +76,15 @@ class PrivacyIconLogicTests: XCTestCase {
         XCTAssertFalse(privacyInfo.https)
         XCTAssertEqual(icon, .shieldWithDot)
     }
-    
+
     func testPrivacyIconIsShieldWithoutDotForMajorTrackerNetwork() {
         let url = PrivacyIconLogicTests.pageURL
         // We don't have constants for major tracker network now now so just use a huge, unlikely prevalence
         let entity = Entity(displayName: "E", domains: [], prevalence: 100.0)
         let protectionStatus = ProtectionStatus(unprotectedTemporary: false, enabledFeatures: [], allowlisted: false, denylisted: false)
         let privacyInfo = PrivacyInfo(url: url, parentEntity: entity, protectionStatus: protectionStatus)
-        
+        privacyInfo.serverTrust = MockSecTrust()
+
         let icon = PrivacyIconLogic.privacyIcon(for: privacyInfo)
         
         XCTAssertTrue(url.isHttps)
@@ -90,4 +92,58 @@ class PrivacyIconLogicTests: XCTestCase {
         XCTAssertEqual(icon, .shield)
     }
 
+    func testPrivacyIconIsShieldWithDotForNoSecTrust() {
+        let url = PrivacyIconLogicTests.pageURL
+        let entity = Entity(displayName: "E", domains: [], prevalence: 100.0)
+        let protectionStatus = ProtectionStatus(unprotectedTemporary: false, enabledFeatures: [], allowlisted: false, denylisted: false)
+        let privacyInfo = PrivacyInfo(url: url, parentEntity: entity, protectionStatus: protectionStatus, shouldCheckServerTrust: true)
+
+        let icon = PrivacyIconLogic.privacyIcon(for: privacyInfo)
+
+        XCTAssertTrue(url.isHttps)
+        XCTAssertTrue(privacyInfo.https)
+        XCTAssertEqual(icon, .shieldWithDot)
+    }
+
+    func testPrivacyIconIsShieldWithoutDotForNoSecTrustAndShouldCheckServerTrustIsFalse() {
+        let url = PrivacyIconLogicTests.pageURL
+        let entity = Entity(displayName: "E", domains: [], prevalence: 100.0)
+        let protectionStatus = ProtectionStatus(unprotectedTemporary: false, enabledFeatures: [], allowlisted: false, denylisted: false)
+        let privacyInfo = PrivacyInfo(url: url, parentEntity: entity, protectionStatus: protectionStatus)
+
+        let icon = PrivacyIconLogic.privacyIcon(for: privacyInfo)
+
+        XCTAssertTrue(url.isHttps)
+        XCTAssertTrue(privacyInfo.https)
+        XCTAssertEqual(icon, .shield)
+    }
+
+    func testWhenPrivacyIconThreatKindIsPhishingThenPrivacyIconIsAlert() {
+        // GIVEN
+        let url = PrivacyIconLogicTests.pageURL
+        let protectionStatus = ProtectionStatus(unprotectedTemporary: false, enabledFeatures: [], allowlisted: true, denylisted: false)
+        let privacyInfo = PrivacyInfo(url: url, parentEntity: nil, protectionStatus: protectionStatus, malicousSiteThreatKind: .phishing)
+
+        // WHEN
+        let icon = PrivacyIconLogic.privacyIcon(for: privacyInfo)
+
+        // THEN
+        XCTAssertEqual(icon, .alert)
+    }
+
+    func testWhenPrivacyIconThreatKindIsMalwareThenPrivacyIconIsAlert() {
+        // GIVEN
+        let url = PrivacyIconLogicTests.pageURL
+        let protectionStatus = ProtectionStatus(unprotectedTemporary: false, enabledFeatures: [], allowlisted: true, denylisted: false)
+        let privacyInfo = PrivacyInfo(url: url, parentEntity: nil, protectionStatus: protectionStatus, malicousSiteThreatKind: .malware)
+
+        // WHEN
+        let icon = PrivacyIconLogic.privacyIcon(for: privacyInfo)
+
+        // THEN
+        XCTAssertEqual(icon, .alert)
+    }
+
 }
+
+final class MockSecTrust: SecurityTrust {}

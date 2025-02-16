@@ -17,8 +17,6 @@
 //  limitations under the License.
 //
 
-#if NETWORK_PROTECTION
-
 import Foundation
 import Combine
 import NetworkExtension
@@ -38,9 +36,7 @@ class NetworkProtectionWidgetRefreshModel {
     }
 
     public func refreshVPNWidget() {
-        WidgetCenter.shared.reloadTimelines(ofKind: "VPNStatusWidget")
+        VPNReloadStatusWidgets()
     }
 
 }
-
-#endif

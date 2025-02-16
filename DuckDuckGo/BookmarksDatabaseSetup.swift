@@ -26,29 +26,88 @@ import Common
 
 struct BookmarksDatabaseSetup {
 
-    let crashOnError: Bool
-    
-    private let migrationAssertion = BookmarksMigrationAssertion()
+    enum Result {
+        case success
+        case failure(Error)
+    }
 
-    func loadStoreAndMigrate(bookmarksDatabase: CoreDataDatabase) -> Bool {
-        let preMigrationErrorHandling = createErrorHandling()
+    private let migrationAssertion: BookmarksMigrationAssertion
 
-        let oldFavoritesOrder = BookmarkFormFactorFavoritesMigration
-            .getFavoritesOrderFromPreV4Model(
+    init(migrationAssertion: BookmarksMigrationAssertion = BookmarksMigrationAssertion()) {
+        self.migrationAssertion = migrationAssertion
+    }
+
+    static func makeValidator() -> BookmarksStateValidator {
+        return BookmarksStateValidator(keyValueStore: UserDefaults.app) { validationError in
+            switch validationError {
+            case .bookmarksStructureLost:
+                DailyPixel.fire(pixel: .debugBookmarksStructureLost, includedParameters: [.appVersion])
+            case .bookmarksStructureNotRecovered:
+                DailyPixel.fire(pixel: .debugBookmarksStructureNotRecovered, includedParameters: [.appVersion])
+            case .bookmarksStructureBroken(let additionalParams):
+                DailyPixel.fire(pixel: .debugBookmarksInvalidRoots,
+                                withAdditionalParameters: additionalParams,
+                                includedParameters: [.appVersion])
+            case .validatorError(let underlyingError):
+                let processedErrors = CoreDataErrorsParser.parse(error: underlyingError as NSError)
+
+                DailyPixel.fireDailyAndCount(pixel: .debugBookmarksValidationFailed,
+                                             pixelNameSuffixes: DailyPixel.Constant.legacyDailyPixelSuffixes,
+                                             withAdditionalParameters: processedErrors.errorPixelParameters,
+                                             includedParameters: [.appVersion])
+            }
+        }
+    }
+
+    func loadStoreAndMigrate(bookmarksDatabase: CoreDataStoring,
+                             formFactorFavoritesMigrator: BookmarkFormFactorFavoritesMigrating = BookmarkFormFactorFavoritesMigration(),
+                             validator: BookmarksStateValidation = Self.makeValidator()) -> Result {
+
+        let oldFavoritesOrder: [String]?
+        do {
+            oldFavoritesOrder = try formFactorFavoritesMigrator.getFavoritesOrderFromPreV4Model(
                 dbContainerLocation: BookmarksDatabase.defaultDBLocation,
-                dbFileURL: BookmarksDatabase.defaultDBFileURL,
-                errorEvents: preMigrationErrorHandling
+                dbFileURL: BookmarksDatabase.defaultDBFileURL
             )
+        } catch {
+            return .failure(error)
+        }
 
         var migrationHappened = false
+        var loadError: Error?
         bookmarksDatabase.loadStore { context, error in
-            guard let context = assertContext(context, error, crashOnError) else { return }
+            guard let context = context, error == nil else {
+                loadError = error
+                return
+            }
+
+            // Perform pre-setup/migration validation
+            let isMissingStructure = !validator.validateInitialState(context: context,
+                                                                     validationError: .bookmarksStructureLost)
+
             self.migrateFromLegacyCoreDataStorageIfNeeded(context)
             migrationHappened = self.migrateToFormFactorSpecificFavorites(context, oldFavoritesOrder)
-            // Add new migrations and set migrationHappened flag here. Only the last migration is relevant.
+
+            if isMissingStructure {
+                _ = validator.validateInitialState(context: context,
+                                                   validationError: .bookmarksStructureNotRecovered)
+            }
+
+            // Add new migrations and set migrationHappened flag above this comment. Only the last migration is relevant.
             // Also bump the int passed to the assert function below.
         }
-        
+
+        if let loadError {
+            return .failure(loadError)
+        }
+
+        // Perform post-setup validation
+        let contextForValidation = bookmarksDatabase.makeContext(concurrencyType: .privateQueueConcurrencyType)
+        contextForValidation.performAndWait {
+            validator.validateBookmarksStructure(context: contextForValidation)
+            repairDeletedFlag(context: contextForValidation)
+        }
+
         if migrationHappened {
             do {
                 try migrationAssertion.assert(migrationVersion: 1)
@@ -57,9 +116,27 @@ struct BookmarksDatabaseSetup {
             }
         }
 
-        return migrationHappened
+        return .success
     }
-    
+
+    private func repairDeletedFlag(context: NSManagedObjectContext) {
+        let stateRepair = BookmarksStateRepair(keyValueStore: UserDefaults.app)
+        let status = stateRepair.validateAndRepairPendingDeletionState(in: context)
+        switch status {
+        case .alreadyPerformed, .noBrokenData:
+            break
+        case .dataRepaired:
+            Pixel.fire(pixel: .debugBookmarksPendingDeletionFixed)
+        case .repairError(let underlyingError):
+            let processedErrors = CoreDataErrorsParser.parse(error: underlyingError as NSError)
+
+            DailyPixel.fireDailyAndCount(pixel: .debugBookmarksPendingDeletionRepairError,
+                                         pixelNameSuffixes: DailyPixel.Constant.legacyDailyPixelSuffixes,
+                                         withAdditionalParameters: processedErrors.errorPixelParameters,
+                                         includedParameters: [.appVersion])
+        }
+    }
+
     private func migrateToFormFactorSpecificFavorites(_ context: NSManagedObjectContext, _ oldFavoritesOrder: [String]?) -> Bool {
         do {
             BookmarkFormFactorFavoritesMigration.migrateToFormFactorSpecificFavorites(byCopyingExistingTo: .mobile,
@@ -82,44 +159,6 @@ struct BookmarksDatabaseSetup {
         LegacyBookmarksStoreMigration.migrate(from: legacyStorage, to: context)
         legacyStorage?.removeStore()
     }
-    
-    private func assertContext(_ context: NSManagedObjectContext?, _ error: Error?, _ crashOnError: Bool) -> NSManagedObjectContext? {
-        guard let context = context else {
-            if let error = error {
-                Pixel.fire(pixel: .bookmarksCouldNotLoadDatabase,
-                           error: error)
-            } else {
-                Pixel.fire(pixel: .bookmarksCouldNotLoadDatabase)
-            }
-
-            if !crashOnError {
-                return nil
-            } else {
-                Thread.sleep(forTimeInterval: 1)
-                fatalError("Could not create Bookmarks database stack: \(error?.localizedDescription ?? "err")")
-            }
-        }
-        return context
-    }
-
-    private func createErrorHandling() -> EventMapping<BookmarkFormFactorFavoritesMigration.MigrationErrors> {
-        return EventMapping<BookmarkFormFactorFavoritesMigration.MigrationErrors> { _, error, _, _ in
-            if let error = error {
-                Pixel.fire(pixel: .bookmarksCouldNotLoadDatabase,
-                           error: error)
-            } else {
-                Pixel.fire(pixel: .bookmarksCouldNotLoadDatabase)
-            }
-
-            if !crashOnError {
-                return
-            } else {
-                Thread.sleep(forTimeInterval: 1)
-                fatalError("Could not create Bookmarks database stack: \(error?.localizedDescription ?? "err")")
-            }
-        }
-    }
-    
 }
 
 class BookmarksMigrationAssertion {
@@ -127,12 +166,30 @@ class BookmarksMigrationAssertion {
     enum Error: Swift.Error {
         case unexpectedMigration
     }
-    
-    @UserDefaultsWrapper(key: .bookmarksLastGoodVersion, defaultValue: nil)
-    var lastGoodVersion: String?
-    
-    @UserDefaultsWrapper(key: .bookmarksMigrationVersion, defaultValue: 0)
-    var migrationVersion: Int
+
+    let store: KeyValueStoring
+
+    init(store: KeyValueStoring = UserDefaults.app) {
+        self.store = store
+    }
+
+    var lastGoodVersion: String? {
+        get {
+            return store.object(forKey: UserDefaultsWrapper<Int>.Key.bookmarksLastGoodVersion.rawValue) as? String
+        }
+        set {
+            store.set(newValue, forKey: UserDefaultsWrapper<Int>.Key.bookmarksLastGoodVersion.rawValue)
+        }
+    }
+
+    var migrationVersion: Int {
+        get {
+            return (store.object(forKey: UserDefaultsWrapper<Int>.Key.bookmarksMigrationVersion.rawValue) as? Int) ?? 0
+        }
+        set {
+            store.set(newValue, forKey: UserDefaultsWrapper<Int>.Key.bookmarksMigrationVersion.rawValue)
+        }
+    }
 
     // Wanted to use assertions here, but that's trick to test.
     func assert(migrationVersion: Int) throws {

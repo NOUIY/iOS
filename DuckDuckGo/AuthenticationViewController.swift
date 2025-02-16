@@ -19,6 +19,12 @@
 
 import UIKit
 
+protocol AuthenticationViewControllerDelegate: AnyObject {
+
+    func authenticationViewController(authenticationViewController: AuthenticationViewController, didTapWithSender sender: Any)
+
+}
+
 class AuthenticationViewController: UIViewController {
 
     override var preferredStatusBarStyle: UIStatusBarStyle {
@@ -28,9 +34,7 @@ class AuthenticationViewController: UIViewController {
     @IBOutlet weak var logo: UIImageView!
     @IBOutlet weak var unlockInstructions: UIView!
 
-    private let authenticator = Authenticator()
-
-    private var completion: (() -> Void)?
+    weak var delegate: AuthenticationViewControllerDelegate?
 
     static func loadFromStoryboard() -> AuthenticationViewController {
         let storyboard = UIStoryboard(name: "Authentication", bundle: nil)
@@ -43,71 +47,30 @@ class AuthenticationViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         hideUnlockInstructions()
-        applyTheme(ThemeManager.shared.currentTheme)
+        decorate()
     }
 
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         return .portrait
     }
 
-    public func beginAuthentication(completion: (() -> Void)?) async {
-        self.completion = completion
-        if authenticator.canAuthenticate() {
-            await authenticate()
-        } else {
-            onCouldNotAuthenticate()
-        }
-    }
-
-    private func authenticate() async {
-        hideUnlockInstructions()
-        let success = await authenticator.authenticate(reason: UserText.appUnlock)
-        if success {
-            self.onAuthenticationSucceeded()
-        } else {
-            self.onAuthenticationFailed()
-        }
-    }
-
     @IBAction func onTap(_ sender: Any) {
-        Task { @MainActor in
-            await authenticate()
-        }
+        delegate?.authenticationViewController(authenticationViewController: self, didTapWithSender: sender)
     }
 
-    private func onCouldNotAuthenticate() {
-        completion?()
-        dismiss(animated: true, completion: nil)
-    }
-
-    private func onAuthenticationSucceeded() {
-        completion?()
-        dismiss(animated: true, completion: nil)
-    }
-
-    private func onAuthenticationFailed() {
-        showUnlockInstructions()
-    }
-
-    private func hideUnlockInstructions() {
+    func hideUnlockInstructions() {
         unlockInstructions.isHidden = true
     }
 
-    private func showUnlockInstructions() {
+    func showUnlockInstructions() {
         unlockInstructions.isHidden = false
     }
 }
 
-extension AuthenticationViewController: Themable {
+extension AuthenticationViewController {
     
-    func decorate(with theme: Theme) {
+    private func decorate() {
+        let theme = ThemeManager.shared.currentTheme
         view.backgroundColor = theme.backgroundColor
-        
-        switch theme.currentImageSet {
-        case .light:
-            logo?.image = UIImage(named: "LogoDarkText")
-        case .dark:
-            logo?.image = UIImage(named: "LogoLightText")
-        }
     }
 }

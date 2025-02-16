@@ -21,13 +21,14 @@ import Common
 import Foundation
 import Speech
 import BrowserServicesKit
+import os.log
 
 extension FeatureName {
     // Define your feature e.g.:
     // public static let experimentalFeature = FeatureName(rawValue: "experimentalFeature")
 
-    // Experiment coming soon
-    public static let history = FeatureName(rawValue: "history")
+    public static let addToDockIntro = FeatureName(rawValue: "addToDockIntro")
+    public static let addToDockContextual = FeatureName(rawValue: "addToDockContextual")
 }
 
 public struct VariantIOS: Variant {
@@ -41,17 +42,10 @@ public struct VariantIOS: Variant {
                 .contains(where: { Locale.current.regionCode == $0 }) }
 
         static let inEnglish = { return Locale.current.languageCode == "en" }
-
-        static let iOS15 = { () -> Bool in
-            if #available(iOS 15, *) {
-                return true
-            }
-            return false
-        }
     }
 
     /// This variant is used for returning users to separate them from really new users.
-    static let returningUser = VariantIOS(name: "ru", weight: doNotAllocate, isIncluded: When.always, features: [])
+    public static let returningUser = VariantIOS(name: "ru", weight: doNotAllocate, isIncluded: When.always, features: [])
 
     static let doNotAllocate = 0
 
@@ -63,8 +57,9 @@ public struct VariantIOS: Variant {
         VariantIOS(name: "sd", weight: doNotAllocate, isIncluded: When.always, features: []),
         VariantIOS(name: "se", weight: doNotAllocate, isIncluded: When.always, features: []),
 
-        VariantIOS(name: "mc", weight: 1, isIncluded: When.inEnglish, features: []),
-        VariantIOS(name: "md", weight: 1, isIncluded: When.inEnglish, features: [.history]),
+        VariantIOS(name: "mh", weight: 1, isIncluded: When.notPadDevice, features: []),
+        VariantIOS(name: "mk", weight: 1, isIncluded: When.notPadDevice, features: [.addToDockIntro]),
+        VariantIOS(name: "mo", weight: 1, isIncluded: When.notPadDevice, features: [.addToDockContextual]),
 
         returningUser
     ]
@@ -89,6 +84,10 @@ public protocol VariantRNG {
 
 }
 
+public protocol VariantNameOverriding {
+    var overriddenAppVariantName: String? { get }
+}
+
 public class DefaultVariantManager: VariantManager {
 
     public var currentVariant: Variant? {
@@ -100,16 +99,19 @@ public class DefaultVariantManager: VariantManager {
     private let storage: StatisticsStore
     private let rng: VariantRNG
     private let returningUserMeasurement: ReturnUserMeasurement
+    private let variantNameOverride: VariantNameOverriding
 
     init(variants: [Variant],
          storage: StatisticsStore,
          rng: VariantRNG,
-         returningUserMeasurement: ReturnUserMeasurement) {
-
+         returningUserMeasurement: ReturnUserMeasurement,
+         variantNameOverride: VariantNameOverriding
+    ) {
         self.variants = variants
         self.storage = storage
         self.rng = rng
         self.returningUserMeasurement = returningUserMeasurement
+        self.variantNameOverride = variantNameOverride
     }
 
     public convenience init() {
@@ -117,7 +119,8 @@ public class DefaultVariantManager: VariantManager {
             variants: VariantIOS.defaultVariants,
             storage: StatisticsUserDefaults(),
             rng: Arc4RandomUniformVariantRNG(),
-            returningUserMeasurement: KeychainReturnUserMeasurement()
+            returningUserMeasurement: KeychainReturnUserMeasurement(),
+            variantNameOverride: LaunchOptionsHandler()
         )
     }
 
@@ -127,17 +130,17 @@ public class DefaultVariantManager: VariantManager {
 
     public func assignVariantIfNeeded(_ newInstallCompletion: (VariantManager) -> Void) {
         guard !storage.hasInstallStatistics else {
-            os_log("no new variant needed for existing user", log: .generalLog, type: .debug)
+            Logger.general.debug("no new variant needed for existing user")
             return
         }
 
         if let variant = currentVariant {
-            os_log("already assigned variant: %s", log: .generalLog, type: .debug, String(describing: variant))
+            Logger.general.debug("already assigned variant: \(String(describing: variant))")
             return
         }
 
         guard let variant = selectVariant() else {
-            os_log("Failed to assign variant", log: .generalLog, type: .debug)
+            Logger.general.debug("Failed to assign variant")
 
             // it's possible this failed because there are none to assign, we should still let new install logic execute
             _ = newInstallCompletion(self)
@@ -149,6 +152,10 @@ public class DefaultVariantManager: VariantManager {
     }
 
     private func selectVariant() -> Variant? {
+        if let overriddenAppVariantName = variantNameOverride.overriddenAppVariantName {
+            return variants.first(where: { $0.name == overriddenAppVariantName })
+        }
+
         if returningUserMeasurement.isReturningUser {
             return VariantIOS.returningUser
         }

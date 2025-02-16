@@ -54,6 +54,7 @@ extension TabSwitcherViewController {
     }
     
     @objc func keyboardNewTab() {
+        guard !isProcessingUpdates else { return }
         delegate?.tabSwitcherDidRequestNewTab(tabSwitcher: self)
         dismiss()
     }
@@ -77,6 +78,7 @@ extension TabSwitcherViewController {
         } else {
             currentSelection = nil
         }
+        refreshTitle()
         collectionView.reloadData()
     }
     

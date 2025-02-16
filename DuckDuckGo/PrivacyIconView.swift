@@ -22,12 +22,20 @@ import UIKit
 import Lottie
 
 enum PrivacyIcon {
-    case daxLogo, shield, shieldWithDot
+    case daxLogo, shield, shieldWithDot, alert
+
+    fileprivate var staticImage: UIImage? {
+        switch self {
+        case .daxLogo: return UIImage(resource: .logoIcon)
+        case .alert: return UIImage(resource: .alertColor24)
+        default: return nil
+        }
+    }
 }
 
 class PrivacyIconView: UIView {
 
-    @IBOutlet var daxLogoImageView: UIImageView!
+    @IBOutlet var staticImageView: UIImageView!
     @IBOutlet var staticShieldAnimationView: LottieAnimationView!
     @IBOutlet var staticShieldDotAnimationView: LottieAnimationView!
 
@@ -48,21 +56,30 @@ class PrivacyIconView: UIView {
     override func awakeFromNib() {
         super.awakeFromNib()
   
-        loadAnimations(for: ThemeManager.shared.currentTheme)
+        loadAnimations()
         
         updateShieldImageView(for: icon)
         updateAccessibilityLabels(for: icon)
+
+        // Animations are not rendering properly when going back from background, hence the change.
+        [staticShieldAnimationView,
+         staticShieldDotAnimationView,
+         shieldAnimationView,
+         shieldDotAnimationView].forEach { animationView in
+            animationView?.configuration = LottieConfiguration(renderingEngine: .mainThread)
+        }
     }
     
-    func loadAnimations(for theme: Theme, animationCache cache: AnimationCacheProvider = DefaultAnimationCache.sharedCache) {
-        let useLightStyle = theme.currentImageSet == .light
-        
-        let shieldAnimation = LottieAnimation.named(useLightStyle ? "shield" : "dark-shield", animationCache: cache)
+    func loadAnimations(animationCache cache: AnimationCacheProvider = DefaultAnimationCache.sharedCache) {
+        let useDarkStyle = traitCollection.userInterfaceStyle == .dark
+
+        let shieldAnimation = LottieAnimation.named(useDarkStyle ? "dark-shield" : "shield", animationCache: cache)
+
         shieldAnimationView.animation = shieldAnimation
         staticShieldAnimationView.animation = shieldAnimation
         staticShieldAnimationView.currentProgress = 0.0
-        
-        let shieldWithDotAnimation = LottieAnimation.named(useLightStyle ? "shield-dot" : "dark-shield-dot", animationCache: cache)
+
+        let shieldWithDotAnimation = LottieAnimation.named(useDarkStyle ? "dark-shield-dot" : "shield-dot", animationCache: cache)
         shieldDotAnimationView.animation = shieldWithDotAnimation
         staticShieldDotAnimationView.animation = shieldWithDotAnimation
         staticShieldDotAnimationView.currentProgress = 1.0
@@ -82,16 +99,17 @@ class PrivacyIconView: UIView {
     
     private func updateShieldImageView(for icon: PrivacyIcon) {
         switch icon {
-        case .daxLogo:
-            daxLogoImageView.isHidden = false
+        case .daxLogo, .alert:
+            staticImageView.isHidden = false
+            staticImageView.image = icon.staticImage
             staticShieldAnimationView.isHidden = true
             staticShieldDotAnimationView.isHidden = true
         case .shield:
-            daxLogoImageView.isHidden = true
+            staticImageView.isHidden = true
             staticShieldAnimationView.isHidden = false
             staticShieldDotAnimationView.isHidden = true
         case .shieldWithDot:
-            daxLogoImageView.isHidden = true
+            staticImageView.isHidden = true
             staticShieldAnimationView.isHidden = true
             staticShieldDotAnimationView.isHidden = false
         }
@@ -104,6 +122,11 @@ class PrivacyIconView: UIView {
             accessibilityHint = nil
             accessibilityTraits = .image
         case .shield, .shieldWithDot:
+            accessibilityIdentifier = "privacy-icon-shield.button"
+            accessibilityLabel = UserText.privacyIconShield
+            accessibilityHint = UserText.privacyIconOpenDashboardHint
+            accessibilityTraits = .button
+        case .alert:
             accessibilityLabel = UserText.privacyIconShield
             accessibilityHint = UserText.privacyIconOpenDashboardHint
             accessibilityTraits = .button
@@ -125,7 +148,7 @@ class PrivacyIconView: UIView {
 
         staticShieldAnimationView.isHidden = true
         staticShieldDotAnimationView.isHidden = true
-        daxLogoImageView.isHidden = true
+        staticImageView.isHidden = true
     }
     
     func shieldAnimationView(for icon: PrivacyIcon) -> LottieAnimationView? {
@@ -143,6 +166,13 @@ class PrivacyIconView: UIView {
         shieldAnimationView.isAnimationPlaying || shieldDotAnimationView.isAnimationPlaying
     }
     
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            loadAnimations()
+        }
+    }
 }
 
 extension PrivacyIconView: UIPointerInteractionDelegate {

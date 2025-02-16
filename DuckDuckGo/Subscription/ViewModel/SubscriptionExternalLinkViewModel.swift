@@ -21,8 +21,6 @@ import Foundation
 import Core
 import Combine
 
-#if SUBSCRIPTION
-@available(iOS 15.0, *)
 final class SubscriptionExternalLinkViewModel: ObservableObject {
                 
     var url: URL
@@ -74,4 +72,3 @@ final class SubscriptionExternalLinkViewModel: ObservableObject {
     }
     
 }
-#endif

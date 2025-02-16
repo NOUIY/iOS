@@ -34,7 +34,7 @@ class WebViewTransition: TabSwitcherTransition {
         }
         
         let previewAspectRatio = preview.size.height / preview.size.width
-        let containerAspectRatio = (cellBounds.height - TabViewGridCell.Constants.cellHeaderHeight) / cellBounds.width
+        let containerAspectRatio = (cellBounds.height - TabViewCell.Constants.cellHeaderHeight) / cellBounds.width
         let strechedVerically = containerAspectRatio < previewAspectRatio
         
         var targetSize = CGSize.zero
@@ -42,12 +42,12 @@ class WebViewTransition: TabSwitcherTransition {
             targetSize.width = cellBounds.width
             targetSize.height = cellBounds.width * previewAspectRatio
         } else {
-            targetSize.height = cellBounds.height - TabViewGridCell.Constants.cellHeaderHeight
+            targetSize.height = cellBounds.height - TabViewCell.Constants.cellHeaderHeight
             targetSize.width = targetSize.height / previewAspectRatio
         }
         
         let targetFrame = CGRect(x: 0,
-                                 y: TabViewGridCell.Constants.cellHeaderHeight,
+                                 y: TabViewCell.Constants.cellHeaderHeight,
                                  width: targetSize.width,
                                  height: targetSize.height)
         return targetFrame
@@ -75,8 +75,17 @@ class FromWebViewTransition: WebViewTransition {
         
         guard let webView = mainViewController.currentTab?.webView,
               let tab = mainViewController.tabManager.model.currentTab,
-              let rowIndex = tabSwitcherViewController.tabsModel.indexOf(tab: tab),
-              let layoutAttr = tabSwitcherViewController.collectionView.layoutAttributesForItem(at: IndexPath(row: rowIndex, section: 0)),
+              let rowIndex = tabSwitcherViewController.tabsModel.indexOf(tab: tab)
+        else {
+            tabSwitcherViewController.view.alpha = 1
+            transitionContext.completeTransition(true)
+            return
+        }
+
+        let indexPath = IndexPath(row: rowIndex, section: 0)
+        tabSwitcherViewController.collectionView.scrollToItem(at: indexPath, at: .centeredVertically, animated: false)
+
+        guard let layoutAttr = tabSwitcherViewController.collectionView.layoutAttributesForItem(at: indexPath),
               let preview = tabSwitcherViewController.previewsSource.preview(for: tab)
         else {
             tabSwitcherViewController.view.alpha = 1
@@ -93,13 +102,13 @@ class FromWebViewTransition: WebViewTransition {
         imageContainer.frame = mainViewController.viewCoordinator.contentContainer.frame
         imageView.frame = imageContainer.bounds
         imageView.image = preview
-        
+
         UIView.animateKeyframes(withDuration: TabSwitcherTransition.Constants.duration, delay: 0, options: .calculationModeLinear, animations: {
-            
+
             UIView.addKeyframe(withRelativeStartTime: 0, relativeDuration: 1.0) {
                 let containerFrame = self.tabSwitcherCellFrame(for: layoutAttr)
                 self.imageContainer.frame = containerFrame
-                self.imageContainer.layer.cornerRadius = TabViewGridCell.Constants.cellCornerRadius
+                self.imageContainer.layer.cornerRadius = TabViewCell.Constants.cellCornerRadius
                 self.imageView.frame = self.previewFrame(for: containerFrame.size, preview: preview)
             }
             
@@ -147,7 +156,7 @@ class ToWebViewTransition: WebViewTransition {
         webView.addSubview(solidBackground)
         
         imageContainer.frame = tabSwitcherCellFrame(for: layoutAttr)
-        imageContainer.layer.cornerRadius = TabViewGridCell.Constants.cellCornerRadius
+        imageContainer.layer.cornerRadius = TabViewCell.Constants.cellCornerRadius
         
         let preview = tabSwitcherViewController.previewsSource.preview(for: tab)
         if let preview = preview {

@@ -58,6 +58,34 @@
 ☝️ Заходя на новый сайт, вы всегда можете проверить, шпионит ли он за вами: просто загляните в адресную строку.</string>
 		</dict>
 	</dict>
+	<key>contextual.onboarding.browsing.multiple.trackers</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>*%2$@, %3$@* и *еще 1 сервис* пытались вести за вами слежку, но мы их заблокировали.
+
+☝️ Нажмите на щит, чтобы узнать подробности.</string>
+			<key>few</key>
+			<string>*%2$@, %3$@* и *еще %1$d сервиса* пытались вести за вами слежку, но мы их заблокировали.
+
+☝️ Нажмите на щит, чтобы узнать подробности.</string>
+			<key>many</key>
+			<string>*%2$@, %3$@* и *еще %1$d сервисов* пытались вести за вами слежку, но мы их заблокировали.
+
+☝️ Нажмите на щит, чтобы узнать подробности.</string>
+			<key>other</key>
+			<string>*%2$@, %3$@* и другие сервисы *(еще %1$d)* пытались вести за вами слежку, но мы их заблокировали.
+
+☝️ Нажмите на щит, чтобы узнать подробности.</string>
+		</dict>
+	</dict>
 	<key>privacy.protection.major.trackers.found</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -158,38 +186,6 @@
 			<string>Приватных вкладок: %1$d</string>
 		</dict>
 	</dict>
-	<key>appTP.home.blockedCount</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@attempts@</string>
-		<key>attempts</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>other</key>
-			<string>%d tracking attempts</string>
-			<key>one</key>
-			<string>%d tracking attempt</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-		</dict>
-	</dict>
-	<key>appTP.trackingattempts</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@attempts@</string>
-		<key>attempts</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>other</key>
-			<string>%d tracking attempts</string>
-			<key>one</key>
-			<string>%d tracking attempt</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-		</dict>
-	</dict>
 	<key>autofill.number.of.passwords</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -198,8 +194,8 @@
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
-            <key>NSStringFormatValueTypeKey</key>
-            <string>d</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
 			<key>one</key>
 			<string>%1$d пароль</string>
 			<key>few</key>
@@ -218,8 +214,8 @@
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
-            <key>NSStringFormatValueTypeKey</key>
-            <string>d</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
 			<key>one</key>
 			<string>Вы точно хотите удалить %1$d пароль?</string>
 			<key>few</key>
@@ -230,41 +226,41 @@
 			<string>Вы точно хотите удалить пароли (%1$d)?</string>
 		</dict>
 	</dict>
-    <key>autofill.delete.all.passwords.confirmation.body</key>
-    <dict>
-        <key>NSStringLocalizedFormatKey</key>
-        <string>%1$#@passwords@</string>
-        <key>passwords</key>
-        <dict>
-            <key>NSStringFormatSpecTypeKey</key>
-            <string>NSStringPluralRuleType</string>
-            <key>NSStringFormatValueTypeKey</key>
-            <string>d</string>
-            <key>one</key>
-            <string>Ваши пароли будут удалены с этого устройства. Убедитесь, что вы по-прежнему можете войти в свою %2$#@accounts@.</string>
-            <key>few</key>
-            <string>Ваши пароли будут удалены с этого устройства. Убедитесь, что вы по-прежнему можете войти в свои %2$#@accounts@.</string>
-            <key>many</key>
-            <string>Ваши пароли будут удалены с этого устройства. Убедитесь, что вы по-прежнему можете войти в свои %2$#@accounts@.</string>
-            <key>other</key>
-            <string>Ваши пароли будут удалены с этого устройства. Убедитесь, что вы по-прежнему можете войти в свои %2$#@accounts@.</string>
-        </dict>
-        <key>accounts</key>
-        <dict>
-            <key>NSStringFormatSpecTypeKey</key>
-            <string>NSStringPluralRuleType</string>
-            <key>NSStringFormatValueTypeKey</key>
-            <string>d</string>
-            <key>one</key>
-            <string>учетную запись</string>
-            <key>few</key>
-            <string>учетные записи</string>
-            <key>many</key>
-            <string>учетные записи</string>
-            <key>other</key>
-            <string>учетные записи</string>
-        </dict>
-    </dict>
+	<key>autofill.delete.all.passwords.confirmation.body</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@passwords@</string>
+		<key>passwords</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>Ваши пароли будут удалены с этого устройства. Убедитесь, что вы по-прежнему можете войти в свою %2$#@accounts@.</string>
+			<key>few</key>
+			<string>Ваши пароли будут удалены с этого устройства. Убедитесь, что вы по-прежнему можете войти в свои %2$#@accounts@.</string>
+			<key>many</key>
+			<string>Ваши пароли будут удалены с этого устройства. Убедитесь, что вы по-прежнему можете войти в свои %2$#@accounts@.</string>
+			<key>other</key>
+			<string>Ваши пароли будут удалены с этого устройства. Убедитесь, что вы по-прежнему можете войти в свои %2$#@accounts@.</string>
+		</dict>
+		<key>accounts</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>one</key>
+			<string>учетную запись</string>
+			<key>few</key>
+			<string>учетные записи</string>
+			<key>many</key>
+			<string>учетные записи</string>
+			<key>other</key>
+			<string>учетные записи</string>
+		</dict>
+	</dict>
 	<key>autofill.delete.all.passwords.sync.confirmation.body</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -273,8 +269,8 @@
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
-            <key>NSStringFormatValueTypeKey</key>
-            <string>d</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
 			<key>one</key>
 			<string>Пароли будут удалены со всех синхронизированных устройств. Убедитесь, что вы по-прежнему можете войти в свою %2$#@accounts@.</string>
 			<key>few</key>
@@ -288,8 +284,8 @@
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
-            <key>NSStringFormatValueTypeKey</key>
-            <string>d</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
 			<key>one</key>
 			<string>учетную запись</string>
 			<key>few</key>
@@ -308,8 +304,8 @@
 		<dict>
 			<key>NSStringFormatSpecTypeKey</key>
 			<string>NSStringPluralRuleType</string>
-            <key>NSStringFormatValueTypeKey</key>
-            <string>d</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
 			<key>one</key>
 			<string>Удален %1$d пароль</string>
 			<key>few</key>

@@ -17,8 +17,6 @@
 //  limitations under the License.
 //
 
-// swiftlint:disable file_length
-
 import BrowserServicesKit
 import Common
 import Foundation
@@ -31,6 +29,8 @@ public protocol UserAgentManager {
     func update(webView: WKWebView, isDesktop: Bool, url: URL?)
 
     func userAgent(isDesktop: Bool) -> String
+
+    func userAgent(isDesktop: Bool, url: URL?) -> String
 
 }
 
@@ -60,6 +60,10 @@ public class DefaultUserAgentManager: UserAgentManager {
         return userAgent.agent(forUrl: nil, isDesktop: isDesktop)
     }
 
+    public func userAgent(isDesktop: Bool, url: URL?) -> String {
+        return userAgent.agent(forUrl: url, isDesktop: isDesktop)
+    }
+
     public func update(request: inout URLRequest, isDesktop: Bool) {
         request.addValue(userAgent.agent(forUrl: nil, isDesktop: isDesktop), forHTTPHeaderField: "User-Agent")
     }
@@ -78,8 +82,7 @@ public class DefaultUserAgentManager: UserAgentManager {
 
     public static var duckDuckGoUserAgent: String { duckduckGoUserAgent(for: AppVersion.shared) }
 
-    public static func duckduckGoUserAgent(for appVersion: AppVersion) -> String {
-        let osVersion = UIDevice.current.systemVersion
+    public static func duckduckGoUserAgent(for appVersion: AppVersion, osVersion: String = UIDevice.current.systemVersion) -> String {
         return "ddg_ios/\(appVersion.versionAndBuildNumber) (\(appVersion.identifier); iOS \(osVersion))"
     }
 
@@ -97,7 +100,6 @@ struct UserAgent {
     }
 
     private enum Constants {
-        // swiftlint:disable line_length
         static let fallbackWekKitVersion = "605.1.15"
         static let fallbackSafariComponent = "Safari/\(fallbackWekKitVersion)"
         static let fallbackDefaultAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 13_5 like Mac OS X) AppleWebKit/\(fallbackWekKitVersion) (KHTML, like Gecko) Mobile/15E148"
@@ -116,7 +118,6 @@ struct UserAgent {
 
         static let uaVersionsKey = "versions"
         static let uaStateKey = "state"
-        // swiftlint:enable line_length
     }
 
     private struct Regex {
@@ -187,7 +188,6 @@ struct UserAgent {
         return versions
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     public func agent(forUrl url: URL?,
                       isDesktop: Bool,
                       privacyConfig: PrivacyConfiguration = ContentBlocking.shared.privacyConfigurationManager.privacyConfig) -> String {
@@ -283,7 +283,7 @@ struct UserAgent {
                               isDesktop: Bool,
                               privacyConfig: PrivacyConfiguration) -> String {
         if isDesktop {
-            return "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Safari/605.1.15"
+            return "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15"
         }
         return "Mozilla/5.0 (" + deviceProfile + ") AppleWebKit/605.1.15 (KHTML, like Gecko) \(versionComponent) Mobile/15E148 Safari/604.1"
     }

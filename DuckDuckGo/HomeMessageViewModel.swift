@@ -31,6 +31,7 @@ struct HomeMessageViewModel {
     }
 
     let messageId: String
+    let sendPixels: Bool
     let modelType: RemoteMessageModelType
 
     var image: String? {
@@ -46,11 +47,6 @@ struct HomeMessageViewModel {
         case .promoSingleAction(_, _, let placeholder, _, _):
             return placeholder.rawValue
         }
-    }
-    
-    var topText: String? {
-        // actually unused!
-        return nil
     }
     
     var title: String {
@@ -97,75 +93,65 @@ struct HomeMessageViewModel {
         case .bigSingleAction(_, _, _, let primaryActionText, let primaryAction):
             return [
                 HomeMessageButtonViewModel(title: primaryActionText,
-                                           actionStyle: primaryAction.actionStyle,
+                                           actionStyle: primaryAction.actionStyle(),
                                            action: mapActionToViewModel(remoteAction: primaryAction, buttonAction:
                                                 .primaryAction(isShare: primaryAction.isShare), onDidClose: onDidClose))
             ]
         case .bigTwoAction(_, _, _, let primaryActionText, let primaryAction, let secondaryActionText, let secondaryAction):
             return [
-                HomeMessageButtonViewModel(title: primaryActionText,
-                                           actionStyle: primaryAction.actionStyle,
-                                           action: mapActionToViewModel(remoteAction: primaryAction, buttonAction:
-                                                .primaryAction(isShare: primaryAction.isShare), onDidClose: onDidClose)),
-
                 HomeMessageButtonViewModel(title: secondaryActionText,
-                                           actionStyle: secondaryAction.actionStyle,
+                                           actionStyle: secondaryAction.actionStyle(isSecondaryAction: true),
                                            action: mapActionToViewModel(remoteAction: secondaryAction, buttonAction:
-                                                .secondaryAction(isShare: primaryAction.isShare), onDidClose: onDidClose))
+                                                .secondaryAction(isShare: secondaryAction.isShare), onDidClose: onDidClose)),
+
+                HomeMessageButtonViewModel(title: primaryActionText,
+                                           actionStyle: primaryAction.actionStyle(),
+                                           action: mapActionToViewModel(remoteAction: primaryAction, buttonAction:
+                                           .primaryAction(isShare: primaryAction.isShare), onDidClose: onDidClose))
             ]
         case .promoSingleAction(_, _, _, let actionText, let action):
             return [
                 HomeMessageButtonViewModel(title: actionText,
-                                           actionStyle: action.actionStyle,
+                                           actionStyle: action.actionStyle(),
                                            action: mapActionToViewModel(remoteAction: action, buttonAction:
                                                 .action(isShare: action.isShare), onDidClose: onDidClose))]
         }
     }
     
-    let onDidClose: (ButtonAction?) -> Void
+    let onDidClose: (ButtonAction?) async -> Void
     let onDidAppear: () -> Void
+    let onAttachAdditionalParameters: ((_ useCase: PrivacyProDataReportingUseCase, _ params: [String: String]) -> [String: String])?
 
     func mapActionToViewModel(remoteAction: RemoteAction,
                               buttonAction: HomeMessageViewModel.ButtonAction,
-                              onDidClose: @escaping (HomeMessageViewModel.ButtonAction?) -> Void) -> () -> Void {
+                              onDidClose: @escaping (HomeMessageViewModel.ButtonAction?) async -> Void) -> () async -> Void {
 
         switch remoteAction {
         case .share:
-            return {
-                onDidClose(buttonAction)
+            return { @MainActor in
+                await onDidClose(buttonAction)
             }
         case .url(let value):
-            return {
+            return { @MainActor in
                 LaunchTabNotification.postLaunchTabNotification(urlString: value)
-                onDidClose(buttonAction)
+                await onDidClose(buttonAction)
             }
-        case .surveyURL(let value):
-            return {
-#if NETWORK_PROTECTION
-                if let surveyURL = URL(string: value) {
-                    let surveyURLBuilder = DefaultSurveyURLBuilder()
-                    let surveyURLWithParameters = surveyURLBuilder.addSurveyParameters(to: surveyURL)
-                    LaunchTabNotification.postLaunchTabNotification(urlString: surveyURLWithParameters.absoluteString)
-                } else {
-                    LaunchTabNotification.postLaunchTabNotification(urlString: value)
-                }
-#else
+        case .survey(let value):
+            return { @MainActor in
                 LaunchTabNotification.postLaunchTabNotification(urlString: value)
-#endif
-
-                onDidClose(buttonAction)
+                await onDidClose(buttonAction)
             }
         case .appStore:
-            return {
+            return { @MainActor in
                 let url = URL.appStore
                 if UIApplication.shared.canOpenURL(url as URL) {
                     UIApplication.shared.open(url)
                 }
-                onDidClose(buttonAction)
+                await onDidClose(buttonAction)
             }
         case .dismiss:
-            return {
-                onDidClose(buttonAction)
+            return { @MainActor in
+                await onDidClose(buttonAction)
             }
         }
     }
@@ -180,6 +166,15 @@ struct HomeMessageButtonViewModel {
     
     let title: String
     var actionStyle: ActionStyle = .default
-    let action: () -> Void
+    let action: () async -> Void
 
+}
+
+private extension RemoteAction {
+    var isShare: Bool {
+        if case .share = self.actionStyle() {
+            return true
+        }
+        return false
+    }
 }

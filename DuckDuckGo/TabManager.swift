@@ -24,6 +24,8 @@ import WebKit
 import BrowserServicesKit
 import Persistence
 import History
+import Subscription
+import os.log
 
 class TabManager {
 
@@ -32,9 +34,23 @@ class TabManager {
     private var tabControllerCache = [TabViewController]()
 
     private let bookmarksDatabase: CoreDataDatabase
-    private let historyManager: HistoryManager
+    private let historyManager: HistoryManaging
     private let syncService: DDGSyncing
     private var previewsSource: TabPreviewsSource
+    private let interactionStateSource: TabInteractionStateSource?
+    private var duckPlayer: DuckPlayerControlling
+    private var privacyProDataReporter: PrivacyProDataReporting
+    private let contextualOnboardingPresenter: ContextualOnboardingPresenting
+    private let contextualOnboardingLogic: ContextualOnboardingLogic
+    private let onboardingPixelReporter: OnboardingPixelReporting
+    private let featureFlagger: FeatureFlagger
+    private let textZoomCoordinator: TextZoomCoordinating
+    private let fireproofing: Fireproofing
+    private let websiteDataManager: WebsiteDataManaging
+    private let subscriptionCookieManager: SubscriptionCookieManaging
+    private let appSettings: AppSettings
+    private let maliciousSiteProtectionManager: MaliciousSiteProtectionManaging
+    private let maliciousSiteProtectionPreferencesManager: MaliciousSiteProtectionPreferencesManaging
 
     weak var delegate: TabDelegate?
 
@@ -44,33 +60,84 @@ class TabManager {
     @MainActor
     init(model: TabsModel,
          previewsSource: TabPreviewsSource,
+         interactionStateSource: TabInteractionStateSource?,
          bookmarksDatabase: CoreDataDatabase,
-         historyManager: HistoryManager,
-         syncService: DDGSyncing) {
+         historyManager: HistoryManaging,
+         syncService: DDGSyncing,
+         duckPlayer: DuckPlayer = DuckPlayer(),
+         privacyProDataReporter: PrivacyProDataReporting,
+         contextualOnboardingPresenter: ContextualOnboardingPresenting,
+         contextualOnboardingLogic: ContextualOnboardingLogic,
+         onboardingPixelReporter: OnboardingPixelReporting,
+         featureFlagger: FeatureFlagger,
+         subscriptionCookieManager: SubscriptionCookieManaging,
+         appSettings: AppSettings,
+         textZoomCoordinator: TextZoomCoordinating,
+         websiteDataManager: WebsiteDataManaging,
+         fireproofing: Fireproofing,
+         maliciousSiteProtectionManager: MaliciousSiteProtectionManaging,
+         maliciousSiteProtectionPreferencesManager: MaliciousSiteProtectionPreferencesManaging
+    ) {
         self.model = model
         self.previewsSource = previewsSource
+        self.interactionStateSource = interactionStateSource
         self.bookmarksDatabase = bookmarksDatabase
         self.historyManager = historyManager
         self.syncService = syncService
-
+        self.duckPlayer = duckPlayer
+        self.privacyProDataReporter = privacyProDataReporter
+        self.contextualOnboardingPresenter = contextualOnboardingPresenter
+        self.contextualOnboardingLogic = contextualOnboardingLogic
+        self.onboardingPixelReporter = onboardingPixelReporter
+        self.featureFlagger = featureFlagger
+        self.subscriptionCookieManager = subscriptionCookieManager
+        self.appSettings = appSettings
+        self.textZoomCoordinator = textZoomCoordinator
+        self.websiteDataManager = websiteDataManager
+        self.fireproofing = fireproofing
+        self.maliciousSiteProtectionManager = maliciousSiteProtectionManager
+        self.maliciousSiteProtectionPreferencesManager = maliciousSiteProtectionPreferencesManager
         registerForNotifications()
     }
 
     @MainActor
-    private func buildController(forTab tab: Tab, inheritedAttribution: AdClickAttributionLogic.State?) -> TabViewController {
+    private func buildController(forTab tab: Tab, inheritedAttribution: AdClickAttributionLogic.State?, interactionState: Data?) -> TabViewController {
         let url = tab.link?.url
-        return buildController(forTab: tab, url: url, inheritedAttribution: inheritedAttribution)
+        return buildController(forTab: tab, url: url, inheritedAttribution: inheritedAttribution, interactionState: interactionState)
     }
 
     @MainActor
-    private func buildController(forTab tab: Tab, url: URL?, inheritedAttribution: AdClickAttributionLogic.State?) -> TabViewController {
+    private func buildController(forTab tab: Tab,
+                                 url: URL?,
+                                 inheritedAttribution: AdClickAttributionLogic.State?,
+                                 interactionState: Data?) -> TabViewController {
         let configuration =  WKWebViewConfiguration.persistent()
+
+        let specialErrorPageNavigationHandler = SpecialErrorPageNavigationHandler(
+            maliciousSiteProtectionNavigationHandler: MaliciousSiteProtectionNavigationHandler(
+                maliciousSiteProtectionManager: maliciousSiteProtectionManager
+            )
+        )
+
         let controller = TabViewController.loadFromStoryboard(model: tab,
                                                               bookmarksDatabase: bookmarksDatabase,
                                                               historyManager: historyManager,
-                                                              syncService: syncService)
+                                                              syncService: syncService,
+                                                              duckPlayer: duckPlayer,
+                                                              privacyProDataReporter: privacyProDataReporter,
+                                                              contextualOnboardingPresenter: contextualOnboardingPresenter,
+                                                              contextualOnboardingLogic: contextualOnboardingLogic,
+                                                              onboardingPixelReporter: onboardingPixelReporter,
+                                                              featureFlagger: featureFlagger,
+                                                              subscriptionCookieManager: subscriptionCookieManager,
+                                                              textZoomCoordinator: textZoomCoordinator,
+                                                              websiteDataManager: websiteDataManager,
+                                                              fireproofing: fireproofing,
+                                                              tabInteractionStateSource: interactionStateSource,
+                                                              specialErrorPageNavigationHandler: specialErrorPageNavigationHandler)
         controller.applyInheritedAttribution(inheritedAttribution)
         controller.attachWebView(configuration: configuration,
+                                 interactionStateData: interactionState,
                                  andLoadRequest: url == nil ? nil : URLRequest.userInitiated(url!),
                                  consumeCookies: !model.hasActiveTabs)
         controller.delegate = delegate
@@ -80,14 +147,14 @@ class TabManager {
 
     @MainActor
     func current(createIfNeeded: Bool = false) -> TabViewController? {
-        let index = model.currentIndex
-        let tab = model.tabs[index]
+        guard let tab = model.currentTab else { return nil }
 
         if let controller = controller(for: tab) {
             return controller
         } else if createIfNeeded {
-            os_log("Tab not in cache, creating", log: .generalLog, type: .debug)
-            let controller = buildController(forTab: tab, inheritedAttribution: nil)
+            Logger.general.debug("Tab not in cache, creating")
+            let tabInteractionState = interactionStateSource?.popLastStateForTab(tab)
+            let controller = buildController(forTab: tab, inheritedAttribution: nil, interactionState: tabInteractionState)
             tabControllerCache.append(controller)
             return controller
         } else {
@@ -137,10 +204,28 @@ class TabManager {
         model.insert(tab: tab, at: model.currentIndex + 1)
         model.select(tabAt: model.currentIndex + 1)
 
+        let specialErrorPageNavigationHandler = SpecialErrorPageNavigationHandler(
+            maliciousSiteProtectionNavigationHandler: MaliciousSiteProtectionNavigationHandler(
+                maliciousSiteProtectionManager: maliciousSiteProtectionManager
+            )
+        )
+
         let controller = TabViewController.loadFromStoryboard(model: tab,
                                                               bookmarksDatabase: bookmarksDatabase,
                                                               historyManager: historyManager,
-                                                              syncService: syncService)
+                                                              syncService: syncService,
+                                                              duckPlayer: duckPlayer,
+                                                              privacyProDataReporter: privacyProDataReporter,
+                                                              contextualOnboardingPresenter: contextualOnboardingPresenter,
+                                                              contextualOnboardingLogic: contextualOnboardingLogic,
+                                                              onboardingPixelReporter: onboardingPixelReporter,
+                                                              featureFlagger: featureFlagger,
+                                                              subscriptionCookieManager: subscriptionCookieManager,
+                                                              textZoomCoordinator: textZoomCoordinator,
+                                                              websiteDataManager: websiteDataManager,
+                                                              fireproofing: fireproofing,
+                                                              tabInteractionStateSource: interactionStateSource,
+                                                              specialErrorPageNavigationHandler: specialErrorPageNavigationHandler)
         controller.attachWebView(configuration: configCopy,
                                  andLoadRequest: request,
                                  consumeCookies: !model.hasActiveTabs,
@@ -197,7 +282,7 @@ class TabManager {
 
         let link = url == nil ? nil : Link(title: nil, url: url!)
         let tab = Tab(link: link)
-        let controller = buildController(forTab: tab, url: url, inheritedAttribution: inheritedAttribution)
+        let controller = buildController(forTab: tab, url: url, inheritedAttribution: inheritedAttribution, interactionState: nil)
         tabControllerCache.append(controller)
 
         let index = model.currentIndex
@@ -218,6 +303,18 @@ class TabManager {
         if let controller = controller(for: tab) {
             removeFromCache(controller)
         }
+        interactionStateSource?.removeStateForTab(tab)
+        save()
+    }
+
+    func replaceTab(at index: Int, withNewTab newTab: Tab) {
+        // Removing a Tab automatically inserts a new one if tabs are empty. Hence add a new one only if needed
+        if model.tabs.count == 1 {
+            model.remove(at: index)
+        } else {
+            model.remove(at: index)
+            model.insert(tab: newTab, at: index)
+        }
         save()
     }
 
@@ -234,7 +331,12 @@ class TabManager {
         for controller in tabControllerCache {
             removeFromCache(controller)
         }
+        interactionStateSource?.removeAll(excluding: [])
         save()
+    }
+
+    func removeLeftoverInteractionStates() {
+        interactionStateSource?.removeAll(excluding: model.tabs)
     }
 
     @MainActor
@@ -266,7 +368,7 @@ class TabManager {
 
         DispatchQueue.global(qos: .background).async { [weak self] in
             guard let self = self,
-                  let tabsCacheUrl = Favicons.CacheType.tabs.cacheLocation()?.appendingPathComponent(Favicons.Constants.tabsCachePath),
+                  let tabsCacheUrl = FaviconsCacheType.tabs.cacheLocation()?.appendingPathComponent(Favicons.Constants.tabsCachePath),
                   let contents = try? FileManager.default.contentsOfDirectory(at: tabsCacheUrl, includingPropertiesForKeys: nil, options: []),
                     !contents.isEmpty else { return }
 
@@ -282,7 +384,7 @@ class TabManager {
             })
 
             // hash the unique tab hosts
-            let tabLinksHashed = tabLink.map { Favicons.createHash(ofDomain: $0) }
+            let tabLinksHashed = tabLink.map { FaviconHasher.createHash(ofDomain: $0) }
 
             // filter images that don't have a corresponding tab
             let toDelete = imageDomainURLs.filter { !tabLinksHashed.contains($0) }
@@ -295,15 +397,6 @@ class TabManager {
     }
 }
 
-extension TabManager: Themable {
-    
-    func decorate(with theme: Theme) {
-        for tabController in tabControllerCache {
-            tabController.decorate(with: theme)
-        }
-    }
-    
-}
 
 // MARK: - Debugging Pixels
 
@@ -332,4 +425,5 @@ extension TabManager {
             TabPreviewsCleanup.shared.startCleanup(with: model, source: previewsSource)
         }
     }
+
 }

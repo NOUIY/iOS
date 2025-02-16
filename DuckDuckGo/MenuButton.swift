@@ -35,7 +35,6 @@ class MenuButton: UIView {
     enum State {
         case menuImage
         case closeImage
-        case bookmarksImage
     }
     
     struct Constants {
@@ -72,11 +71,12 @@ class MenuButton: UIView {
         addSubview(pointerView)
         addSubview(anim)
         addSubview(bookmarksIconView)
-        
+
         configureAnimationView()
-        configureBookmarksView()
-        
+
         addInteraction(UIPointerInteraction(delegate: self))
+
+        decorate()
     }
 
     override func layoutSubviews() {
@@ -86,15 +86,6 @@ class MenuButton: UIView {
         anim.center = center
         pointerView.center = center
         bookmarksIconView.center = center
-    }
-    
-    private func configureBookmarksView() {
-        bookmarksIconView.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
-        bookmarksIconView.image = UIImage(named: "Book-24")
-        
-        bookmarksIconView.center = CGPoint(x: bounds.midX, y: bounds.midY)
-        
-        bookmarksIconView.isHidden = true
     }
 
     private func configureAnimationView() {
@@ -120,8 +111,6 @@ class MenuButton: UIView {
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         tint(alpha: 1)
         switch currentState {
-        case .bookmarksImage:
-            delegate?.showBookmarks(self)
         case .menuImage, .closeImage:
             delegate?.showMenu(self)
         }
@@ -160,9 +149,6 @@ class MenuButton: UIView {
             } else {
                 anim.currentProgress = 0.0
             }
-        case .bookmarksImage:
-            bookmarksIconView.isHidden = false
-            anim.isHidden = true
         }
         
         currentState = state
@@ -183,24 +169,34 @@ class MenuButton: UIView {
     }
 }
 
-extension MenuButton: Themable {
+extension MenuButton {
     
-    func decorate(with theme: Theme) {
+    private func decorate() {
+        let theme = ThemeManager.shared.currentTheme
         tintColor = theme.barTintColor
 
-        switch theme.currentImageSet {
-        case .light:
-            anim.animation = LottieAnimation.named("menu_light")
+        updateAnimationForCurrentAppearance()
+    }
+
+    private func updateAnimationForCurrentAppearance() {
+        switch traitCollection.userInterfaceStyle {
         case .dark:
             anim.animation = LottieAnimation.named("menu_dark")
+        default:
+            anim.animation = LottieAnimation.named("menu_light")
         }
-        
+
         if currentState == State.closeImage {
             anim.currentProgress = 1.0
         }
+    }
 
-        addSubview(anim)
-        configureAnimationView()
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateAnimationForCurrentAppearance()
+        }
     }
 }
 

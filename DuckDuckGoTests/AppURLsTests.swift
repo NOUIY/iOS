@@ -47,8 +47,7 @@ final class AppURLsTests: XCTestCase {
         appConfig = AppPrivacyConfiguration(data: privacyData,
                                             identifier: "",
                                             localProtection: localProtection,
-                                            internalUserDecider: DefaultInternalUserDecider(),
-                                            toggleProtectionsCounter: ToggleProtectionsCounter(eventReporting: nil))
+                                            internalUserDecider: DefaultInternalUserDecider())
     }
 
     func testWhenRemoveInternalSearchParametersFromSearchUrlThenUrlIsChanged() throws {
@@ -157,13 +156,6 @@ final class AppURLsTests: XCTestCase {
     func testWhenDdgUrlHasSubdomainThenIsDddgIsTrue() {
         let result = URL(string: "http://www.duckduckgo.com")!.isDuckDuckGo
         XCTAssertTrue(result)
-    }
-    
-    func testAutocompleteUrlCreatesCorrectUrlWithParams() throws {
-        let actual = try URL.makeAutocompleteURL(for: "a term")
-        XCTAssertTrue(actual.isDuckDuckGo)
-        XCTAssertEqual("/ac", actual.path)
-        XCTAssertEqual("a term", actual.getParameter(named: "q"))
     }
 
     func testInitialAtbDoesNotContainAtbParams() throws {

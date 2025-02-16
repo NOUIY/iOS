@@ -28,5 +28,9 @@ protocol TabSwitcherDelegate: AnyObject {
     func tabSwitcher(_ tabSwitcher: TabSwitcherViewController, didRemoveTab tab: Tab)
 
     func tabSwitcherDidRequestForgetAll(tabSwitcher: TabSwitcherViewController)
-        
+    
+    func tabSwitcherDidRequestCloseAll(tabSwitcher: TabSwitcherViewController)
+
+    func tabSwitcherDidReorderTabs(tabSwitcher: TabSwitcherViewController)
+
 }

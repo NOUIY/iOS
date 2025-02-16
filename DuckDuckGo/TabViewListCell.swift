@@ -19,13 +19,12 @@
 
 import UIKit
 import Core
+import DuckPlayer
 
 class TabViewListCell: TabViewCell {
 
     struct Constants {
         
-        static let selectedBorderWidth: CGFloat = 2.0
-        static let unselectedBorderWidth: CGFloat = 0.0
         static let selectedAlpha: CGFloat = 1.0
         static let unselectedAlpha: CGFloat = 0.92
         static let swipeToDeleteAlpha: CGFloat = 0.5
@@ -40,20 +39,23 @@ class TabViewListCell: TabViewCell {
     @IBOutlet weak var link: UILabel!
     @IBOutlet weak var removeButton: UIButton!
     @IBOutlet weak var unread: UIView!
+    @IBOutlet weak var selectionIndicator: UIImageView!
 
     override func update(withTab tab: Tab,
-                         preview: UIImage?,
-                         reorderRecognizer: UIGestureRecognizer?) {
+                         isSelectionModeEnabled: Bool,
+                         preview: UIImage?) {
         accessibilityElements = [ title as Any, removeButton as Any ]
         
         self.tab = tab
-        self.collectionReorderRecognizer = reorderRecognizer
+        self.isSelectionModeEnabled = isSelectionModeEnabled
         
         if !isDeleting {
             isHidden = false
         }
         isCurrent = delegate?.isCurrent(tab: tab) ?? false
-        decorate(with: ThemeManager.shared.currentTheme)
+        decorate()
+
+        updateCurrentTabBorder(background)
 
         if let link = tab.link {
             removeButton.accessibilityLabel = UserText.closeTab(withTitle: link.displayTitle, atAddress: link.url.host ?? "")
@@ -75,15 +77,36 @@ class TabViewListCell: TabViewCell {
             link.isHidden = !tab.viewed
         } else {
             removeButton.isHidden = false
+            
+            // Duck Player videos
+            if let url = tab.link?.url,
+                url.isDuckPlayer,
+                let (videoID, _) = url.youtubeVideoParams {
+                    link.text = URL.duckPlayer(videoID).absoluteString
+                    favicon.image = UIImage(named: "DuckPlayerURLIcon")
+                    return
+            }
+            
+            // Other URLs
             link.text = tab.link?.url.absoluteString ?? ""
             favicon.loadFavicon(forDomain: tab.link?.url.host, usingCache: .tabs)
+            
+        }
+
+        updateUIForSelectionMode(removeButton, selectionIndicator)
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            decorate()
         }
     }
-    
-    override func decorate(with theme: Theme) {
-        super.decorate(with: theme)
-        
-        background.layer.borderWidth = isCurrent ? Constants.selectedBorderWidth : Constants.unselectedBorderWidth
+
+    private func decorate() {
+        let theme = ThemeManager.shared.currentTheme
+
         background.layer.borderColor = theme.tabSwitcherCellBorderColor.cgColor
         background.alpha = isCurrent ? Constants.selectedAlpha : Constants.unselectedAlpha
         

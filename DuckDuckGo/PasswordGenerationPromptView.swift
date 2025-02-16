@@ -56,7 +56,7 @@ struct PasswordGenerationPromptView: View {
                     passwordView
                     AutofillViews.LegacySpacerView()
                 }
-                AutofillViews.Description(text: UserText.autofillPasswordGenerationPromptSubtitle)
+                AutofillViews.SecureDescription(text: UserText.autofillSaveLoginSecurityMessage)
                 contentViewSpacer
                 ctaView
                     .padding(.bottom, AutofillViews.isIPad(verticalSizeClass, horizontalSizeClass) ? Const.Size.bottomPaddingIPad
@@ -169,11 +169,7 @@ private extension View {
 
     @ViewBuilder
     func textSelectionEnabled() -> some View {
-        if #available(iOS 15.0, *) {
-            self.textSelection(.enabled)
-        } else {
-            self
-        }
+        self.textSelection(.enabled)
     }
 }
 

@@ -19,8 +19,6 @@
 
 import Foundation
 import SwiftUI
-#if SUBSCRIPTION
-@available(iOS 15.0, *)
 
 struct SubscriptionGoogleView: View {
         
@@ -50,12 +48,9 @@ struct SubscriptionGoogleView: View {
     }
         
 }
-#endif
 
 
-#if SUBSCRIPTION && DEBUG
-@available(iOS 15.0, *)
-
+#if DEBUG
 struct SubscriptionGoogleView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {

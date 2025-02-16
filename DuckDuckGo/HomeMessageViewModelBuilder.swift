@@ -33,23 +33,36 @@ struct HomeMessageViewModelBuilder {
     }
 
     static func build(for remoteMessage: RemoteMessageModel,
-                      onDidClose: @escaping (HomeMessageViewModel.ButtonAction?) -> Void,
+                      with privacyProDataReporter: PrivacyProDataReporting?,
+                      onDidClose: @escaping (HomeMessageViewModel.ButtonAction?) async -> Void,
                       onDidAppear: @escaping () -> Void) -> HomeMessageViewModel? {
             guard let content = remoteMessage.content else { return nil }
 
-        return HomeMessageViewModel(messageId: remoteMessage.id, modelType: content, onDidClose: onDidClose, onDidAppear: onDidAppear)
+        return HomeMessageViewModel(
+            messageId: remoteMessage.id,
+            sendPixels: remoteMessage.isMetricsEnabled,
+            modelType: content,
+            onDidClose: onDidClose,
+            onDidAppear: onDidAppear,
+            onAttachAdditionalParameters: { useCase, params in
+                privacyProDataReporter?.mergeRandomizedParameters(for: useCase, with: params) ?? params
+            }
+        )
     }
 
 }
 
 extension RemoteAction {
 
-    var actionStyle: HomeMessageButtonViewModel.ActionStyle {
+    func actionStyle(isSecondaryAction: Bool = false) -> HomeMessageButtonViewModel.ActionStyle {
         switch self {
         case .share(let value, let title):
             return .share(value: value, title: title)
 
-        case .appStore, .url, .surveyURL:
+        case .appStore, .url, .survey:
+            if isSecondaryAction {
+                return .cancel
+            }
             return .default
 
         case .dismiss:

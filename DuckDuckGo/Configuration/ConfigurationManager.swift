@@ -21,9 +21,18 @@ import Foundation
 import Core
 import Configuration
 import BrowserServicesKit
+import Persistence
 import Common
+import os.log
 
-struct ConfigurationManager {
+final class ConfigurationManager: DefaultConfigurationManager {
+
+    private let trackerDataManager: TrackerDataManager
+    private let privacyConfigurationManager: PrivacyConfigurationManaging
+
+    private enum Constants {
+        static let lastConfigurationInstallDateKey = "config.last.installed"
+    }
 
     enum UpdateResult {
         case noData
@@ -50,7 +59,6 @@ struct ConfigurationManager {
     }
 
     public static let didUpdateTrackerDependencies = NSNotification.Name(rawValue: "com.duckduckgo.configurationManager.didUpdateTrackerDependencies")
-    private let fetcher = ConfigurationFetcher(store: ConfigurationStore.shared, log: .configurationLog, eventMapping: Self.configurationDebugEvents)
 
     private static let configurationDebugEvents = EventMapping<ConfigurationDebugEvents> { event, error, _, _ in
         let domainEvent: Pixel.Event
@@ -66,7 +74,24 @@ struct ConfigurationManager {
         }
     }
 
+    init(fetcher: ConfigurationFetching = ConfigurationFetcher(store: ConfigurationStore(), eventMapping: configurationDebugEvents),
+         store: ConfigurationStoring = AppDependencyProvider.shared.configurationStore,
+         defaults: KeyValueStoring = UserDefaults(suiteName: "\(Global.groupIdPrefix).app-configuration") ?? UserDefaults(),
+         trackerDataManager: TrackerDataManager = ContentBlocking.shared.trackerDataManager,
+         privacyConfigurationManager: PrivacyConfigurationManaging = ContentBlocking.shared.privacyConfigurationManager) {
+        self.trackerDataManager = trackerDataManager
+        self.privacyConfigurationManager = privacyConfigurationManager
+        super.init(fetcher: fetcher, store: store, defaults: defaults)
+        subscribeToLifecycleNotifications()
+    }
+
+    deinit {
+        removeLifecycleNotifications()
+    }
+
+    @discardableResult
     func update(isDebug: Bool = false) async -> UpdateResult {
+        lastUpdateTime = Date()
         async let didFetchAnyTrackerBlockingDependencies = fetchAndUpdateTrackerBlockingDependencies(isDebug: isDebug)
         async let didFetchExcludedDomains = fetchAndUpdateBloomFilterExcludedDomains()
         async let didFetchBloomFilter = fetchAndUpdateBloomFilter()
@@ -77,6 +102,14 @@ struct ConfigurationManager {
             return .assetsUpdated(includesPrivacyProtectionChanges: results.0)
         }
         return .noData
+    }
+
+    func loadPrivacyConfigFromDiskIfNeeded() {
+        let storedEtag = store.loadEtag(for: .privacyConfiguration)
+        let privacyManagerEtag = (ContentBlocking.shared.privacyConfigurationManager as? PrivacyConfigurationManager)?.fetchedConfigData?.etag
+        if let privacyManagerEtag, privacyManagerEtag != storedEtag {
+            updateTrackerBlockingDependencies()
+        }
     }
 
     @discardableResult
@@ -91,39 +124,56 @@ struct ConfigurationManager {
     private func fetchTrackerBlockingDependencies(isDebug: Bool = false) async -> Bool {
         var didFetchAnyTrackerBlockingDependencies = false
 
-        var tasks = [Configuration: Task<(), Swift.Error>]()
-        tasks[.trackerDataSet] = Task { try await fetcher.fetch(.trackerDataSet) }
-        tasks[.surrogates] = Task { try await fetcher.fetch(.surrogates) }
-        tasks[.privacyConfiguration] = Task { try await fetcher.fetch(.privacyConfiguration, isDebug: isDebug) }
+        // Start surrogates fetch task
+        let surrogatesTask = Task { try await fetcher.fetch(.surrogates, isDebug: isDebug) }
+
+        // Perform privacyConfiguration fetch and update
+        do {
+            try await fetcher.fetch(.privacyConfiguration, isDebug: isDebug)
+            didFetchAnyTrackerBlockingDependencies = true
+            privacyConfigurationManager.reload(etag: store.loadEtag(for: .privacyConfiguration),
+                                               data: store.loadData(for: .privacyConfiguration))
+        } catch {
+            Logger.general.error("Did not apply update to \(Configuration.privacyConfiguration.rawValue, privacy: .public): \(error.localizedDescription, privacy: .public)")
+        }
+
+        // Start trackerDataSet fetch task after privacyConfiguration completes
+        let trackerDataSetTask = Task { try await fetcher.fetch(.trackerDataSet, isDebug: isDebug) }
+
+        // Wait for surrogates and trackerDataSet tasks
+        let tasks: [(Configuration, Task<(), Swift.Error>)] = [
+            (.surrogates, surrogatesTask),
+            (.trackerDataSet, trackerDataSetTask)
+        ]
 
         for (configuration, task) in tasks {
             do {
                 try await task.value
                 didFetchAnyTrackerBlockingDependencies = true
             } catch {
-                os_log("Did not apply update to %@: %@", log: .generalLog, type: .debug, configuration.rawValue, error.localizedDescription)
+                Logger.general.error("Did not apply update to \(configuration.rawValue, privacy: .public): \(error.localizedDescription, privacy: .public)")
             }
         }
 
         return didFetchAnyTrackerBlockingDependencies
     }
-    
+
     private func updateTrackerBlockingDependencies() {
-        ContentBlocking.shared.privacyConfigurationManager.reload(etag: ConfigurationStore.shared.loadEtag(for: .privacyConfiguration),
-                                                                  data: ConfigurationStore.shared.loadData(for: .privacyConfiguration))
-        ContentBlocking.shared.trackerDataManager.reload(etag: ConfigurationStore.shared.loadEtag(for: .trackerDataSet),
-                                                         data: ConfigurationStore.shared.loadData(for: .trackerDataSet))
+        privacyConfigurationManager.reload(etag: store.loadEtag(for: .privacyConfiguration),
+                                           data: store.loadData(for: .privacyConfiguration))
+        trackerDataManager.reload(etag: store.loadEtag(for: .trackerDataSet),
+                                  data: store.loadData(for: .trackerDataSet))
         NotificationCenter.default.post(name: ConfigurationManager.didUpdateTrackerDependencies, object: self)
     }
 
     @discardableResult
     func fetchAndUpdateBloomFilterExcludedDomains() async -> Bool {
         do {
-            try await fetcher.fetch(.bloomFilterExcludedDomains)
+            try await fetcher.fetch(.bloomFilterExcludedDomains, isDebug: false)
             try await updateBloomFilterExclusions()
             return true
         } catch {
-            os_log("Failed to apply update to bloom filter exclusions: %@", log: .generalLog, type: .debug, error.localizedDescription)
+            Logger.general.error("Failed to apply update to bloom filter exclusions: \(error.localizedDescription, privacy: .public)")
             return false
         }
     }
@@ -135,16 +185,16 @@ struct ConfigurationManager {
             try await updateBloomFilter()
             return true
         } catch {
-            os_log("Failed to apply update to bloom filter: %@", log: .generalLog, type: .debug, error.localizedDescription)
+            Logger.general.error("Failed to apply update to bloom filter: \(error.localizedDescription, privacy: .public)")
             return false
         }
     }
     
     private func updateBloomFilter() async throws {
-        guard let specData = ConfigurationStore.shared.loadData(for: .bloomFilterSpec) else {
+        guard let specData = store.loadData(for: .bloomFilterSpec) else {
             throw Error.bloomFilterSpecNotFound
         }
-        guard let bloomFilterData = ConfigurationStore.shared.loadData(for: .bloomFilterBinary) else {
+        guard let bloomFilterData = store.loadData(for: .bloomFilterBinary) else {
             throw Error.bloomFilterBinaryNotFound
         }
         let specification = try JSONDecoder().decode(HTTPSBloomFilterSpecification.self, from: specData)
@@ -153,7 +203,7 @@ struct ConfigurationManager {
     }
     
     private func updateBloomFilterExclusions() async throws {
-        guard let excludedDomainsData = ConfigurationStore.shared.loadData(for: .bloomFilterExcludedDomains) else {
+        guard let excludedDomainsData = store.loadData(for: .bloomFilterExcludedDomains) else {
             throw Error.bloomFilterExcludedDomainsNotFound
         }
         let excludedDomains = try HTTPSUpgradeParser.convertExcludedDomainsData(excludedDomainsData)
@@ -161,4 +211,40 @@ struct ConfigurationManager {
         await PrivacyFeatures.httpsUpgrade.loadData()
     }
     
+}
+
+extension ConfigurationManager {
+    override var presentedItemURL: URL? {
+        return store.fileUrl(for: .privacyConfiguration).deletingLastPathComponent()
+    }
+
+    override func presentedSubitemDidAppear(at url: URL) {
+        guard url == store.fileUrl(for: .privacyConfiguration) else { return }
+        updateTrackerBlockingDependencies()
+    }
+
+    override func presentedSubitemDidChange(at url: URL) {
+        guard url == store.fileUrl(for: .privacyConfiguration) else { return }
+        updateTrackerBlockingDependencies()
+    }
+
+    func subscribeToLifecycleNotifications() {
+        NotificationCenter.default.addObserver(self, selector: #selector(addPresenter), name: UIApplication.willEnterForegroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(removePresenter), name: UIApplication.didEnterBackgroundNotification, object: nil)
+    }
+
+    func removeLifecycleNotifications() {
+        NotificationCenter.default.removeObserver(self, name: UIApplication.willEnterForegroundNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIApplication.didEnterBackgroundNotification, object: nil)
+    }
+
+    @objc
+    func addPresenter() {
+        NSFileCoordinator.addFilePresenter(self)
+    }
+
+    @objc
+    func removePresenter() {
+        NSFileCoordinator.removeFilePresenter(self)
+    }
 }

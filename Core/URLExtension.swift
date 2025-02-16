@@ -21,9 +21,10 @@ import Foundation
 import JavaScriptCore
 import BrowserServicesKit
 import Network
+import Common
 
 extension URL {
-
+    
     enum Host: String {
         case localhost
     }
@@ -45,7 +46,9 @@ extension URL {
         guard var url = URL(string: text) else { return nil }
 
         switch url.scheme {
-        case URLProtocol.http.rawValue, URLProtocol.https.rawValue:
+        case URLProtocol.http.rawValue,
+            URLProtocol.https.rawValue,
+            NavigationalScheme.duck.rawValue: // duck:// internal scheme
             break
         case .none:
             // assume http by default

@@ -21,7 +21,7 @@ import UIKit
 import Core
 
 class OnboardingDefaultBroswerViewController: OnboardingContentViewController {
-    
+
     override var header: String {
         return UserText.onboardingDefaultBrowserTitle
     }
@@ -35,6 +35,8 @@ class OnboardingDefaultBroswerViewController: OnboardingContentViewController {
     }
     
     override func onContinuePressed(navigationHandler: @escaping () -> Void) {
+        Pixel.fire(pixel: .onboardingIntroChooseBrowserCTAPressed, includedParameters: [.appVersion, .atb])
+
         if let url = URL(string: UIApplication.openSettingsURLString) {
             UIApplication.shared.open(url)
         }

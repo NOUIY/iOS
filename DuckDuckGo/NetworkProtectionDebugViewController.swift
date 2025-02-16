@@ -17,28 +17,13 @@
 //  limitations under the License.
 //
 
-// swiftlint:disable file_length
-
 import UIKit
-
-#if !NETWORK_PROTECTION
-
-final class NetworkProtectionDebugViewController: UITableViewController {
-    // Just an empty VC
-}
-
-#else
-
 import Common
 import Network
 import NetworkExtension
 import NetworkProtection
-
-#if SUBSCRIPTION
 import Subscription
-#endif
 
-// swiftlint:disable:next type_body_length
 final class NetworkProtectionDebugViewController: UITableViewController {
     private let titles = [
         Sections.featureVisibility: "Feature Visibility",
@@ -73,12 +58,12 @@ final class NetworkProtectionDebugViewController: UITableViewController {
     }
 
     enum ClearDataRows: Int, CaseIterable {
-        case clearAuthToken
-        case clearAllVPNData
+        case removeVPNConfiguration
     }
 
     enum DebugFeatureRows: Int, CaseIterable {
         case toggleAlwaysOn
+        case enforceRoutes
     }
 
     enum SimulateFailureRows: Int, CaseIterable {
@@ -98,7 +83,7 @@ final class NetworkProtectionDebugViewController: UITableViewController {
         case shutDown
         case showEntitlementMessaging
         case resetEntitlementMessaging
-        case resetThankYouMessaging
+        case startSnooze
     }
 
     enum NetworkPathRows: Int, CaseIterable {
@@ -140,21 +125,25 @@ final class NetworkProtectionDebugViewController: UITableViewController {
     private var connectionTestResults: [ConnectionTestResult] = []
     private var connectionTestResultError: String?
     private let connectionTestQueue = DispatchQueue(label: "com.duckduckgo.ios.vpnDebugConnectionTestQueue")
+    private let accountManager: AccountManager
 
     // MARK: Lifecycle
 
-    init?(coder: NSCoder,
-          tokenStore: NetworkProtectionTokenStore,
-          debugFeatures: NetworkProtectionDebugFeatures = NetworkProtectionDebugFeatures()) {
-
+    required init?(coder: NSCoder,
+                   tokenStore: NetworkProtectionTokenStore,
+                   debugFeatures: NetworkProtectionDebugFeatures = NetworkProtectionDebugFeatures(),
+                   accountManager: AccountManager) {
+        
         self.debugFeatures = debugFeatures
         self.tokenStore = tokenStore
+        self.accountManager = accountManager
 
         super.init(coder: coder)
     }
 
     required convenience init?(coder: NSCoder) {
-        self.init(coder: coder, tokenStore: NetworkProtectionKeychainTokenStore())
+        self.init(coder: coder, tokenStore: AppDependencyProvider.shared.networkProtectionKeychainTokenStore,
+                  accountManager: AppDependencyProvider.shared.subscriptionManager.accountManager)
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -178,7 +167,6 @@ final class NetworkProtectionDebugViewController: UITableViewController {
         return titles[section]
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
 
@@ -190,10 +178,8 @@ final class NetworkProtectionDebugViewController: UITableViewController {
 
         case .clearData:
             switch ClearDataRows(rawValue: indexPath.row) {
-            case .clearAuthToken:
-                cell.textLabel?.text = "Clear Auth Token"
-            case .clearAllVPNData:
-                cell.textLabel?.text = "Reset VPN State Completely"
+            case .removeVPNConfiguration:
+                cell.textLabel?.text = "Remove VPN Configuration"
             case .none:
                 break
             }
@@ -232,7 +218,6 @@ final class NetworkProtectionDebugViewController: UITableViewController {
         return cell
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch Sections(rawValue: section) {
         case .clearData: return ClearDataRows.allCases.count
@@ -250,13 +235,11 @@ final class NetworkProtectionDebugViewController: UITableViewController {
         }
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         switch Sections(rawValue: indexPath.section) {
         case .clearData:
             switch ClearDataRows(rawValue: indexPath.row) {
-            case .clearAuthToken: clearAuthToken()
-            case .clearAllVPNData: clearAllVPNData()
+            case .removeVPNConfiguration: deleteVPNConfiguration()
             default: break
             }
         case .debugFeature:
@@ -342,6 +325,14 @@ final class NetworkProtectionDebugViewController: UITableViewController {
             } else {
                 cell.accessoryType = .checkmark
             }
+        case .enforceRoutes:
+            cell.textLabel?.text = "Enforce Routes"
+
+            if !AppDependencyProvider.shared.vpnSettings.enforceRoutes {
+                cell.accessoryType = .none
+            } else {
+                cell.accessoryType = .checkmark
+            }
         default:
             break
         }
@@ -351,6 +342,9 @@ final class NetworkProtectionDebugViewController: UITableViewController {
         switch DebugFeatureRows(rawValue: indexPath.row) {
         case .toggleAlwaysOn:
             debugFeatures.alwaysOnDisabled.toggle()
+            tableView.reloadRows(at: [indexPath], with: .none)
+        case .enforceRoutes:
+            AppDependencyProvider.shared.vpnSettings.enforceRoutes.toggle()
             tableView.reloadRows(at: [indexPath], with: .none)
         default:
             break
@@ -391,8 +385,8 @@ final class NetworkProtectionDebugViewController: UITableViewController {
             cell.textLabel?.text = "Show Entitlement Messaging"
         case .resetEntitlementMessaging:
             cell.textLabel?.text = "Reset Entitlement Messaging"
-        case .resetThankYouMessaging:
-            cell.textLabel?.text = "Reset Thank You Messaging"
+        case .startSnooze:
+            cell.textLabel?.text = "Snooze For 30 Seconds"
         case .none:
             break
         }
@@ -412,8 +406,10 @@ final class NetworkProtectionDebugViewController: UITableViewController {
             UserDefaults.networkProtectionGroupDefaults.enableEntitlementMessaging()
         case .resetEntitlementMessaging:
             UserDefaults.networkProtectionGroupDefaults.resetEntitlementMessaging()
-        case .resetThankYouMessaging:
-            UserDefaults.networkProtectionGroupDefaults.resetThankYouMessaging()
+        case .startSnooze:
+            Task {
+                await NetworkProtectionDebugUtilities().startSnooze(duration: .seconds(30))
+            }
         case .none:
             break
         }
@@ -439,7 +435,7 @@ final class NetworkProtectionDebugViewController: UITableViewController {
             Supports IPv6: \(path.supportsIPv6)
             """
 
-            if #available(iOS 14.2, *), path.status == .unsatisfied {
+            if path.status == .unsatisfied {
                 pathDescription.append("\nUnsatisfied Reason: \(path.unsatisfiedReason)")
             }
 
@@ -630,7 +626,7 @@ final class NetworkProtectionDebugViewController: UITableViewController {
     private func configure(_ cell: UITableViewCell, forVisibilityRow row: Int) {
         switch FeatureVisibilityRows(rawValue: row) {
         case .toggleSelectedEnvironment:
-            let settings = VPNSettings(defaults: .networkProtectionGroupDefaults)
+            let settings = AppDependencyProvider.shared.vpnSettings
             if settings.selectedEnvironment == .production {
                 cell.textLabel?.text = "Selected Environment: PRODUCTION"
             } else {
@@ -644,19 +640,12 @@ final class NetworkProtectionDebugViewController: UITableViewController {
                 cell.textLabel?.text = "Subscription Override: N/A"
             }
         case .debugInfo:
-            let vpnVisibility = DefaultNetworkProtectionVisibility()
+            let vpnVisibility = AppDependencyProvider.shared.vpnFeatureVisibility
 
             cell.textLabel?.font = .monospacedSystemFont(ofSize: 13.0, weight: .regular)
             cell.textLabel?.text = """
-Endpoint: \(VPNSettings(defaults: .networkProtectionGroupDefaults).selectedEnvironment.endpointURL.absoluteString)
+Endpoint: \(AppDependencyProvider.shared.vpnSettings.selectedEnvironment.endpointURL.absoluteString)
 
-isPrivacyProLaunched: \(vpnVisibility.isPrivacyProLaunched() ? "YES" : "NO")
-isWaitlistBetaActive: \(vpnVisibility.isWaitlistBetaActive() ? "YES" : "NO")
-isWaitlistUser: \(vpnVisibility.isWaitlistUser() ? "YES" : "NO")
-
-shouldShowThankYouMessaging: \(vpnVisibility.shouldShowThankYouMessaging() ? "YES" : "NO")
-shouldKeepVPNAccessViaWaitlist: \(vpnVisibility.shouldKeepVPNAccessViaWaitlist() ? "YES" : "NO")
-shouldMonitorEntitlement: \(vpnVisibility.shouldMonitorEntitlement() ? "YES" : "NO")
 shouldShowVPNShortcut: \(vpnVisibility.shouldShowVPNShortcut() ? "YES" : "NO")
 """
         case .none:
@@ -666,31 +655,38 @@ shouldShowVPNShortcut: \(vpnVisibility.shouldShowVPNShortcut() ? "YES" : "NO")
 
     @MainActor
     private func refreshMetadata() async {
-        let collector = DefaultVPNMetadataCollector()
+        let collector = DefaultVPNMetadataCollector(
+            statusObserver: AppDependencyProvider.shared.connectionObserver,
+            serverInfoObserver: AppDependencyProvider.shared.serverInfoObserver
+        )
         self.vpnMetadata = await collector.collectMetadata()
         self.tableView.reloadData()
+    }
+    
+    private func showSubscriptionEnvAlert() {
+            let alertController = UIAlertController(title: "Use Subscription Environment", message: nil, preferredStyle: .alert)
+
+            alertController.message = "Go to Debug > Subscription > Environment to change the environment."
+        
+            // Add a "Cancel" action
+        let cancelAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+            alertController.addAction(cancelAction)
+
+            // Present the alert
+            present(alertController, animated: true, completion: nil)
+            
     }
 
     private func didSelectFeatureVisibility(at indexPath: IndexPath) {
         switch FeatureVisibilityRows(rawValue: indexPath.row) {
         case .toggleSelectedEnvironment:
-            let vpnSettings = VPNSettings(defaults: .networkProtectionGroupDefaults)
-            if vpnSettings.selectedEnvironment == .production {
-                vpnSettings.selectedEnvironment = .staging
-            } else {
-                vpnSettings.selectedEnvironment = .production
-            }
-            vpnSettings.selectedServer = .automatic
-            NetworkProtectionLocationListCompositeRepository.clearCache()
-            tableView.reloadData()
+            showSubscriptionEnvAlert()
         case .updateSubscriptionOverride:
             let defaults = UserDefaults.networkProtectionGroupDefaults
             if let subscriptionOverrideEnabled = defaults.subscriptionOverrideEnabled {
                 if subscriptionOverrideEnabled {
                     defaults.subscriptionOverrideEnabled = false
-#if SUBSCRIPTION
-                    AccountManager().signOut()
-#endif
+                    accountManager.signOut()
                 } else {
                     defaults.resetsubscriptionOverrideEnabled()
                 }
@@ -705,17 +701,13 @@ shouldShowVPNShortcut: \(vpnVisibility.shouldShowVPNShortcut() ? "YES" : "NO")
 
     // MARK: Selection Actions
 
-    private func clearAuthToken() {
-        try? tokenStore.deleteToken()
+    private func deleteVPNConfiguration() {
+        Task {
+            await AppDependencyProvider.shared.networkProtectionTunnelController.stop()
+            await AppDependencyProvider.shared.networkProtectionTunnelController.removeVPN(reason: .debugMenu)
+        }
     }
-
-    private func clearAllVPNData() {
-        let accessController = NetworkProtectionAccessController()
-        accessController.revokeNetworkProtectionAccess()
-    }
-
 }
-
 
 extension NWConnection {
 
@@ -749,7 +741,3 @@ extension NWConnection {
     }
 
 }
-
-#endif
-
-// swiftlint:enable file_length

@@ -20,11 +20,12 @@
 import UIKit
 
 protocol BrowserChromeDelegate: AnyObject {
-
-    func setBarsHidden(_ hidden: Bool, animated: Bool)
-    func setNavigationBarHidden(_ hidden: Bool)
     
-    func setBarsVisibility(_ percent: CGFloat, animated: Bool)
+    func setBarsHidden(_ hidden: Bool, animated: Bool, customAnimationDuration: CGFloat?)
+    func setNavigationBarHidden(_ hidden: Bool)
+    func setRefreshControlEnabled(_ isEnabled: Bool)
+    
+    func setBarsVisibility(_ percent: CGFloat, animated: Bool, animationDuration: CGFloat?)
     
     var canHideBars: Bool { get }
     var isToolbarHidden: Bool { get }
@@ -61,7 +62,8 @@ class BrowserChromeManager: NSObject, UIScrollViewDelegate {
         
         scrollView.delegate = self
         
-        observation = scrollView.observe(\.contentSize, options: .new) { [weak self] scrollView, _ in
+        observation = scrollView.observe(\.contentSize, options: .new) { [weak self] scrollView, observation in
+            guard observation.newValue != observation.oldValue else { return }
             self?.scrollViewDidResizeContent(scrollView)
         }
     }
@@ -104,6 +106,11 @@ class BrowserChromeManager: NSObject, UIScrollViewDelegate {
     
     func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
         startZoomScale = scrollView.zoomScale
+        delegate?.setRefreshControlEnabled(false)
+    }
+
+    func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
+        delegate?.setRefreshControlEnabled(true)
     }
 
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {

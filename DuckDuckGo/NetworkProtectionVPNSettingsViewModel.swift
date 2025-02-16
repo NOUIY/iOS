@@ -17,8 +17,6 @@
 //  limitations under the License.
 //
 
-#if NETWORK_PROTECTION
-
 import Foundation
 import UserNotifications
 import NetworkProtection
@@ -31,6 +29,7 @@ enum NetworkProtectionNotificationsViewKind: Equatable {
 }
 
 final class NetworkProtectionVPNSettingsViewModel: ObservableObject {
+    private let controller: TunnelController
     private let settings: VPNSettings
     private var cancellables: Set<AnyCancellable> = []
 
@@ -41,15 +40,48 @@ final class NetworkProtectionVPNSettingsViewModel: ObservableObject {
         self.settings.notifyStatusChanges
     }
 
-    @Published public var excludeLocalNetworks: Bool = true
+    @Published public var excludeLocalNetworks: Bool {
+        didSet {
+            guard oldValue != excludeLocalNetworks else {
+                return
+            }
 
-    init(notificationsAuthorization: NotificationsAuthorizationControlling, settings: VPNSettings) {
+            settings.excludeLocalNetworks = excludeLocalNetworks
+
+            Task {
+                // We need to allow some time for the setting to propagate
+                // But ultimately this should actually be a user choice
+                try await Task.sleep(interval: 0.1)
+                try await controller.command(.restartAdapter)
+            }
+        }
+    }
+
+    @Published public var usesCustomDNS = false
+    @Published public var dnsServers: String = UserText.vpnSettingDNSServerDefaultValue
+
+    init(notificationsAuthorization: NotificationsAuthorizationControlling,
+         controller: TunnelController,
+         settings: VPNSettings) {
+
+        self.controller = controller
+        self.excludeLocalNetworks = settings.excludeLocalNetworks
         self.settings = settings
         self.notificationsAuthorization = notificationsAuthorization
         
         settings.excludeLocalNetworksPublisher
             .receive(on: DispatchQueue.main)
             .assign(to: \.excludeLocalNetworks, onWeaklyHeld: self)
+            .store(in: &cancellables)
+        settings.dnsSettingsPublisher
+            .receive(on: DispatchQueue.main)
+            .map { $0.usesCustomDNS }
+            .assign(to: \.usesCustomDNS, onWeaklyHeld: self)
+            .store(in: &cancellables)
+        settings.dnsSettingsPublisher
+            .receive(on: DispatchQueue.main)
+            .map { String(describing: $0) }
+            .assign(to: \.dnsServers, onWeaklyHeld: self)
             .store(in: &cancellables)
     }
 
@@ -65,10 +97,6 @@ final class NetworkProtectionVPNSettingsViewModel: ObservableObject {
 
     func didToggleAlerts(to enabled: Bool) {
         settings.notifyStatusChanges = enabled
-    }
-
-    func toggleExcludeLocalNetworks() {
-        settings.excludeLocalNetworks.toggle()
     }
 
     private static func localizedString(forRegionCode: String) -> String {
@@ -92,5 +120,3 @@ extension NetworkProtectionVPNSettingsViewModel: NotificationsPermissionsControl
         updateViewKind(for: status)
     }
 }
-
-#endif

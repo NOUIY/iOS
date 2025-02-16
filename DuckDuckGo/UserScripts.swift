@@ -23,6 +23,8 @@ import BrowserServicesKit
 import TrackerRadarKit
 import UserScript
 import WebKit
+import SpecialErrorPages
+import AIChat
 
 final class UserScripts: UserScriptsProvider {
 
@@ -33,21 +35,35 @@ final class UserScripts: UserScriptsProvider {
     let contentScopeUserScript: ContentScopeUserScript
     let contentScopeUserScriptIsolated: ContentScopeUserScript
     let autoconsentUserScript: AutoconsentUserScript
+    let aiChatUserScript: AIChatUserScript
+
+    var specialPages: SpecialPagesUserScript?
+    var duckPlayer: DuckPlayerControlling? {
+        didSet {
+            initializeDuckPlayer()
+        }
+    }
+    var youtubeOverlayScript: YoutubeOverlayUserScript?
+    var youtubePlayerUserScript: YoutubePlayerUserScript?
+    var specialErrorPageUserScript: SpecialErrorPageUserScript?
 
     private(set) var faviconScript = FaviconUserScript()
     private(set) var navigatorPatchScript = NavigatorSharePatchUserScript()
     private(set) var findInPageScript = FindInPageUserScript()
     private(set) var fullScreenVideoScript = FullScreenVideoUserScript()
     private(set) var printingUserScript = PrintingUserScript()
-    private(set) var textSizeUserScript = TextSizeUserScript(textSizeAdjustmentInPercents: AppDependencyProvider.shared.appSettings.textSize)
     private(set) var debugScript = DebugUserScript()
 
-    init(with sourceProvider: ScriptSourceProviding) {
+    init(with sourceProvider: ScriptSourceProviding,
+         appSettings: AppSettings = AppDependencyProvider.shared.appSettings,
+         featureFlagger: FeatureFlagger = AppDependencyProvider.shared.featureFlagger,
+         aiChatDebugSettings: AIChatDebugSettingsHandling = AIChatDebugSettings()) {
+
         contentBlockerUserScript = ContentBlockerRulesUserScript(configuration: sourceProvider.contentBlockerRulesConfig)
         surrogatesScript = SurrogatesUserScript(configuration: sourceProvider.surrogatesConfig)
         autofillUserScript = AutofillUserScript(scriptSourceProvider: sourceProvider.autofillSourceProvider)
         autofillUserScript.sessionKey = sourceProvider.contentScopeProperties.sessionKey
-
+        
         loginFormDetectionScript = sourceProvider.loginDetectionEnabled ? LoginFormDetectionUserScript() : nil
         contentScopeUserScript = ContentScopeUserScript(sourceProvider.privacyConfigurationManager,
                                                         properties: sourceProvider.contentScopeProperties)
@@ -55,11 +71,24 @@ final class UserScripts: UserScriptsProvider {
                                                                 properties: sourceProvider.contentScopeProperties,
                                                                 isIsolated: true)
         autoconsentUserScript = AutoconsentUserScript(config: sourceProvider.privacyConfigurationManager.privacyConfig)
+
+        let aiChatScriptHandler = AIChatUserScriptHandler(featureFlagger: featureFlagger)
+        aiChatUserScript = AIChatUserScript(handler: aiChatScriptHandler,
+                                            debugSettings: aiChatDebugSettings)
+        contentScopeUserScriptIsolated.registerSubfeature(delegate: aiChatUserScript)
+
+        // Special pages - Such as Duck Player
+        specialPages = SpecialPagesUserScript()
+        if let specialPages {
+            userScripts.append(specialPages)
+        }
+        specialErrorPageUserScript = SpecialErrorPageUserScript(localeStrings: SpecialErrorPageUserScript.localeStrings(),
+                                                                languageCode: Locale.current.languageCode ?? "en")
+        specialErrorPageUserScript.map { specialPages?.registerSubfeature(delegate: $0) }
     }
 
     lazy var userScripts: [UserScript] = [
         debugScript,
-        textSizeUserScript,
         autoconsentUserScript,
         findInPageScript,
         navigatorPatchScript,
@@ -73,7 +102,17 @@ final class UserScripts: UserScriptsProvider {
         contentScopeUserScript,
         contentScopeUserScriptIsolated
     ].compactMap({ $0 })
-
+    
+    // Initialize DuckPlayer scripts
+    private func initializeDuckPlayer() {
+        if let duckPlayer {
+            youtubeOverlayScript = YoutubeOverlayUserScript(duckPlayer: duckPlayer)
+            youtubePlayerUserScript = YoutubePlayerUserScript(duckPlayer: duckPlayer)
+            youtubeOverlayScript.map { contentScopeUserScriptIsolated.registerSubfeature(delegate: $0) }
+            youtubePlayerUserScript.map { specialPages?.registerSubfeature(delegate: $0) }
+        }
+    }
+    
     @MainActor
     func loadWKUserScripts() async -> [WKUserScript] {
         return await withTaskGroup(of: WKUserScriptBox.self) { @MainActor group in
@@ -90,5 +129,5 @@ final class UserScripts: UserScriptsProvider {
             return wkUserScripts
         }
     }
-
+    
 }

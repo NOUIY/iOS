@@ -57,12 +57,14 @@ public final class ContentBlockingUpdating {
 
     init(appSettings: AppSettings = AppUserDefaults(),
          contentBlockerRulesManager: ContentBlockerRulesManagerProtocol = ContentBlocking.shared.contentBlockingManager,
-         privacyConfigurationManager: PrivacyConfigurationManaging = ContentBlocking.shared.privacyConfigurationManager) {
+         privacyConfigurationManager: PrivacyConfigurationManaging = ContentBlocking.shared.privacyConfigurationManager,
+         fireproofing: Fireproofing = UserDefaultsFireproofing.xshared) {
 
         let makeValue: (Update) -> NewContent = { rulesUpdate in
             let sourceProvider = DefaultScriptSourceProvider(appSettings: appSettings,
                                                              privacyConfigurationManager: privacyConfigurationManager,
-                                                             contentBlockingManager: contentBlockerRulesManager)
+                                                             contentBlockingManager: contentBlockerRulesManager,
+                                                             fireproofing: fireproofing)
             return NewContent(rulesUpdate: rulesUpdate, sourceProvider: sourceProvider)
         }
 
@@ -84,10 +86,9 @@ public final class ContentBlockingUpdating {
             // prefs changes notifications with initially published value for combineLatest to work.
             // Not all of these will trigger Tab reload,
             // refer TabViewController.swift:2116 for the list of notifications triggering reload
-            .combineLatest(onNotificationWithInitial(PreserveLogins.Notifications.loginDetectionStateChanged), combine)
+            .combineLatest(onNotificationWithInitial(UserDefaultsFireproofing.Notifications.loginDetectionStateChanged), combine)
             .combineLatest(onNotificationWithInitial(AppUserDefaults.Notifications.doNotSellStatusChange), combine)
             .combineLatest(onNotificationWithInitial(AppUserDefaults.Notifications.autofillEnabledChange), combine)
-            .combineLatest(onNotificationWithInitial(AppUserDefaults.Notifications.textSizeChange), combine)
             .combineLatest(onNotificationWithInitial(AppUserDefaults.Notifications.didVerifyInternalUser), combine)
             .combineLatest(onNotificationWithInitial(ConfigurationManager.didUpdateTrackerDependencies)
                 .receive(on: DispatchQueue.main), combine)

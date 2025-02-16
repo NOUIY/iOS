@@ -24,16 +24,20 @@ import Core
 import BrowserServicesKit
 import PrivacyDashboard
 import Common
+import os.log
+import PixelExperimentKit
 
 final class PrivacyDashboardViewController: UIViewController {
 
     @IBOutlet private(set) weak var webView: WKWebView!
-    
+
+    public var breakageAdditionalInfo: BreakageAdditionalInfo?
+
     private let privacyDashboardController: PrivacyDashboardController
     private let privacyConfigurationManager: PrivacyConfigurationManaging
     private let contentBlockingManager: ContentBlockerRulesManager
-    public var breakageAdditionalInfo: BreakageAdditionalInfo?
     private var privacyDashboardDidTriggerDismiss: Bool = false
+    private let entryPoint: PrivacyDashboardEntryPoint
 
     private let brokenSiteReporter: BrokenSiteReporter = {
         BrokenSiteReporter(pixelHandler: { parameters in
@@ -51,11 +55,12 @@ final class PrivacyDashboardViewController: UIViewController {
         }, keyValueStoring: UserDefaults.standard)
     }()
 
-    private let toggleReportEvents = EventMapping<ToggleReportEvents> { event, _, parameters, _ in
+    private let privacyDashboardEvents = EventMapping<PrivacyDashboardEvents> { event, _, parameters, _ in
         let domainEvent: Pixel.Event
         switch event {
-        case .toggleReportDismiss: domainEvent = .toggleReportDismiss
-        case .toggleReportDoNotSend: domainEvent = .toggleReportDoNotSend
+        case .showReportBrokenSite: domainEvent = .privacyDashboardReportBrokenSite
+        case .reportBrokenSiteShown: domainEvent = .reportBrokenSiteShown
+        case .reportBrokenSiteSent: domainEvent = .reportBrokenSiteSent
         }
         if let parameters {
             Pixel.fire(pixel: domainEvent, withAdditionalParameters: parameters)
@@ -66,25 +71,27 @@ final class PrivacyDashboardViewController: UIViewController {
 
     init?(coder: NSCoder,
           privacyInfo: PrivacyInfo?,
-          dashboardMode: PrivacyDashboardMode,
+          entryPoint: PrivacyDashboardEntryPoint,
           privacyConfigurationManager: PrivacyConfigurationManaging,
           contentBlockingManager: ContentBlockerRulesManager,
           breakageAdditionalInfo: BreakageAdditionalInfo?) {
-        self.privacyDashboardController = PrivacyDashboardController(privacyInfo: privacyInfo,
-                                                                     dashboardMode: dashboardMode,
-                                                                     privacyConfigurationManager: privacyConfigurationManager,
-                                                                     eventMapping: toggleReportEvents)
+
+        let toggleReportingConfiguration = ToggleReportingConfiguration(privacyConfigurationManager: privacyConfigurationManager)
+        let toggleReportingFeature = ToggleReportingFeature(toggleReportingConfiguration: toggleReportingConfiguration)
+        let toggleReportingManager = ToggleReportingManager(feature: toggleReportingFeature)
+        privacyDashboardController = PrivacyDashboardController(privacyInfo: privacyInfo,
+                                                                entryPoint: entryPoint,
+                                                                toggleReportingManager: toggleReportingManager,
+                                                                eventMapping: privacyDashboardEvents)
         self.privacyConfigurationManager = privacyConfigurationManager
         self.contentBlockingManager = contentBlockingManager
         self.breakageAdditionalInfo = breakageAdditionalInfo
+        self.entryPoint = entryPoint
         super.init(coder: coder)
         
-        self.privacyDashboardController.privacyDashboardDelegate = self
-        self.privacyDashboardController.privacyDashboardNavigationDelegate = self
-        self.privacyDashboardController.privacyDashboardReportBrokenSiteDelegate = self
-        self.privacyDashboardController.privacyDashboardToggleReportDelegate = self
+        privacyDashboardController.delegate = self
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -93,7 +100,8 @@ final class PrivacyDashboardViewController: UIViewController {
         super.viewDidLoad()
         privacyDashboardController.setup(for: webView)
         privacyDashboardController.preferredLocale = Bundle.main.preferredLocalizations.first
-        applyTheme(ThemeManager.shared.currentTheme)
+        
+        decorate()
     }
 
     public override func viewDidDisappear(_ animated: Bool) {
@@ -101,7 +109,7 @@ final class PrivacyDashboardViewController: UIViewController {
         if !privacyDashboardDidTriggerDismiss {
             privacyDashboardController.handleViewWillDisappear()
         }
-        privacyDashboardController.cleanUp()
+        privacyDashboardController.cleanup()
     }
     
     public func updatePrivacyInfo(_ privacyInfo: PrivacyInfo?) {
@@ -113,10 +121,10 @@ final class PrivacyDashboardViewController: UIViewController {
         privacyDashboardDidTriggerDismiss = true
         guard let domain = privacyDashboardController.privacyInfo?.url.host else { return }
         
-        let source: BrokenSiteReport.Source = privacyDashboardController.initDashboardMode == .report ? .appMenu : .dashboard
         let privacyConfiguration = privacyConfigurationManager.privacyConfig
+        let source = entryPoint == .dashboard ? "dashboard" : "menu"
         let pixelParam = ["trigger_origin": state.eventOrigin.screen.rawValue,
-                          "source": source.rawValue]
+                          "source": source]
         if state.isProtected {
             privacyConfiguration.userEnabledProtection(forDomain: domain)
             ActionMessageView.present(message: UserText.messageProtectionEnabled.format(arguments: domain))
@@ -129,34 +137,37 @@ final class PrivacyDashboardViewController: UIViewController {
                 ActionMessageView.present(message: UserText.messageProtectionDisabled.format(arguments: domain))
             }
             Pixel.fire(pixel: .dashboardProtectionAllowlistAdd, withAdditionalParameters: pixelParam)
+            let tdsEtag = AppDependencyProvider.shared.configurationStore.loadEtag(for: .trackerDataSet) ?? ""
+            TDSOverrideExperimentMetrics.fireTDSExperimentMetric(metricType: .privacyToggleUsed, etag: tdsEtag) { parameters in
+                UniquePixel.fire(pixel: .debugBreakageExperiment, withAdditionalParameters: parameters)
+            }
+            TDSOverrideExperimentMetrics.fireTDSExperimentMetricUpdated(metricType: .privacyToggleUsed)
         }
         
         contentBlockingManager.scheduleCompilation()
-        AppDependencyProvider.shared.userBehaviorMonitor.handleAction(.toggleProtections)
     }
     
     private func privacyDashboardCloseHandler() {
         privacyDashboardDidTriggerDismiss = true
         dismiss(animated: true)
     }
-
 }
 
-extension PrivacyDashboardViewController: Themable {
+extension PrivacyDashboardViewController {
     
-    func decorate(with theme: Theme) {
+    private func decorate() {
+        let theme = ThemeManager.shared.currentTheme
         view.backgroundColor = theme.privacyDashboardWebviewBackgroundColor
-        privacyDashboardController.theme = privacyDashboardTheme(from: theme)
-    }
-    
-    private func privacyDashboardTheme(from theme: Theme) -> PrivacyDashboardTheme {
-        switch theme.name {
-        case .light: return .light
-        case .dark: return .dark
-        default: return .light
-        }
+        privacyDashboardController.theme = .init(traitCollection)
     }
 
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            privacyDashboardController.theme = .init(traitCollection)
+        }
+    }
 }
 
 // MARK: - PrivacyDashboardControllerDelegate
@@ -176,14 +187,9 @@ extension PrivacyDashboardViewController: PrivacyDashboardControllerDelegate {
         }
     }
     
-    func privacyDashboardControllerDidRequestShowReportBrokenSite(_ privacyDashboardController: PrivacyDashboardController) {
-        Pixel.fire(pixel: .privacyDashboardReportBrokenSite)
-    }
-    
-    func privacyDashboardController(_ privacyDashboardController: PrivacyDashboard.PrivacyDashboardController,
-                                    didRequestOpenSettings target: PrivacyDashboard.PrivacyDashboardOpenSettingsTarget) {
+    func privacyDashboardController(_ privacyDashboardController: PrivacyDashboardController,
+                                    didRequestOpenSettings target: PrivacyDashboardOpenSettingsTarget) {
         guard let mainViewController = presentingViewController as? MainViewController else { return }
-        
         dismiss(animated: true) {
             switch target {
             case .cookiePopupManagement:
@@ -193,72 +199,74 @@ extension PrivacyDashboardViewController: PrivacyDashboardControllerDelegate {
             }
         }
     }
-
-}
-
-// MARK: - PrivacyDashboardNavigationDelegate
-
-extension PrivacyDashboardViewController: PrivacyDashboardNavigationDelegate {
     
-    func privacyDashboardController(_ privacyDashboardController: PrivacyDashboard.PrivacyDashboardController, didSetHeight height: Int) {
+    func privacyDashboardController(_ privacyDashboardController: PrivacyDashboardController, didSetHeight height: Int) {
         // The size received in iPad is wrong, shane will sort this out soon.
         // preferredContentSize.height = CGFloat(height)
     }
     
-    func privacyDashboardControllerDidTapClose(_ privacyDashboardController: PrivacyDashboardController) {
+    func privacyDashboardControllerDidRequestClose(_ privacyDashboardController: PrivacyDashboardController) {
         privacyDashboardCloseHandler()
     }
-
-}
-
-// MARK: - PrivacyDashboardReportBrokenSiteDelegate
-
-extension PrivacyDashboardViewController: PrivacyDashboardReportBrokenSiteDelegate {
     
     func privacyDashboardController(_ privacyDashboardController: PrivacyDashboardController,
                                     reportBrokenSiteDidChangeProtectionSwitch protectionState: ProtectionState) {
         privacyDashboardProtectionSwitchChangeHandler(state: protectionState)
     }
     
-    func privacyDashboardController(_ privacyDashboardController: PrivacyDashboard.PrivacyDashboardController,
+    func privacyDashboardController(_ privacyDashboardController: PrivacyDashboardController,
                                     didRequestSubmitBrokenSiteReportWithCategory category: String,
                                     description: String) {
         Task { @MainActor in
-            let source: BrokenSiteReport.Source = privacyDashboardController.initDashboardMode == .report ? .appMenu : .dashboard
             do {
-                let report = try await makeBrokenSiteReport(category: category, description: description, source: source)
+                let report = try await makeBrokenSiteReport(category: category, description: description, source: privacyDashboardController.source)
                 try brokenSiteReporter.report(report, reportMode: .regular)
             } catch {
-                os_log("Failed to generate or send the broken site report: %@", type: .error, error.localizedDescription)
+                Logger.privacyDashboard.error("Failed to generate or send the broken site report: \(error.localizedDescription, privacy: .public)")
             }
-
-            ActionMessageView.present(message: UserText.feedbackSumbittedConfirmation)
+            let message = PixelExperiment.cohort == .control ? UserText.feedbackSumbittedConfirmation : UserText.brokenSiteReportSuccessToast
+            ActionMessageView.present(message: message)
             privacyDashboardCloseHandler()
         }
     }
 
-}
+    func privacyDashboardControllerDidRequestShowGeneralFeedback(_ privacyDashboardController: PrivacyDashboardController) {
+        guard let mainViewController = presentingViewController as? MainViewController else { return }
+        dismiss(animated: true) {
+            mainViewController.segueToNegativeFeedbackForm()
+        }
+    }
 
-// MARK: - PrivacyDashboardToggleReportDelegate
-
-extension PrivacyDashboardViewController: PrivacyDashboardToggleReportDelegate {
+    func privacyDashboardControllerDidRequestShowAlertForMissingDescription(_ privacyDashboardController: PrivacyDashboardController) {
+        let alert = UIAlertController(title: UserText.brokenSiteReportMissingDescriptionAlertTitle,
+                                      message: UserText.brokenSiteReportMissingDescriptionAlertDescription,
+                                      preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: UserText.brokenSiteReportMissingDescriptionAlertButton, style: .default))
+        present(alert, animated: true)
+    }
 
     func privacyDashboardController(_ privacyDashboardController: PrivacyDashboardController,
-                                    didRequestSubmitToggleReportWithSource source: BrokenSiteReport.Source,
-                                    didOpenReportInfo: Bool,
-                                    toggleReportCounter: Int?) {
+                                    didRequestSubmitToggleReportWithSource source: BrokenSiteReport.Source) {
         Task { @MainActor in
             do {
-                let report = try await makeBrokenSiteReport(source: source,
-                                                            didOpenReportInfo: didOpenReportInfo,
-                                                            toggleReportCounter: toggleReportCounter)
+                let report = try await makeBrokenSiteReport(source: source)
                 try toggleProtectionsOffReporter.report(report, reportMode: .toggle)
             } catch {
-                os_log("Failed to generate or send the broken site report: %@", type: .error, error.localizedDescription)
+                Logger.general.error("Failed to generate or send the broken site report: \(error.localizedDescription, privacy: .public)")
             }
 
             privacyDashboardCloseHandler()
         }
+    }
+
+    func privacyDashboardController(_ privacyDashboardController: PrivacyDashboardController,
+                                    didSetPermission permissionName: String,
+                                    to state: PermissionAuthorizationState) {
+        // not supported on iOS
+    }
+
+    func privacyDashboardController(_ privacyDashboardController: PrivacyDashboardController, setPermission permissionName: String, paused: Bool) {
+        // not supported on iOS
     }
 
 }
@@ -301,9 +309,7 @@ extension PrivacyDashboardViewController {
 
     private func makeBrokenSiteReport(category: String = "",
                                       description: String = "",
-                                      source: BrokenSiteReport.Source,
-                                      didOpenReportInfo: Bool = false,
-                                      toggleReportCounter: Int? = nil) async throws -> BrokenSiteReport {
+                                      source: BrokenSiteReport.Source) async throws -> BrokenSiteReport {
 
         guard let privacyInfo = privacyDashboardController.privacyInfo,
               let breakageAdditionalInfo = breakageAdditionalInfo  else {
@@ -333,6 +339,7 @@ extension PrivacyDashboardViewController {
                                 manufacturer: "Apple",
                                 upgradedHttps: breakageAdditionalInfo.httpsForced,
                                 tdsETag: ContentBlocking.shared.contentBlockingManager.currentMainRules?.etag ?? "",
+                                configVersion: privacyConfigurationManager.privacyConfig.version,
                                 blockedTrackerDomains: blockedTrackerDomains,
                                 installedSurrogates: privacyInfo.trackerInfo.installedSurrogates.map { $0 },
                                 isGPCEnabled: AppDependencyProvider.shared.appSettings.sendDoNotSell,
@@ -349,8 +356,18 @@ extension PrivacyDashboardViewController {
                                 vpnOn: breakageAdditionalInfo.vpnOn,
                                 jsPerformance: webVitalsResult,
                                 userRefreshCount: breakageAdditionalInfo.userRefreshCount,
-                                didOpenReportInfo: didOpenReportInfo,
-                                toggleReportCounter: toggleReportCounter)
+                                variant: PixelExperiment.cohort?.rawValue ?? "")
     }
 
+}
+
+private extension PrivacyDashboardTheme {
+    init(_ traitCollection: UITraitCollection) {
+        switch traitCollection.userInterfaceStyle {
+        case .light: self = .light
+        case .dark: self = .dark
+        case .unspecified: self = .light
+        @unknown default: self = .light
+        }
+    }
 }

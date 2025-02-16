@@ -24,6 +24,7 @@ import BrowserServicesKit
 class PrivacyConfigurationMock: PrivacyConfiguration {
 
     var identifier: String = "id"
+    var version: String? = "123456789"
 
     var userUnprotectedDomains: [String] = []
 
@@ -66,6 +67,18 @@ class PrivacyConfigurationMock: PrivacyConfiguration {
         return .disabled(.disabledInConfig) // this is not used in platform tests, so mocking this poorly for now
     }
 
+    func stateFor(subfeatureID: SubfeatureID, parentFeatureID: ParentFeatureID, versionProvider: AppVersionProvider, randomizer: (Range<Double>) -> Double) -> PrivacyConfigurationFeatureState {
+        return .disabled(.disabledInConfig)
+    }
+
+    func cohorts(for subfeature: any PrivacySubfeature) -> [PrivacyConfigurationData.Cohort]? {
+        return nil
+    }
+
+    func cohorts(subfeatureID: SubfeatureID, parentFeatureID: ParentFeatureID) -> [PrivacyConfigurationData.Cohort]? {
+        return nil
+    }
+
     var protectedDomains = Set<String>()
     func isProtected(domain: String?) -> Bool {
         return protectedDomains.contains(domain ?? "")
@@ -83,6 +96,10 @@ class PrivacyConfigurationMock: PrivacyConfiguration {
     var settings: [PrivacyFeature: PrivacyConfigurationData.PrivacyFeature.FeatureSettings] = [:]
     func settings(for feature: PrivacyFeature) -> PrivacyConfigurationData.PrivacyFeature.FeatureSettings {
         return settings[feature] ?? [:]
+    }
+
+    func settings(for subfeature: any BrowserServicesKit.PrivacySubfeature) -> PrivacyConfigurationData.PrivacyFeature.SubfeatureSettings? {
+        return nil
     }
 
     var userUnprotected = Set<String>()
@@ -121,7 +138,6 @@ class PrivacyConfigurationManagerMock: PrivacyConfigurationManaging {
 
     var privacyConfig: PrivacyConfiguration = PrivacyConfigurationMock()
     var internalUserDecider: InternalUserDecider = DefaultInternalUserDecider()
-    var toggleProtectionsCounter: ToggleProtectionsCounter = ToggleProtectionsCounter(eventReporting: nil)
 
     var reloadFired = [(etag: String?, data: Data?)]()
     var reloadResult: PrivacyConfigurationManager.ReloadResult = .embedded

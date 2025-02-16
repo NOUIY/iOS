@@ -164,7 +164,7 @@ extension HeadlessWebViewCoordinator: WKNavigationDelegate {
         
         // Handle custom schemes (e.g., tel:, facetime:, etc.)
         if Constants.externalSchemes.contains(scheme), UIApplication.shared.canOpenURL(url) {
-            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            UIApplication.shared.open(url)
             decisionHandler(.cancel)
             return
         }
@@ -226,7 +226,7 @@ extension HeadlessWebViewCoordinator: WKNavigationDelegate {
                 return
             }
 
-        let alertController = UIAlertController(title: UserText.subscriptionAlertTitle, message: message, preferredStyle: .alert)
+        let alertController = UIAlertController(title: "", message: message, preferredStyle: .alert)
             alertController.addAction(UIAlertAction(title: UserText.actionOK, style: .default, handler: { _ in completionHandler() }))
             presenter.present(alertController, animated: true, completion: nil)
         }

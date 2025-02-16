@@ -31,14 +31,14 @@ extension Tab: TabNotifying {}
 
 protocol FaviconProviding {
 
-    func loadFavicon(forDomain domain: String, fromURL url: URL?, intoCache cacheType: Favicons.CacheType, completion: ((UIImage?) -> Void)?)
+    func loadFavicon(forDomain domain: String, fromURL url: URL?, intoCache cacheType: FaviconsCacheType, completion: ((UIImage?) -> Void)?)
     func replaceFireproofFavicon(forDomain domain: String?, withImage: UIImage)
 
 }
 
 extension Favicons: FaviconProviding {
 
-    func loadFavicon(forDomain domain: String, fromURL url: URL?, intoCache cacheType: CacheType, completion: ((UIImage?) -> Void)?) {
+    func loadFavicon(forDomain domain: String, fromURL url: URL?, intoCache cacheType: FaviconsCacheType, completion: ((UIImage?) -> Void)?) {
         self.loadFavicon(forDomain: domain, fromURL: url, intoCache: cacheType, fromCache: nil, completion: completion)
     }
 
@@ -117,7 +117,7 @@ class FireproofFaviconUpdater: NSObject, FaviconUserScriptDelegate {
     private func initSecureVault() -> (any AutofillSecureVault)? {
         if featureFlagger.isFeatureOn(.autofillCredentialInjecting) && AutofillSettingStatus.isAutofillEnabledInSettings {
             if secureVault == nil {
-                secureVault = try? AutofillSecureVaultFactory.makeVault(errorReporter: SecureVaultErrorReporter.shared)
+                secureVault = try? AutofillSecureVaultFactory.makeVault(reporter: SecureVaultReporter())
             }
             return secureVault
         }

@@ -21,9 +21,10 @@ import Common
 import Foundation
 import LocalAuthentication
 import Core
+import os.log
 
 class UserAuthenticator {
-    enum AuthError: Equatable {
+    enum AuthError: Error, Equatable {
         case noAuthAvailable
         case failedToAuthenticate
     }
@@ -67,14 +68,14 @@ class UserAuthenticator {
 
         if canAuthenticate() {
             let reason = reason
-            context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason ) { success, error in
+            context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason ) { [weak self] success, error in
 
                 DispatchQueue.main.async {
                     if success {
-                        self.state = .loggedIn
+                        self?.state = .loggedIn
                         completion?(nil)
                     } else {
-                        os_log("Failed to authenticate: %s", log: .generalLog, type: .debug, error?.localizedDescription ?? "nil error")
+                        Logger.general.error("Failed to authenticate: \(error?.localizedDescription ?? "nil", privacy: .public)")
                         completion?(.failedToAuthenticate)
                     }
                 }
@@ -88,4 +89,5 @@ class UserAuthenticator {
     func invalidateContext() {
         context.invalidate()
     }
+
 }

@@ -20,33 +20,52 @@
 import SwiftUI
 
 extension View {
-    /// Applies the given transform if the given condition evaluates to `true`.
-    /// - Parameters:
-    ///   - condition: The condition to evaluate.
-    ///   - transform: The transform to apply to the source `View`.
-    /// - Returns: Either the original `View` or the modified `View` if the condition is `true`.
-    @ViewBuilder func `if`<Content: View>(_ condition: Bool, transform: (Self) -> Content) -> some View {
-        if condition {
-            transform(self)
+    /// Disables scroll if available for current system version
+    @available(iOS, deprecated: 16.0, renamed: "scrollDisabled")
+    @ViewBuilder
+    func withoutScroll(_ isScrollDisabled: Bool = true) -> some View {
+        if #available(iOS 16, *) {
+            scrollDisabled(isScrollDisabled)
         } else {
             self
         }
     }
 }
 
-/*
- These exensions are needed to provide the UI styling specs for Network Protection
- However, at time of writing, they are not supported in iOS <=14. As Network Protection
- is not supporting iOS <=14, these are being kept separate.
- */
+extension View {
+    /// Adds a preference key observer for views' frame in a given coordinate space.
+    ///
+    /// - Parameters:
+    ///    - space: `CoordinateSpace` used to convert the frame to.
+    ///    - key: `PreferenceKey` used to observe the value.
+    ///    - perform: Closure to call on value change.
+    func onFrameUpdate<K: PreferenceKey>(
+        in space: CoordinateSpace,
+        using key: K.Type,
+        perform: @escaping (CGRect) -> Void) -> some View where K.Value == CGRect {
 
-@available(iOS 15, *)
+        self.background {
+            GeometryReader(content: { geometry in
+                Color.clear
+                    .preference(key: key, value: geometry.frame(in: space))
+            })
+        }
+        .onPreferenceChange(key, perform: perform)
+    }
+}
+
 extension View {
     @ViewBuilder
     func applyInsetGroupedListStyle() -> some View {
         self
             .listStyle(.insetGrouped)
             .applyBackground()
+    }
+
+    /// Removes the grouped list style insets for a single row.
+    ///
+    func removeGroupedListStyleInsets() -> some View {
+        listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
     }
 
     @ViewBuilder

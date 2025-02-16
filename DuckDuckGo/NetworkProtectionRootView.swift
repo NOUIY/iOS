@@ -17,36 +17,41 @@
 //  limitations under the License.
 //
 
-#if NETWORK_PROTECTION
-
 import SwiftUI
 import NetworkProtection
+import Subscription
+import Core
+import Networking
 
-@available(iOS 15, *)
 struct NetworkProtectionRootView: View {
-    let model = NetworkProtectionRootViewModel()
-    let inviteCompletion: () -> Void
+
+    let statusViewModel: NetworkProtectionStatusViewModel
+    let feedbackFormModel: UnifiedFeedbackFormViewModel
+
+    init() {
+        let subscriptionManager = AppDependencyProvider.shared.subscriptionManager
+        let accountManager = AppDependencyProvider.shared.subscriptionManager.accountManager
+        let locationListRepository = NetworkProtectionLocationListCompositeRepository(accountManager: accountManager)
+        let usesUnifiedFeedbackForm = accountManager.isUserAuthenticated
+        statusViewModel = NetworkProtectionStatusViewModel(tunnelController: AppDependencyProvider.shared.networkProtectionTunnelController,
+                                                           settings: AppDependencyProvider.shared.vpnSettings,
+                                                           statusObserver: AppDependencyProvider.shared.connectionObserver,
+                                                           serverInfoObserver: AppDependencyProvider.shared.serverInfoObserver,
+                                                           locationListRepository: locationListRepository,
+                                                           usesUnifiedFeedbackForm: usesUnifiedFeedbackForm,
+                                                           subscriptionManager: subscriptionManager)
+
+        feedbackFormModel = UnifiedFeedbackFormViewModel(subscriptionManager: subscriptionManager,
+                                                         apiService: DefaultAPIService(),
+                                                         vpnMetadataCollector: DefaultVPNMetadataCollector(),
+                                                         source: .vpn)
+    }
 
     var body: some View {
-        let inviteViewModel = NetworkProtectionInviteViewModel(
-            redemptionCoordinator: NetworkProtectionCodeRedemptionCoordinator(isManualCodeRedemptionFlow: true),
-            completion: inviteCompletion
-        )
-        if DefaultNetworkProtectionVisibility().isPrivacyProLaunched() {
-            NetworkProtectionStatusView(
-                statusModel: NetworkProtectionStatusViewModel()
-            )
-        } else {
-            switch model.initialViewKind {
-            case .invite:
-                NetworkProtectionInviteView(model: inviteViewModel)
-            case .status:
-                NetworkProtectionStatusView(
-                    statusModel: NetworkProtectionStatusViewModel()
-                )
+        NetworkProtectionStatusView(statusModel: statusViewModel, feedbackFormModel: feedbackFormModel)
+            .navigationTitle(UserText.netPNavTitle)
+            .onFirstAppear {
+                Pixel.fire(pixel: .privacyProVPNSettings)
             }
-        }
     }
 }
-
-#endif
